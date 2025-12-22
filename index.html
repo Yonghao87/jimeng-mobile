@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>即梦灵感库 (Mobile)</title>
+    <style>
+        /* --- 1. 基础重置 --- */
+        body { margin: 0; padding: 0; font-family: -apple-system, sans-serif; height: 100vh; display: flex; background: #fff; color: #111; overflow: hidden; }
+        .icon { width: 18px; height: 18px; stroke: currentColor; stroke-width: 2; fill: none; vertical-align: middle; }
+        
+        /* --- 2. 侧边栏 (手机端适配) --- */
+        .sidebar { 
+            width: 240px; background: #f9fafb; border-right: 1px solid #eee; 
+            display: flex; flex-direction: column; z-index: 50; 
+            position: absolute; top:0; left:0; bottom:0; /* 手机端绝对定位 */
+            transform: translateX(-100%); /* 默认隐藏 */
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 4px 0 15px rgba(0,0,0,0.1);
+        }
+        .sidebar.show { transform: translateX(0); } /* 展开 */
+
+        /* 遮罩层 (手机端侧边栏打开时显示) */
+        .sidebar-overlay {
+            position: fixed; top:0; left:0; right:0; bottom:0; background: rgba(0,0,0,0.5);
+            z-index: 40; display: none; backdrop-filter: blur(2px);
+        }
+        .sidebar-overlay.show { display: block; }
+
+        .app-title { padding: 20px 16px; font-size: 18px; font-weight: 800; display: flex; align-items: center; justify-content: space-between; }
+        .menu-item { padding: 12px 16px; margin: 4px 8px; border-radius: 8px; display: flex; justify-content: space-between; font-size: 14px; color: #555; }
+        .menu-item.active { background: #fff; color: #000; font-weight: 600; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .menu-count { background: #eee; padding: 2px 8px; border-radius: 10px; font-size: 12px; }
+
+        /* --- 3. 主内容区 --- */
+        .main-content { flex: 1; display: flex; flex-direction: column; width: 100%; position: relative; }
+        
+        /* 手机顶部导航 */
+        .mobile-header { 
+            padding: 10px 16px; border-bottom: 1px solid #f3f4f6; 
+            display: flex; align-items: center; justify-content: space-between; 
+            background: rgba(255,255,255,0.95); height: 50px; flex-shrink: 0;
+        }
+        .menu-btn { font-size: 24px; cursor: pointer; padding: 5px; }
+        .page-title { font-weight: 700; font-size: 16px; }
+        .search-btn { font-size: 20px; }
+
+        /* 瀑布流 (手机端单列或双列) */
+        .gallery-container { flex: 1; overflow-y: auto; padding: 15px; -webkit-overflow-scrolling: touch; }
+        .waterfall { column-count: 2; column-gap: 10px; } /* 手机默认双列 */
+        
+        .pin { break-inside: avoid; margin-bottom: 10px; background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        .pin img { width: 100%; display: block; }
+        
+        /* 手机端不需要复杂的 Hover 遮罩，直接显示简略信息或点击看大图 */
+        .pin-footer { padding: 8px; font-size: 12px; color: #666; display: flex; justify-content: space-between; }
+
+        /* --- 登录/导入页 --- */
+        .login-screen { 
+            position: fixed; top:0; left:0; width:100%; height:100%; background: #fff; 
+            z-index: 100; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 30px; box-sizing: border-box; 
+        }
+        .btn-big { 
+            width: 100%; padding: 15px; background: #000; color: #fff; border: none; 
+            border-radius: 12px; font-size: 16px; font-weight: bold; margin-bottom: 15px; 
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+        }
+        .btn-outline { background: #fff; color: #000; border: 1px solid #eee; }
+        .or-divider { margin: 20px 0; color: #999; font-size: 12px; }
+
+        /* 画板概览 (适配手机) */
+        .board-grid { display: grid; grid-template-columns: 1fr; gap: 15px; padding-bottom: 50px;} /* 手机单列 */
+        .b-card { background: #fff; border-radius: 12px; border: 1px solid #eee; overflow: hidden; display: flex; flex-direction: column; }
+        .b-cover { height: 120px; display: grid; grid-template-columns: 2fr 1fr; gap: 2px; background: #f9f9f9; }
+        .b-cover-img { width: 100%; height: 100%; object-fit: cover; }
+        .b-info { padding: 12px; display: flex; justify-content: space-between; align-items: center; }
+        .b-name { font-weight: 700; font-size: 15px; }
+        .b-count { color: #999; font-size: 12px; }
+
+        /* 详情弹窗 (全屏) */
+        .detail-modal { 
+            position: fixed; top:0; left:0; width:100%; height:100%; background: #fff; 
+            z-index: 200; display: none; flex-direction: column; overflow-y: auto; 
+        }
+        .dm-img { width: 100%; display: block; }
+        .dm-info { padding: 20px; }
+        .dm-prompt { background: #f5f5f5; padding: 15px; border-radius: 12px; font-size: 14px; line-height: 1.5; margin: 15px 0; max-height: 200px; overflow-y: auto; }
+        .dm-close { position: fixed; top: 15px; right: 15px; width: 36px; height: 36px; background: rgba(0,0,0,0.5); border-radius: 50%; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 20px; backdrop-filter: blur(4px); }
+    </style>
+</head>
+<body>
+
+    <div id="login-screen" class="login-screen">
+        <h1 style="margin-bottom: 40px;">⚡️ 灵感库 Mobile</h1>
+        
+        <input type="file" id="file-input" accept=".json" style="display:none">
+        <button class="btn-big" onclick="document.getElementById('file-input').click()">
+            📂 打开本地备份文件
+        </button>
+        <div style="font-size:12px; color:#999; margin-bottom:10px;">推荐：从坚果云下载 json 后选择</div>
+
+        <div class="or-divider">- 或者 -</div>
+
+        <div style="width:100%; margin-bottom:10px;">
+            <input id="dav-user" placeholder="坚果云账号" style="width:100%; padding:12px; border:1px solid #eee; border-radius:8px; margin-bottom:8px; box-sizing:border-box;">
+            <input id="dav-pass" type="password" placeholder="应用密码" style="width:100%; padding:12px; border:1px solid #eee; border-radius:8px; box-sizing:border-box;">
+        </div>
+        <button class="btn-big btn-outline" id="btn-webdav">
+            ☁️ 连接 WebDAV
+        </button>
+    </div>
+
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
+    <div class="sidebar" id="sidebar">
+        <div class="app-title">
+            <span>灵感库</span>
+            <span onclick="toggleSidebar()" style="padding:10px;">✕</span>
+        </div>
+        <div id="menu-container" style="flex:1; overflow-y:auto;"></div>
+    </div>
+
+    <div class="main-content">
+        <div class="mobile-header">
+            <div class="menu-btn" onclick="toggleSidebar()">☰</div>
+            <div class="page-title" id="page-title">全部采集</div>
+            <div class="search-btn" onclick="doSearch()">🔍</div>
+        </div>
+        <div class="gallery-container">
+            <div id="gallery" class="waterfall"></div>
+        </div>
+    </div>
+
+    <div id="detail-modal" class="detail-modal">
+        <div class="dm-close" onclick="closeDetail()">✕</div>
+        <img id="dm-img" class="dm-img">
+        <div class="dm-info">
+            <h3 id="dm-author"></h3>
+            <div class="dm-prompt" id="dm-prompt"></div>
+            <button class="btn-big" onclick="copyPrompt()">📋 复制提示词</button>
+        </div>
+    </div>
+
+    <script>
+        // --- 逻辑核心 (无 Chrome 依赖) ---
+        let allData = [];
+        let currentBoard = 'all';
+        
+        // 1. 文件导入逻辑
+        document.getElementById('file-input').onchange = (e) => {
+            const f = e.target.files[0];
+            if(!f) return;
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                try {
+                    const json = JSON.parse(ev.target.result);
+                    // 兼容处理：有些备份可能是直接数组，有些是对象
+                    allData = Array.isArray(json) ? json : (json.jimengCollections || []);
+                    startApp();
+                } catch(err) { alert("文件格式错误"); }
+            };
+            reader.readAsText(f);
+        };
+
+        // 2. WebDAV 逻辑 (简易版)
+        document.getElementById('btn-webdav').onclick = async () => {
+            const user = document.getElementById('dav-user').value;
+            const pass = document.getElementById('dav-pass').value;
+            if(!user || !pass) return alert("请输入账号密码");
+            
+            const btn = document.getElementById('btn-webdav');
+            btn.innerText = "连接中...";
+            
+            try {
+                const res = await fetch("https://dav.jianguoyun.com/dav/jimeng/jimeng_backup.json", {
+                    headers: { 'Authorization': 'Basic ' + btoa(user + ':' + pass) }
+                });
+                if(res.ok) {
+                    const json = await res.json();
+                    allData = json.jimengCollections || [];
+                    // 保存凭证到 localStorage 方便下次
+                    localStorage.setItem('jm_dav_user', user);
+                    localStorage.setItem('jm_dav_pass', pass);
+                    startApp();
+                } else {
+                    alert("连接失败: " + res.status + "\n(注意：纯网页版可能因跨域限制无法直接连接)");
+                    btn.innerText = "☁️ 连接 WebDAV";
+                }
+            } catch(e) {
+                alert("网络错误或跨域限制，请使用文件导入功能。");
+                btn.innerText = "☁️ 连接 WebDAV";
+            }
+        };
+
+        // 自动填充之前的 WebDAV
+        if(localStorage.getItem('jm_dav_user')) {
+            document.getElementById('dav-user').value = localStorage.getItem('jm_dav_user');
+            document.getElementById('dav-pass').value = localStorage.getItem('jm_dav_pass');
+        }
+
+        // --- 应用启动 ---
+        function startApp() {
+            document.getElementById('login-screen').style.display = 'none';
+            renderSidebar();
+            renderGallery();
+        }
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('show');
+            document.getElementById('sidebar-overlay').classList.toggle('show');
+        }
+        
+        document.getElementById('sidebar-overlay').onclick = toggleSidebar;
+
+        function renderSidebar() {
+            const menu = document.getElementById('menu-container');
+            menu.innerHTML = '';
+            
+            const counts = {};
+            allData.forEach(i => counts[i.board||'默认画板'] = (counts[i.board||'默认画板']||0) + 1);
+            
+            // 静态菜单
+            addMenuItem('全部采集', allData.length, 'all', '📂');
+            addMenuItem('全部画板', null, '__ALL_BOARDS__', '🧩');
+            
+            // 动态画板
+            const boards = [...new Set(allData.map(i => i.board || '默认画板'))];
+            if(!boards.includes('默认画板')) boards.unshift('默认画板');
+            
+            const hr = document.createElement('div');
+            hr.style.margin="10px"; hr.style.borderBottom="1px solid #eee";
+            menu.appendChild(hr);
+            
+            boards.forEach(b => {
+                addMenuItem(b, counts[b]||0, b, '🎨');
+            });
+
+            function addMenuItem(name, count, target, icon) {
+                const div = document.createElement('div');
+                div.className = `menu-item ${currentBoard === target ? 'active' : ''}`;
+                div.innerHTML = `<span>${icon} ${name}</span><span class="menu-count">${count!==null?count:''}</span>`;
+                div.onclick = () => {
+                    currentBoard = target;
+                    document.getElementById('page-title').innerText = name;
+                    renderGallery();
+                    toggleSidebar(); // 选完自动收起
+                };
+                menu.appendChild(div);
+            }
+        }
+
+        function renderGallery() {
+            const gallery = document.getElementById('gallery');
+            gallery.innerHTML = '';
+            gallery.className = 'waterfall'; // 默认瀑布流
+
+            if(currentBoard === '__ALL_BOARDS__') {
+                gallery.className = 'board-grid'; // 切换为网格
+                renderBoardsView(gallery);
+                return;
+            }
+
+            let filtered = allData.filter(i => {
+                if(currentBoard === 'all') return true;
+                return i.board === currentBoard;
+            });
+            
+            filtered.sort((a,b) => b.id - a.id); // 最新在前
+
+            filtered.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'pin';
+                div.innerHTML = `
+                    <img src="${item.mainImage}" loading="lazy">
+                    <div class="pin-footer">
+                        <span>${item.board}</span>
+                        <span>${item.version||''}</span>
+                    </div>
+                `;
+                div.onclick = () => openDetail(item);
+                gallery.appendChild(div);
+            });
+        }
+
+        function renderBoardsView(container) {
+            const boards = [...new Set(allData.map(i => i.board || '默认画板'))];
+            boards.forEach(bName => {
+                const imgs = allData.filter(i => i.board === bName).slice(-3).reverse();
+                const img1 = imgs[0]?.mainImage || '';
+                const img2 = imgs[1]?.mainImage || '';
+                const img3 = imgs[2]?.mainImage || '';
+                
+                const card = document.createElement('div');
+                card.className = 'b-card';
+                card.innerHTML = `
+                    <div class="b-cover">
+                        <div style="background:#eee; overflow:hidden;"><img src="${img1}" class="b-cover-img"></div>
+                        <div style="display:grid; grid-template-rows:1fr 1fr; gap:2px;">
+                            <div style="background:#e5e5e5; overflow:hidden;"><img src="${img2}" class="b-cover-img"></div>
+                            <div style="background:#e5e5e5; overflow:hidden;"><img src="${img3}" class="b-cover-img"></div>
+                        </div>
+                    </div>
+                    <div class="b-info">
+                        <span class="b-name">${bName}</span>
+                        <span class="b-count">${allData.filter(i=>i.board===bName).length}</span>
+                    </div>
+                `;
+                card.onclick = () => {
+                    currentBoard = bName;
+                    document.getElementById('page-title').innerText = bName;
+                    renderGallery();
+                };
+                container.appendChild(card);
+            });
+        }
+
+        // --- 详情页逻辑 ---
+        function openDetail(item) {
+            const modal = document.getElementById('detail-modal');
+            document.getElementById('dm-img').src = item.mainImage;
+            document.getElementById('dm-author').innerText = item.author || '未知作者';
+            document.getElementById('dm-prompt').innerText = item.prompt || '无提示词';
+            modal.style.display = 'flex';
+        }
+        function closeDetail() {
+            document.getElementById('detail-modal').style.display = 'none';
+        }
+        function copyPrompt() {
+            const txt = document.getElementById('dm-prompt').innerText;
+            navigator.clipboard.writeText(txt).then(() => alert('已复制！'));
+        }
+        function doSearch() {
+            const key = prompt("搜索提示词:");
+            if(key) {
+                // 简单搜索逻辑...
+                alert("手机版搜索暂仅支持画板筛选，后续更新支持全局搜索");
+            }
+        }
+    </script>
+</body>
+</html>
