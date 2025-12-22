@@ -4,74 +4,91 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <title>即梦灵感库</title>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
     <style>
-        /* --- 1. 核心变量与重置 --- */
+        /* --- 1. CSS 变量与主题定义 --- */
         :root {
-            --bg-color: #f2f3f5;
+            /* ☀️ 白天模式 (默认) */
+            --bg-color: #f7f8fa;
             --card-bg: #ffffff;
-            --primary: #111111;
             --text-main: #333333;
             --text-sub: #999999;
+            --border-color: rgba(0,0,0,0.05);
+            --nav-bg: rgba(255,255,255,0.95);
+            --primary: #111111;
             --accent: #2563eb;
-            --nav-height: 55px; /* 底部导航高度 */
+            --btn-bg: #111111;
+            --btn-text: #ffffff;
+            --btn-sub-bg: #f0f0f0;
+            --btn-sub-text: #333333;
+            --shadow: 0 4px 20px rgba(0,0,0,0.04);
+            
             --safe-bottom: env(safe-area-inset-bottom);
             --safe-top: env(safe-area-inset-top);
+            --nav-height: 55px;
         }
-        body { margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif; background: var(--bg-color); color: var(--text-main); height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+
+        /* 🌙 深色模式 */
+        [data-theme="dark"] {
+            --bg-color: #121212;
+            --card-bg: #1e1e1e;
+            --text-main: #e0e0e0;
+            --text-sub: #777777;
+            --border-color: #333333;
+            --nav-bg: rgba(30,30,30,0.95);
+            --primary: #ffffff;
+            --accent: #4dabf7;
+            --btn-bg: #ffffff;
+            --btn-text: #000000;
+            --btn-sub-bg: #333333;
+            --btn-sub-text: #ffffff;
+            --shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+
+        body { margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif; background: var(--bg-color); color: var(--text-main); height: 100vh; overflow: hidden; display: flex; flex-direction: column; transition: background 0.3s; }
         * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
-        button:active { opacity: 0.7; }
-
-        /* 图标 SVG */
-        .icon { width: 22px; height: 22px; stroke: currentColor; stroke-width: 2; fill: none; stroke-linecap: round; stroke-linejoin: round; }
-        .icon-sm { width: 16px; height: 16px; }
-
-        /* --- 2. 顶部导航 (Sticky) --- */
-        .top-bar {
-            height: 50px; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px);
-            display: flex; align-items: center; justify-content: center;
-            position: sticky; top: 0; z-index: 20; border-bottom: 1px solid rgba(0,0,0,0.05);
-            padding-top: var(--safe-top); font-weight: 700; font-size: 17px;
-            padding-left: 15px; padding-right: 15px;
-        }
         
-        /* 顶部按钮 */
-        .top-left-btn, .top-right-group { position: absolute; top: calc(var(--safe-top) + 13px); display: flex; gap: 15px; }
-        .top-left-btn { left: 15px; cursor: pointer; display: none; } /* 默认隐藏返回 */
-        .top-right-group { right: 15px; }
-        .top-icon-btn { cursor: pointer; color: var(--primary); display: flex; align-items: center; }
+        /* 图标通用调整 */
+        i.ri-lg { font-size: 20px; }
+        i.ri-xl { font-size: 24px; }
 
-        /* --- 3. 筛选面板 (抽屉式) --- */
+        /* --- 2. 顶部导航 --- */
+        .top-bar {
+            height: 50px; background: var(--nav-bg); backdrop-filter: blur(10px);
+            display: flex; align-items: center; justify-content: center;
+            position: sticky; top: 0; z-index: 20; border-bottom: 1px solid var(--border-color);
+            padding-top: var(--safe-top); font-weight: 700; font-size: 17px;
+            padding-left: 15px; padding-right: 15px; transition: background 0.3s;
+        }
+        .top-left-btn, .top-right-group { position: absolute; top: calc(var(--safe-top) + 13px); display: flex; gap: 18px; }
+        .top-left-btn { left: 15px; cursor: pointer; display: none; } 
+        .top-right-group { right: 15px; }
+        .top-icon-btn { cursor: pointer; color: var(--text-main); font-size: 20px; }
+
+        /* --- 3. 筛选面板 --- */
         .filter-panel {
             position: absolute; top: calc(50px + var(--safe-top)); left: 0; width: 100%;
-            background: #fff; z-index: 19; padding: 0 20px 20px 20px;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+            background: var(--card-bg); z-index: 19; padding: 0 20px 20px 20px;
+            box-shadow: var(--shadow);
             transform: translateY(-150%); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             max-height: 70vh; overflow-y: auto; border-bottom-left-radius: 20px; border-bottom-right-radius: 20px;
         }
         .filter-panel.open { transform: translateY(0); }
-        .filter-section { margin-top: 20px; }
-        .filter-title { font-size: 12px; color: var(--text-sub); margin-bottom: 10px; font-weight: 600; text-transform: uppercase; }
+        .filter-title { font-size: 12px; color: var(--text-sub); margin: 20px 0 10px 0; font-weight: 600; text-transform: uppercase; }
         .filter-tags { display: flex; flex-wrap: wrap; gap: 8px; }
         .f-chip {
-            padding: 6px 14px; background: #f5f5f5; border-radius: 20px; font-size: 12px;
-            color: #555; cursor: pointer; transition: 0.2s; border: 1px solid transparent;
+            padding: 6px 14px; background: var(--bg-color); border-radius: 20px; font-size: 12px;
+            color: var(--text-main); cursor: pointer; transition: 0.2s; border: 1px solid transparent;
         }
-        .f-chip.active { background: #000; color: #fff; }
-        .filter-actions { margin-top: 20px; display: flex; justify-content: flex-end; gap: 10px; padding-top: 15px; border-top: 1px solid #eee; }
-
-        /* 遮罩 */
-        .mask-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.3); z-index: 15; display: none; opacity: 0; transition: opacity 0.3s;
-        }
+        .f-chip.active { background: var(--primary); color: var(--bg-color); }
+        .mask-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 15; display: none; opacity: 0; transition: opacity 0.3s; }
         .mask-overlay.show { display: block; opacity: 1; }
 
-        /* --- 4. 内容滚动区 --- */
+        /* --- 4. 内容区 --- */
         .content-area {
             flex: 1; overflow-y: auto; overflow-x: hidden;
-            /* ✅ 修复：底部留白，防止被Tab遮挡 */
             padding: 15px 15px calc(var(--nav-height) + var(--safe-bottom) + 40px) 15px;
             -webkit-overflow-scrolling: touch;
         }
@@ -80,60 +97,59 @@
         .waterfall { column-count: 2; column-gap: 12px; }
         .pin {
             break-inside: avoid; margin-bottom: 12px; background: var(--card-bg);
-            border-radius: 10px; overflow: hidden; position: relative;
+            border-radius: 12px; overflow: hidden; position: relative;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.02);
         }
-        .pin img { width: 100%; display: block; min-height: 100px; background: #eee; object-fit: cover; }
+        .pin img { width: 100%; display: block; min-height: 100px; background: var(--bg-color); object-fit: cover; }
         .pin-tag {
-            position: absolute; bottom: 5px; right: 5px; background: rgba(0,0,0,0.5);
-            color: #fff; font-size: 10px; padding: 3px 6px; border-radius: 6px;
+            position: absolute; bottom: 6px; right: 6px; background: rgba(0,0,0,0.6);
+            color: #fff; font-size: 10px; padding: 2px 8px; border-radius: 6px;
             backdrop-filter: blur(4px); max-width: 90%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
         }
 
-        /* 画板列表 (Grid 布局) */
+        /* 画板列表 */
         .board-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
         .b-card {
-            background: #fff; border-radius: 12px; overflow: hidden;
-            display: flex; flex-direction: column; aspect-ratio: 1 / 1.1; /* 方形卡片 */
-            box-shadow: 0 2px 8px rgba(0,0,0,0.03); position: relative;
+            background: var(--card-bg); border-radius: 12px; overflow: hidden;
+            display: flex; flex-direction: column; aspect-ratio: 1 / 1.1;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.02); position: relative; border: 1px solid var(--border-color);
         }
-        .b-cover-wrap { flex: 2; position: relative; background: #eee; overflow: hidden; }
+        .b-cover-wrap { flex: 2; position: relative; background: var(--bg-color); overflow: hidden; }
         .b-cover-wrap img { width: 100%; height: 100%; object-fit: cover; }
-        
-        /* 特殊卡片：我的作品 */
-        .b-card.my-works .b-cover-wrap { background: linear-gradient(135deg, #000 0%, #333 100%); display: flex; align-items: center; justify-content: center; color: #fff; }
-        
-        .b-info { flex: 1; padding: 10px; display: flex; flex-direction: column; justify-content: center; background: #fff; }
-        .b-title { font-weight: 700; font-size: 14px; margin-bottom: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .b-card.my-works .b-cover-wrap { background: linear-gradient(135deg, #333 0%, #000 100%); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 32px; }
+        .b-info { flex: 1; padding: 10px; display: flex; flex-direction: column; justify-content: center; background: var(--card-bg); }
+        .b-title { font-weight: 700; font-size: 14px; margin-bottom: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-main); }
         .b-count { font-size: 11px; color: var(--text-sub); }
 
-        /* --- 5. 底部导航栏 (Dock) --- */
+        /* --- 5. 底部导航 --- */
         .tab-bar {
             height: calc(var(--nav-height) + var(--safe-bottom));
-            background: rgba(255,255,255,0.95); border-top: 1px solid rgba(0,0,0,0.05);
+            background: var(--nav-bg); border-top: 1px solid var(--border-color);
             backdrop-filter: blur(10px);
             display: flex; position: fixed; bottom: 0; width: 100%; z-index: 30;
             padding-bottom: var(--safe-bottom);
         }
         .tab-item {
             flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
-            color: #999; font-size: 10px; gap: 4px; transition: 0.2s;
+            color: var(--text-sub); font-size: 10px; gap: 4px; transition: 0.2s; cursor: pointer;
         }
-        .tab-item.active { color: var(--primary); font-weight: 600; }
-        .tab-item.active .icon { stroke-width: 2.5; }
+        .tab-item i { font-size: 22px; margin-bottom: 2px; }
+        .tab-item.active { color: var(--text-main); font-weight: 600; }
+        .tab-item.active i { font-weight: bold; }
 
         /* --- 6. 设置页 --- */
         .settings-page { padding: 15px; }
-        .setting-group { background: #fff; border-radius: 12px; padding: 15px; margin-bottom: 15px; }
-        .s-title { font-size: 14px; font-weight: 700; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
+        .setting-group { background: var(--card-bg); border-radius: 16px; padding: 20px; margin-bottom: 15px; box-shadow: var(--shadow); }
+        .s-title { font-size: 15px; font-weight: 700; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; color: var(--text-main); }
         .s-row { margin-bottom: 12px; }
-        .s-input { width: 100%; padding: 12px; border: 1px solid #eee; border-radius: 8px; font-size: 14px; box-sizing: border-box; background: #f9f9f9; }
+        .s-input { width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 10px; font-size: 14px; box-sizing: border-box; background: var(--bg-color); color: var(--text-main); }
         
         .btn-full {
-            background: #000; color: #fff; width: 100%; padding: 12px;
-            border-radius: 8px; border: none; font-size: 14px; font-weight: 600;
-            display: flex; align-items: center; justify-content: center; gap: 8px;
+            background: var(--btn-bg); color: var(--btn-text); width: 100%; padding: 14px;
+            border-radius: 10px; border: none; font-size: 15px; font-weight: 600;
+            display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer;
         }
-        .btn-outline { background: #fff; color: #333; border: 1px solid #ddd; }
+        .btn-outline { background: var(--btn-sub-bg); color: var(--btn-sub-text); border: 1px solid var(--border-color); }
         
         /* --- 7. 详情弹窗 --- */
         .detail-overlay {
@@ -143,19 +159,18 @@
         }
         .detail-img-box { flex: 1; display: flex; align-items: center; justify-content: center; overflow: hidden; }
         .detail-img { max-width: 100%; max-height: 100%; object-fit: contain; }
-        .detail-bar { background: rgba(30,30,30,0.9); padding: 20px 20px calc(20px + var(--safe-bottom)) 20px; color: #fff; border-top: 1px solid #333; }
+        .detail-bar { background: rgba(20,20,20,0.95); padding: 20px 20px calc(20px + var(--safe-bottom)) 20px; color: #fff; border-top: 1px solid #333; }
         .detail-close {
             position: absolute; top: max(15px, var(--safe-top)); right: 15px;
-            width: 36px; height: 36px; background: rgba(255,255,255,0.2);
+            width: 40px; height: 40px; background: rgba(255,255,255,0.15);
             border-radius: 50%; display: flex; align-items: center; justify-content: center;
-            color: #fff; z-index: 101; backdrop-filter: blur(4px);
+            color: #fff; z-index: 101; backdrop-filter: blur(4px); font-size: 24px;
         }
-        .d-prompt { font-size: 14px; color: #ccc; line-height: 1.5; max-height: 120px; overflow-y: auto; margin-bottom: 15px; background: #222; padding: 12px; border-radius: 8px; }
+        .d-prompt { font-size: 14px; color: #ccc; line-height: 1.6; max-height: 150px; overflow-y: auto; margin-bottom: 15px; background: #333; padding: 15px; border-radius: 10px; }
 
         /* 页面切换 */
         .page { display: none; height: 100%; flex-direction: column; }
         .page.active { display: flex; }
-        
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
 </head>
@@ -165,43 +180,39 @@
 
     <div class="filter-panel" id="filter-panel">
         <div class="filter-section">
-            <div class="filter-title">模型版本</div>
+            <div class="filter-title"><i class="ri-git-branch-line"></i> 模型版本</div>
             <div class="filter-tags" id="filter-version"></div>
         </div>
         <div class="filter-section">
-            <div class="filter-title">画面比例</div>
+            <div class="filter-title"><i class="ri-aspect-ratio-line"></i> 画面比例</div>
             <div class="filter-tags" id="filter-ratio"></div>
         </div>
         <div class="filter-section">
-            <div class="filter-title">内容标签</div>
+            <div class="filter-title"><i class="ri-price-tag-3-line"></i> 内容标签</div>
             <div class="filter-tags" id="filter-tags"></div>
         </div>
-        <div class="filter-actions">
-            <button class="btn-full btn-outline" style="width:auto; padding: 8px 16px;" onclick="resetFilters()">重置</button>
-            <button class="btn-full" style="width:auto; padding: 8px 24px;" onclick="toggleFilter(false)">确定</button>
+        <div style="margin-top:25px; display:flex; gap:10px;">
+            <button class="btn-full btn-outline" onclick="resetFilters()">重置</button>
+            <button class="btn-full" onclick="toggleFilter(false)">确定</button>
         </div>
     </div>
 
     <div id="page-home" class="page active">
         <div class="top-bar">
             <div class="top-left-btn" id="home-back-btn" onclick="goBackToAll()">
-                <svg class="icon"><path d="M15 18l-6-6 6-6"></path></svg>
+                <i class="ri-arrow-left-line ri-lg"></i>
             </div>
-            
             <span id="page-title">全部采集</span>
-            
             <div class="top-right-group">
-                <div class="top-icon-btn" onclick="showSearch()">
-                    <svg class="icon"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                </div>
-                <div class="top-icon-btn" onclick="toggleFilter(true)">
-                    <svg class="icon"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
-                </div>
+                <div class="top-icon-btn" onclick="showSearch()"><i class="ri-search-line"></i></div>
+                <div class="top-icon-btn" onclick="toggleFilter(true)"><i class="ri-filter-3-line"></i></div>
             </div>
         </div>
         <div class="content-area">
             <div id="gallery" class="waterfall"></div>
-            <div id="empty-hint" style="text-align:center; color:#999; margin-top:50px; display:none;">暂无内容</div>
+            <div id="empty-hint" style="text-align:center; color:var(--text-sub); margin-top:80px; display:none;">
+                <i class="ri-inbox-2-line" style="font-size:48px; opacity:0.5;"></i><br><br>暂无内容
+            </div>
         </div>
     </div>
 
@@ -217,64 +228,79 @@
         <div class="content-area settings-page">
             
             <div class="setting-group">
-                <div class="s-title">☁️ 云同步 (WebDAV)</div>
+                <div class="s-title"><i class="ri-palette-line"></i> 外观设置</div>
+                <button class="btn-full btn-outline" id="theme-btn" onclick="toggleTheme()">
+                    <i class="ri-moon-line"></i> 切换至深色模式
+                </button>
+            </div>
+
+            <div class="setting-group">
+                <div class="s-title"><i class="ri-cloud-line"></i> 云同步 (WebDAV)</div>
                 <div class="s-row"><input id="dav-url" class="s-input" value="https://dav.jianguoyun.com/dav/jimeng/" placeholder="服务器地址"></div>
                 <div class="s-row"><input id="dav-user" class="s-input" placeholder="坚果云账号"></div>
                 <div class="s-row"><input id="dav-pass" class="s-input" type="password" placeholder="应用密码"></div>
                 
                 <div style="display:flex; gap:10px;">
-                    <button class="btn-full btn-outline" onclick="syncData('download')">⬇️ 下载覆盖本地</button>
-                    <button class="btn-full btn-outline" onclick="syncData('upload')">⬆️ 上传覆盖云端</button>
-                </div>
-                <div style="font-size:12px; color:#999; margin-top:10px; line-height:1.4;">
-                    提示：首次使用请先点“下载”。手机端因浏览器限制，部分WebDAV可能无法连接，推荐使用下方文件导入。
+                    <button class="btn-full btn-outline" onclick="syncData('download')"><i class="ri-download-cloud-2-line"></i> 下载</button>
+                    <button class="btn-full btn-outline" onclick="syncData('upload')"><i class="ri-upload-cloud-2-line"></i> 上传</button>
                 </div>
             </div>
 
             <div class="setting-group">
-                <div class="s-title">📂 文件管理</div>
+                <div class="s-title"><i class="ri-folder-open-line"></i> 文件管理</div>
                 <input type="file" id="file-input" accept=".json" style="display:none">
-                <button class="btn-full" onclick="document.getElementById('file-input').click()">导入本地 JSON 文件</button>
+                <button class="btn-full" onclick="document.getElementById('file-input').click()">
+                    <i class="ri-file-upload-line"></i> 导入本地 JSON
+                </button>
                 <div style="height:10px"></div>
-                <button class="btn-full btn-outline" style="border-color:#ffcccc; color:#ff4d4f;" onclick="clearCache()">🗑️ 清空所有数据</button>
-                <div class="status-txt" id="data-status" style="margin-top:10px; font-size:12px; color:#666;"></div>
+                <button class="btn-full btn-outline" style="color:#ff4d4f; border-color: rgba(255,0,0,0.1);" onclick="clearCache()">
+                    <i class="ri-delete-bin-line"></i> 清空所有数据
+                </button>
+                <div class="status-txt" id="data-status" style="margin-top:10px; font-size:12px; color:var(--text-sub); text-align:center;"></div>
             </div>
         </div>
     </div>
 
     <div class="tab-bar">
         <div class="tab-item active" onclick="switchTab('home')">
-            <svg class="icon"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+            <i class="ri-home-4-line ri-lg"></i>
             <span>首页</span>
         </div>
         <div class="tab-item" onclick="switchTab('boards')">
-            <svg class="icon"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+            <i class="ri-layout-grid-line ri-lg"></i>
             <span>画板</span>
         </div>
         <div class="tab-item" onclick="switchTab('settings')">
-            <svg class="icon"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+            <i class="ri-settings-3-line ri-lg"></i>
             <span>设置</span>
         </div>
     </div>
 
     <div class="detail-overlay" id="detail-overlay">
-        <div class="detail-close" onclick="closeDetail()"><svg class="icon"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></div>
+        <div class="detail-close" onclick="closeDetail()"><i class="ri-close-line"></i></div>
         <div class="detail-img-box"><img id="d-img" class="detail-img"></div>
         <div class="detail-bar">
             <div class="d-prompt" id="d-prompt"></div>
-            <button class="btn-full" onclick="copyPrompt()">📋 复制提示词</button>
+            <button class="btn-full" style="background:#fff; color:#000;" onclick="copyPrompt()">
+                <i class="ri-file-copy-line"></i> 复制提示词
+            </button>
         </div>
     </div>
 
     <script>
         let allData = [];
-        let currentFilterBoard = 'all'; // 'all', 'fav', 'mine', 'BoardName'
+        let currentFilterBoard = 'all'; 
         let activeFilters = { version: new Set(), ratio: new Set(), tags: new Set() };
         let searchTerm = "";
+        let isDarkMode = false;
 
         // --- 初始化 ---
         window.onload = () => {
-            // 加载设置
+            // 加载主题
+            const savedTheme = localStorage.getItem('jm_theme');
+            if(savedTheme === 'dark') toggleTheme(true);
+
+            // 加载WebDAV
             if(localStorage.getItem('jm_dav_user')) {
                 document.getElementById('dav-user').value = localStorage.getItem('jm_dav_user');
                 document.getElementById('dav-pass').value = localStorage.getItem('jm_dav_pass');
@@ -286,44 +312,54 @@
                     const parsed = JSON.parse(cached);
                     if (parsed && parsed.length > 0) {
                         allData = parsed;
-                        updateStatus(`✅ 本地缓存 (${allData.length}条)`);
+                        updateStatus(`✅ 缓存 (${allData.length}条)`);
                         initUI();
                         return;
                     }
                 } catch(e) {}
             }
-            // 无数据去设置
             switchTab('settings');
         };
 
-        // --- 核心 UI 渲染 ---
+        // --- 主题切换 ---
+        function toggleTheme(forceDark) {
+            const body = document.body;
+            const btn = document.getElementById('theme-btn');
+            
+            if (forceDark === true || !body.hasAttribute('data-theme')) {
+                body.setAttribute('data-theme', 'dark');
+                btn.innerHTML = '<i class="ri-sun-line"></i> 切换至白天模式';
+                isDarkMode = true;
+                localStorage.setItem('jm_theme', 'dark');
+            } else {
+                body.removeAttribute('data-theme');
+                btn.innerHTML = '<i class="ri-moon-line"></i> 切换至深色模式';
+                isDarkMode = false;
+                localStorage.setItem('jm_theme', 'light');
+            }
+        }
+
+        // --- UI 渲染 ---
         function initUI() {
             renderGallery();
             renderBoardList();
             renderFilterTags();
         }
 
-        // 1. 瀑布流渲染
         function renderGallery() {
             const container = document.getElementById('gallery');
             container.innerHTML = '';
             
-            // 过滤逻辑
             let filtered = allData.filter(i => {
-                // 画板过滤
                 if(currentFilterBoard === 'fav' && !i.favorite) return false;
                 if(currentFilterBoard === 'mine' && !i.isMine) return false;
                 if(currentFilterBoard !== 'all' && currentFilterBoard !== 'fav' && currentFilterBoard !== 'mine' && i.board !== currentFilterBoard) return false;
+                if(searchTerm && !((i.prompt && i.prompt.toLowerCase().includes(searchTerm.toLowerCase())) || (i.author && i.author.toLowerCase().includes(searchTerm.toLowerCase())))) return false;
                 
-                // 搜索过滤
-                if(searchTerm && !((i.prompt && i.prompt.includes(searchTerm)) || (i.author && i.author.includes(searchTerm)))) return false;
-
-                // 标签过滤
                 const tags = i.tags || [];
                 if(activeFilters.version.size > 0 && !tags.some(t => activeFilters.version.has(t))) return false;
                 if(activeFilters.ratio.size > 0 && !tags.some(t => activeFilters.ratio.has(t))) return false;
                 if(activeFilters.tags.size > 0 && !tags.some(t => activeFilters.tags.has(t))) return false;
-
                 return true;
             });
 
@@ -344,7 +380,6 @@
             });
         }
 
-        // 2. 画板列表渲染 (双列)
         function renderBoardList() {
             const container = document.getElementById('board-grid');
             container.innerHTML = '';
@@ -352,13 +387,11 @@
             const boardCounts = {};
             allData.forEach(i => boardCounts[i.board || '默认画板'] = (boardCounts[i.board || '默认画板'] || 0) + 1);
             
-            // 特殊卡片：我的作品
             const mineCount = allData.filter(i => i.isMine).length;
             container.appendChild(createBoardCard('👤 我的作品', mineCount, null, true, () => {
                 enterBoard('mine', '我的作品');
             }));
 
-            // 普通画板
             const boards = Object.keys(boardCounts);
             boards.forEach(b => {
                 const coverItem = allData.find(i => i.board === b);
@@ -371,7 +404,7 @@
         function createBoardCard(title, count, imgUrl, isMine, onClick) {
             const div = document.createElement('div');
             div.className = `b-card ${isMine ? 'my-works' : ''}`;
-            const imgContent = isMine ? `<svg class="icon" style="width:32px;height:32px"><circle cx="12" cy="7" r="4"></circle><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path></svg>` 
+            const imgContent = isMine ? `<i class="ri-user-smile-line" style="font-size:32px"></i>` 
                                       : `<img src="${imgUrl || ''}">`;
             div.innerHTML = `
                 <div class="b-cover-wrap">${imgContent}</div>
@@ -384,11 +417,11 @@
             return div;
         }
 
-        // --- 逻辑控制 ---
+        // --- 交互 ---
         function enterBoard(boardId, title) {
             currentFilterBoard = boardId;
             document.getElementById('page-title').innerText = title;
-            document.getElementById('home-back-btn').style.display = 'flex'; // 显示返回按钮
+            document.getElementById('home-back-btn').style.display = 'flex';
             switchTab('home');
             renderGallery();
         }
@@ -396,7 +429,7 @@
         function goBackToAll() {
             currentFilterBoard = 'all';
             document.getElementById('page-title').innerText = '全部采集';
-            document.getElementById('home-back-btn').style.display = 'none'; // 隐藏返回按钮
+            document.getElementById('home-back-btn').style.display = 'none';
             renderGallery();
         }
 
@@ -406,25 +439,26 @@
             
             document.querySelectorAll('.tab-item').forEach((el, idx) => {
                 const names = ['home', 'boards', 'settings'];
-                if (names[idx] === tabName) el.classList.add('active');
-                else el.classList.remove('active');
+                if (names[idx] === tabName) {
+                    el.classList.add('active');
+                    // 替换为实心图标 (Fill style)
+                    const icons = ['ri-home-4-fill', 'ri-layout-grid-fill', 'ri-settings-3-fill'];
+                    el.querySelector('i').className = `${icons[idx]} ri-lg`;
+                } else {
+                    el.classList.remove('active');
+                    // 替换为线性图标 (Line style)
+                    const icons = ['ri-home-4-line', 'ri-layout-grid-line', 'ri-settings-3-line'];
+                    el.querySelector('i').className = `${icons[idx]} ri-lg`;
+                }
             });
-            
             if(tabName === 'home') renderGallery();
         }
 
-        // --- 筛选器逻辑 ---
         function toggleFilter(show) {
             const panel = document.getElementById('filter-panel');
             const mask = document.getElementById('mask-overlay');
-            if(show) {
-                panel.classList.add('open');
-                mask.classList.add('show');
-            } else {
-                panel.classList.remove('open');
-                mask.classList.remove('show');
-                renderGallery(); // 关闭时刷新
-            }
+            if(show) { panel.classList.add('open'); mask.classList.add('show'); }
+            else { panel.classList.remove('open'); mask.classList.remove('show'); renderGallery(); }
         }
 
         function renderFilterTags() {
@@ -434,21 +468,19 @@
                 else if(/\d:\d/.test(t)) sets.ratio.add(t);
                 else sets.tags.add(t);
             }));
-
             renderChips('filter-version', sets.version, activeFilters.version);
             renderChips('filter-ratio', sets.ratio, activeFilters.ratio);
             renderChips('filter-tags', sets.tags, activeFilters.tags);
         }
 
-        function renderChips(containerId, dataSet, activeSet) {
-            const c = document.getElementById(containerId);
-            c.innerHTML = '';
-            Array.from(dataSet).sort().forEach(val => {
+        function renderChips(cid, dSet, aSet) {
+            const c = document.getElementById(cid); c.innerHTML = '';
+            Array.from(dSet).sort().forEach(val => {
                 const chip = document.createElement('div');
-                chip.className = `f-chip ${activeSet.has(val) ? 'active' : ''}`;
+                chip.className = `f-chip ${aSet.has(val) ? 'active' : ''}`;
                 chip.innerText = val;
                 chip.onclick = () => {
-                    if(activeSet.has(val)) activeSet.delete(val); else activeSet.add(val);
+                    if(aSet.has(val)) aSet.delete(val); else aSet.add(val);
                     chip.classList.toggle('active');
                 };
                 c.appendChild(chip);
@@ -461,7 +493,7 @@
         }
 
         function showSearch() {
-            const t = prompt("🔍 搜索关键词 (提示词/作者):");
+            const t = prompt("🔍 搜索关键词:");
             if(t !== null) {
                 searchTerm = t;
                 renderGallery();
@@ -469,10 +501,9 @@
             }
         }
 
-        // --- 数据功能 ---
+        // --- 数据 ---
         document.getElementById('file-input').onchange = (e) => {
-            const f = e.target.files[0];
-            if(!f) return;
+            const f = e.target.files[0]; if(!f) return;
             const r = new FileReader();
             r.onload = (ev) => {
                 try {
@@ -489,62 +520,41 @@
             const p = document.getElementById('dav-pass').value;
             const url = document.getElementById('dav-url').value + "jimeng_backup.json";
             if(!u || !p) return alert("请先填写账号密码");
-
-            // 保存凭证
-            localStorage.setItem('jm_dav_user', u);
-            localStorage.setItem('jm_dav_pass', p);
-
-            const btn = event.target;
-            const oldTxt = btn.innerText;
-            btn.innerText = "⏳ 处理中...";
-
+            localStorage.setItem('jm_dav_user', u); localStorage.setItem('jm_dav_pass', p);
+            
+            const btn = event.target; const txt = btn.innerHTML; btn.innerHTML = "⏳...";
             try {
                 if (action === 'download') {
                     const res = await fetch(url, { headers: { 'Authorization': 'Basic ' + btoa(u + ':' + p) } });
                     if(res.ok) {
                         const json = await res.json();
-                        const list = json.jimengCollections || [];
-                        saveToLocal(list);
-                        alert("下载成功！");
-                    } else alert("下载失败: " + res.status);
+                        saveToLocal(json.jimengCollections || []);
+                        alert("下载成功");
+                    } else alert("下载失败:" + res.status);
                 } else {
-                    // 手机端上传
-                    if(allData.length === 0) return alert("本地无数据，无法上传");
-                    const dataStr = JSON.stringify({ jimengCollections: allData });
+                    if(allData.length === 0) return alert("无数据");
                     const res = await fetch(url, {
                         method: 'PUT',
                         headers: { 'Authorization': 'Basic ' + btoa(u + ':' + p), 'Content-Type': 'application/json' },
-                        body: dataStr
+                        body: JSON.stringify({ jimengCollections: allData })
                     });
-                    if(res.ok || res.status===201 || res.status===204) alert("上传成功！");
-                    else alert("上传失败: " + res.status);
+                    if(res.ok || res.status===201 || res.status===204) alert("上传成功"); else alert("失败:" + res.status);
                 }
-            } catch(e) { alert("网络错误 (手机端WebDAV可能受限，建议用文件导入)"); }
-            btn.innerText = oldTxt;
+            } catch(e) { alert("网络错误 (跨域限制，请尝试文件导入)"); }
+            btn.innerHTML = txt;
         }
 
         function saveToLocal(list) {
             allData = list;
-            try {
-                localStorage.setItem('jm_mobile_data', JSON.stringify(list));
-                updateStatus(`✅ 数据已更新 (${list.length}条)`);
-                initUI();
-                switchTab('home');
-            } catch (e) { alert("存储空间不足，数据未缓存，但本次可用"); }
+            try { localStorage.setItem('jm_mobile_data', JSON.stringify(list)); updateStatus(`✅ 已更新 (${list.length}条)`); initUI(); switchTab('home'); } 
+            catch (e) { alert("存储不足"); }
         }
 
         function clearCache() {
-            if(confirm("确定清空？")) {
-                localStorage.removeItem('jm_mobile_data');
-                allData = [];
-                initUI();
-                updateStatus("无数据");
-            }
+            if(confirm("确定清空？")) { localStorage.removeItem('jm_mobile_data'); allData=[]; initUI(); updateStatus("无数据"); }
         }
-        
         function updateStatus(msg) { document.getElementById('data-status').innerText = msg; }
 
-        // --- 详情弹窗 ---
         function openDetail(item) {
             document.getElementById('detail-overlay').style.display = 'flex';
             document.getElementById('d-img').src = item.mainImage;
@@ -552,8 +562,7 @@
         }
         function closeDetail() { document.getElementById('detail-overlay').style.display = 'none'; }
         function copyPrompt() {
-            const t = document.getElementById('d-prompt').innerText;
-            navigator.clipboard.writeText(t).then(()=>alert("已复制"));
+            navigator.clipboard.writeText(document.getElementById('d-prompt').innerText).then(()=>alert("已复制"));
         }
     </script>
 </body>
