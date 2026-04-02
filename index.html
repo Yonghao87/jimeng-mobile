@@ -529,6 +529,42 @@ html, body { height: 100%; width: 100%; background: var(--bg); color: var(--t1);
 
 <script>
 // ═══════════════════════════════════════
+// INDEXED DB CACHE
+// ═══════════════════════════════════════
+const IDB_NAME    = 'aigc_mobile_db';
+const IDB_VERSION = 1;
+const IDB_STORE   = 'cache';
+
+function openIDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(IDB_NAME, IDB_VERSION);
+    req.onupgradeneeded = e => e.target.result.createObjectStore(IDB_STORE);
+    req.onsuccess = e => resolve(e.target.result);
+    req.onerror   = e => reject(e.target.error);
+  });
+}
+
+async function idbSet(key, value) {
+  const db = await openIDB();
+  return new Promise((resolve, reject) => {
+    const tx  = db.transaction(IDB_STORE, 'readwrite');
+    const req = tx.objectStore(IDB_STORE).put(value, key);
+    req.onsuccess = () => resolve();
+    req.onerror   = e => reject(e.target.error);
+  });
+}
+
+async function idbGet(key) {
+  const db = await openIDB();
+  return new Promise((resolve, reject) => {
+    const tx  = db.transaction(IDB_STORE, 'readonly');
+    const req = tx.objectStore(IDB_STORE).get(key);
+    req.onsuccess = e => resolve(e.target.result);
+    req.onerror   = e => reject(e.target.error);
+  });
+}
+
+// ═══════════════════════════════════════
 // STATE
 // ═══════════════════════════════════════
 let cloudData    = [];   // 从 COS 同步的数据
@@ -563,15 +599,14 @@ function getAllData() {
 // ═══════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════
-window.addEventListener('DOMContentLoaded', () => {
+window.addEventListener('DOMContentLoaded', async () => {
   loadConfig();
-  // Load cached cloud data
+  // Load cached cloud data from IndexedDB
   try {
-    const cached = sessionStorage.getItem('aigc_mobile_cache');
+    const cached = await idbGet('cloud_cache');
     if (cached) {
-      const p = JSON.parse(cached);
-      cloudData = (p.data || []).map(normalizeItem);
-      boards    = p.boards || [];
+      cloudData = (cached.data || []).map(normalizeItem);
+      boards    = cached.boards || [];
     }
   } catch(e) {}
   render();
@@ -617,7 +652,7 @@ async function syncData() {
     cloudData = (json.data || []).map(normalizeItem);
     boards    = json.boards || [...new Set(cloudData.map(i => i.board).filter(Boolean))];
 
-    sessionStorage.setItem('aigc_mobile_cache', JSON.stringify({ data: cloudData, boards }));
+    await idbSet('cloud_cache', { data: cloudData, boards });
 
     render();
     renderBoards();
