@@ -670,7 +670,7 @@ function normalizeItem(item) {
   return {
     ...item,
     id:          String(item.id || ''),
-    imageUrl:    item.thumbBlobBase64 || item.cosThumbUrl || item.cosUrl || item.imageUrl || item.localThumb || item.mainImage || '',
+    imageUrl: item.cosThumbUrl || item.cosUrl || item.imageUrl || '',
     promptText:  item.promptText || item.prompt || '',
     metaVersion: item.metaVersion || item.version || '',
     arType:      item.arType || item.ratio || '',
