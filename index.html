@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#080c14">
@@ -33,531 +34,228 @@
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-
-html, body {
-  height: 100%; width: 100%;
-  background: var(--bg);
-  color: var(--t1);
-  font-family: 'DM Sans', system-ui, sans-serif;
-  overflow: hidden;
-  -webkit-font-smoothing: antialiased;
-}
+html, body { height: 100%; width: 100%; background: var(--bg); color: var(--t1); font-family: 'DM Sans', system-ui, sans-serif; overflow: hidden; -webkit-font-smoothing: antialiased; }
+* { scrollbar-width: none; }
+*::-webkit-scrollbar { display: none; }
 
 /* ═══════════════════════════════════════
-   LAYOUT SHELL
+   LAYOUT
 ═══════════════════════════════════════ */
-.app {
-  display: flex; flex-direction: column;
-  height: 100%; width: 100%;
-  position: relative;
-}
+.app { display: flex; flex-direction: column; height: 100%; width: 100%; position: relative; }
 
 /* ═══════════════════════════════════════
    HEADER
 ═══════════════════════════════════════ */
 .header {
-  position: fixed; top: 0; left: 0; right: 0;
-  z-index: 100;
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
   padding-top: var(--safe-t);
-  background: rgba(8,12,20,0.85);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  background: rgba(8,12,20,0.88);
+  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
   border-bottom: 1px solid var(--border);
 }
-
-.header-inner {
-  display: flex; align-items: center; gap: 10px;
-  padding: 10px 16px;
-  height: var(--header-h);
-}
-
-.logo {
-  width: 28px; height: 28px; border-radius: 7px;
-  background: linear-gradient(135deg, #4f8ef7, #a78bfa);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 10px; font-weight: 700; color: #fff;
-  flex-shrink: 0;
-}
-
-.header-title {
-  font-size: 16px; font-weight: 600; letter-spacing: -0.3px;
-  flex: 1;
-}
-
-.header-btn {
-  width: 36px; height: 36px; border-radius: 10px;
-  background: var(--glass); border: 1px solid var(--border);
-  display: flex; align-items: center; justify-content: center;
-  cursor: pointer; flex-shrink: 0; transition: background 0.2s;
-}
+.header-inner { display: flex; align-items: center; gap: 10px; padding: 10px 16px; height: var(--header-h); }
+.logo { width: 28px; height: 28px; border-radius: 7px; background: linear-gradient(135deg, #4f8ef7, #a78bfa); display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: #fff; flex-shrink: 0; }
+.header-title { font-size: 16px; font-weight: 600; letter-spacing: -0.3px; flex: 1; }
+.header-btn { width: 36px; height: 36px; border-radius: 10px; background: var(--glass); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; transition: background 0.2s; }
 .header-btn:active { background: rgba(255,255,255,0.1); }
 .header-btn svg { width: 18px; height: 18px; stroke: var(--t2); fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 
-/* Source tabs */
-.source-tabs {
-  display: flex; gap: 6px;
-  padding: 0 16px 10px;
-  overflow-x: auto; scrollbar-width: none;
-}
-.source-tabs::-webkit-scrollbar { display: none; }
-
-.src-tab {
-  display: flex; align-items: center; gap: 5px;
-  padding: 5px 12px; border-radius: 20px;
-  font-size: 12px; font-weight: 500;
-  border: 1px solid var(--border);
-  background: var(--glass);
-  color: var(--t2); cursor: pointer;
-  white-space: nowrap; transition: all 0.2s;
-  flex-shrink: 0;
-}
-.src-tab.active-all      { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.15); color: var(--t1); }
-.src-tab.active-jimeng   { background: rgba(6,182,212,0.15);  border-color: rgba(6,182,212,0.3);   color: var(--jimeng); }
-.src-tab.active-mj       { background: rgba(79,142,247,0.15); border-color: rgba(79,142,247,0.3);  color: var(--mj); }
-.src-tab.active-banana   { background: rgba(245,158,11,0.15); border-color: rgba(245,158,11,0.3);  color: var(--banana); }
-.src-dot { width: 6px; height: 6px; border-radius: 50%; }
-.dot-jimeng  { background: var(--jimeng); }
-.dot-mj      { background: var(--mj); }
-.dot-banana  { background: var(--banana); }
+.source-tabs { display: flex; gap: 6px; padding: 0 16px 10px; overflow-x: auto; }
+.src-tab { display: flex; align-items: center; gap: 5px; padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 500; border: 1px solid var(--border); background: var(--glass); color: var(--t2); cursor: pointer; white-space: nowrap; transition: all 0.2s; flex-shrink: 0; }
+.src-tab.active-all      { background: rgba(255,255,255,0.1);  border-color: rgba(255,255,255,0.15); color: var(--t1); }
+.src-tab.active-jimeng   { background: rgba(6,182,212,0.15);   border-color: rgba(6,182,212,0.3);   color: var(--jimeng); }
+.src-tab.active-mj       { background: rgba(79,142,247,0.15);  border-color: rgba(79,142,247,0.3);  color: var(--mj); }
+.src-tab.active-nanobanana { background: rgba(245,158,11,0.15); border-color: rgba(245,158,11,0.3); color: var(--banana); }
+.src-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+.dot-jimeng   { background: var(--jimeng); }
+.dot-mj       { background: var(--mj); }
+.dot-banana   { background: var(--banana); }
 
 /* ═══════════════════════════════════════
    PAGES
 ═══════════════════════════════════════ */
 .pages { flex: 1; position: relative; }
-
-.page {
-  position: absolute; inset: 0;
-  overflow-y: auto; overflow-x: hidden;
-  -webkit-overflow-scrolling: touch;
-  display: none;
-}
+.page { position: absolute; inset: 0; overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; display: none; }
 .page.active { display: block; }
-
-/* scroll padding */
-.page-home   { padding-top: calc(var(--safe-t) + var(--header-h) + 46px); padding-bottom: calc(var(--tab-h) + var(--safe-b) + 16px); }
-.page-boards { padding-top: calc(var(--safe-t) + var(--header-h) - 46px + 16px); padding-bottom: calc(var(--tab-h) + var(--safe-b) + 16px); }
+.page-home     { padding-top: calc(var(--safe-t) + var(--header-h) + 46px); padding-bottom: calc(var(--tab-h) + var(--safe-b) + 16px); }
+.page-boards   { padding-top: calc(var(--safe-t) + var(--header-h) - 46px + 16px); padding-bottom: calc(var(--tab-h) + var(--safe-b) + 16px); }
 .page-settings { padding-top: calc(var(--safe-t) + var(--header-h) - 46px + 16px); padding-bottom: calc(var(--tab-h) + var(--safe-b) + 16px); }
 
 /* ═══════════════════════════════════════
-   MASONRY GRID
+   MASONRY
 ═══════════════════════════════════════ */
-.masonry {
-  columns: 2; column-gap: 6px;
-  padding: 0 6px;
-}
-
-.card {
-  break-inside: avoid; margin-bottom: 6px;
-  border-radius: 12px; overflow: hidden;
-  position: relative; cursor: pointer;
-  background: var(--bg3);
-  transform: translateZ(0);
-  transition: transform 0.15s;
-}
+.masonry { columns: 2; column-gap: 6px; padding: 0 6px; }
+.card { break-inside: avoid; margin-bottom: 6px; border-radius: 12px; overflow: hidden; position: relative; cursor: pointer; background: var(--bg3); transform: translateZ(0); transition: transform 0.15s; }
 .card:active { transform: scale(0.97); }
-
-.card img {
-  width: 100%; display: block;
-  object-fit: cover; min-height: 80px;
-  background: var(--bg3);
-}
-
-.card-stripe {
-  position: absolute; top: 0; left: 0; right: 0;
-  height: 2px;
-}
-.stripe-jimeng   { background: var(--jimeng); }
+.card img { width: 100%; display: block; object-fit: cover; min-height: 80px; background: var(--bg3); }
+.card-stripe { position: absolute; top: 0; left: 0; right: 0; height: 2px; }
+.stripe-jimeng     { background: var(--jimeng); }
 .stripe-midjourney { background: var(--mj); }
 .stripe-nanobanana { background: var(--banana); }
-
-.card-overlay {
-  position: absolute; bottom: 0; left: 0; right: 0;
-  background: linear-gradient(to top, rgba(0,0,0,0.75) 0%, transparent 100%);
-  padding: 24px 8px 8px;
-}
-
-.card-prompt {
-  font-size: 10px; line-height: 1.4;
-  color: rgba(255,255,255,0.8);
-  font-family: 'DM Mono', monospace;
-  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.video-badge {
-  position: absolute; top: 6px; right: 6px;
-  width: 22px; height: 22px; border-radius: 50%;
-  background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);
-  display: flex; align-items: center; justify-content: center;
-}
-.video-badge svg { width: 10px; height: 10px; fill: #fff; }
+.card-overlay { position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(to top, rgba(0,0,0,0.75) 0%, transparent 100%); padding: 24px 8px 8px; }
+.card-prompt { font-size: 10px; line-height: 1.4; color: rgba(255,255,255,0.8); font-family: 'DM Mono', monospace; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.video-badge { position: absolute; top: 6px; right: 6px; width: 22px; height: 22px; border-radius: 50%; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; }
+.local-badge { position: absolute; top: 6px; left: 6px; padding: 2px 6px; border-radius: 6px; background: rgba(79,142,247,0.7); font-size: 9px; font-weight: 600; color: #fff; letter-spacing: 0.5px; }
 
 /* ═══════════════════════════════════════
-   EMPTY / LOADING
+   EMPTY / SKELETON
 ═══════════════════════════════════════ */
-.empty-state {
-  display: flex; flex-direction: column; align-items: center;
-  justify-content: center; padding: 60px 40px; gap: 12px; text-align: center;
-}
+.empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 60px 40px; gap: 12px; text-align: center; }
 .empty-icon { font-size: 40px; opacity: 0.3; }
 .empty-title { font-size: 16px; font-weight: 500; color: var(--t2); }
 .empty-sub { font-size: 13px; color: var(--t3); line-height: 1.6; }
 
-.skeleton {
-  background: linear-gradient(90deg, var(--bg3) 25%, var(--bg2) 50%, var(--bg3) 75%);
-  background-size: 200% 100%;
-  animation: shimmer 1.4s infinite;
-  border-radius: 12px; margin-bottom: 6px; break-inside: avoid;
-}
-@keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
-
 /* ═══════════════════════════════════════
    SEARCH OVERLAY
 ═══════════════════════════════════════ */
-.search-overlay {
-  position: fixed; inset: 0; z-index: 200;
-  background: rgba(8,12,20,0.97);
-  backdrop-filter: blur(20px);
-  display: flex; flex-direction: column;
-  padding-top: var(--safe-t);
-  transform: translateY(-100%);
-  transition: transform 0.3s cubic-bezier(0.19,1,0.22,1);
-}
+.search-overlay { position: fixed; inset: 0; z-index: 200; background: rgba(8,12,20,0.97); backdrop-filter: blur(20px); display: flex; flex-direction: column; padding-top: var(--safe-t); transform: translateY(-100%); transition: transform 0.3s cubic-bezier(0.19,1,0.22,1); }
 .search-overlay.open { transform: translateY(0); }
-
-.search-bar {
-  display: flex; align-items: center; gap: 10px;
-  padding: 12px 16px;
-}
-.search-input-wrap {
-  flex: 1; display: flex; align-items: center; gap: 8px;
-  background: var(--bg3); border: 1px solid var(--border);
-  border-radius: 12px; padding: 10px 14px;
-}
+.search-bar { display: flex; align-items: center; gap: 10px; padding: 12px 16px; }
+.search-input-wrap { flex: 1; display: flex; align-items: center; gap: 8px; background: var(--bg3); border: 1px solid var(--border); border-radius: 12px; padding: 10px 14px; }
 .search-input-wrap svg { width: 16px; height: 16px; stroke: var(--t3); fill: none; stroke-width: 2; stroke-linecap: round; flex-shrink: 0; }
-.search-input {
-  flex: 1; background: none; border: none; outline: none;
-  color: var(--t1); font-family: inherit; font-size: 15px;
-}
+.search-input { flex: 1; background: none; border: none; outline: none; color: var(--t1); font-family: inherit; font-size: 15px; }
 .search-input::placeholder { color: var(--t3); }
-.search-cancel {
-  color: var(--acc); font-size: 14px; font-weight: 500;
-  cursor: pointer; white-space: nowrap;
-}
-
-.search-results {
-  flex: 1; overflow-y: auto; padding: 0 16px 16px;
-  -webkit-overflow-scrolling: touch;
-}
+.search-cancel { color: var(--acc); font-size: 14px; font-weight: 500; cursor: pointer; white-space: nowrap; }
+.search-results { flex: 1; overflow-y: auto; padding: 0 16px 16px; -webkit-overflow-scrolling: touch; }
 .search-results .masonry { padding: 0; }
 
 /* ═══════════════════════════════════════
-   FILTER SHEET
+   SHEET (Filter + New Entry)
 ═══════════════════════════════════════ */
-.sheet-bg {
-  position: fixed; inset: 0; z-index: 150;
-  background: rgba(0,0,0,0.6);
-  opacity: 0; pointer-events: none;
-  transition: opacity 0.3s;
-}
+.sheet-bg { position: fixed; inset: 0; z-index: 150; background: rgba(0,0,0,0.6); opacity: 0; pointer-events: none; transition: opacity 0.3s; }
 .sheet-bg.open { opacity: 1; pointer-events: auto; }
-
-.filter-sheet {
-  position: fixed; bottom: 0; left: 0; right: 0; z-index: 160;
-  background: var(--bg2);
-  border-radius: 20px 20px 0 0;
-  border-top: 1px solid var(--border);
-  padding: 0 20px calc(20px + var(--safe-b));
-  transform: translateY(100%);
-  transition: transform 0.35s cubic-bezier(0.19,1,0.22,1);
-  max-height: 75vh; overflow-y: auto;
-}
-.filter-sheet.open { transform: translateY(0); }
-
-.sheet-handle {
-  width: 36px; height: 4px; border-radius: 2px;
-  background: var(--t3); margin: 12px auto 16px;
-}
-.sheet-title { font-size: 14px; font-weight: 600; margin-bottom: 16px; }
-
+.bottom-sheet { position: fixed; bottom: 0; left: 0; right: 0; z-index: 160; background: var(--bg2); border-radius: 20px 20px 0 0; border-top: 1px solid var(--border); padding: 0 20px calc(20px + var(--safe-b)); transform: translateY(100%); transition: transform 0.35s cubic-bezier(0.19,1,0.22,1); max-height: 92vh; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+.bottom-sheet.open { transform: translateY(0); }
+.sheet-handle { width: 36px; height: 4px; border-radius: 2px; background: var(--t3); margin: 12px auto 16px; }
+.sheet-title { font-size: 16px; font-weight: 600; margin-bottom: 16px; }
 .filter-section { margin-bottom: 20px; }
-.filter-lbl {
-  font-size: 10px; font-weight: 600; color: var(--t3);
-  letter-spacing: 1.2px; text-transform: uppercase; margin-bottom: 10px;
-}
+.filter-lbl { font-size: 10px; font-weight: 600; color: var(--t3); letter-spacing: 1.2px; text-transform: uppercase; margin-bottom: 10px; display: block; }
 .filter-chips { display: flex; flex-wrap: wrap; gap: 8px; }
-.chip {
-  padding: 6px 14px; border-radius: 20px; font-size: 12px;
-  border: 1px solid var(--border); background: var(--glass);
-  color: var(--t2); cursor: pointer; transition: all 0.2s;
-}
+.chip { padding: 6px 14px; border-radius: 20px; font-size: 12px; border: 1px solid var(--border); background: var(--glass); color: var(--t2); cursor: pointer; transition: all 0.2s; }
 .chip.active { background: rgba(79,142,247,0.15); border-color: rgba(79,142,247,0.4); color: var(--acc); }
+.sheet-footer { display: flex; gap: 10px; margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border); }
+.btn-reset { flex: 1; padding: 13px; border-radius: 12px; background: var(--glass); border: 1px solid var(--border); color: var(--t2); font-family: inherit; font-size: 14px; cursor: pointer; }
+.btn-apply { flex: 2; padding: 13px; border-radius: 12px; background: var(--acc); border: none; color: #fff; font-family: inherit; font-size: 14px; font-weight: 600; cursor: pointer; }
 
-.sheet-footer {
-  display: flex; gap: 10px; margin-top: 20px;
-  padding-top: 16px; border-top: 1px solid var(--border);
-}
-.btn-reset {
-  flex: 1; padding: 13px; border-radius: 12px;
-  background: var(--glass); border: 1px solid var(--border);
-  color: var(--t2); font-family: inherit; font-size: 14px;
-  cursor: pointer;
-}
-.btn-apply {
-  flex: 2; padding: 13px; border-radius: 12px;
-  background: var(--acc); border: none;
-  color: #fff; font-family: inherit; font-size: 14px; font-weight: 600;
-  cursor: pointer;
-}
+/* New Entry specific */
+.ne-src-row { display: flex; gap: 8px; }
+.ne-src { padding: 7px 16px; border-radius: 20px; font-size: 13px; border: 1px solid var(--border); background: var(--glass); color: var(--t2); cursor: pointer; transition: all 0.2s; }
+.ne-src.active { background: rgba(79,142,247,0.15); border-color: rgba(79,142,247,0.3); color: var(--acc); }
+.ne-field { margin-bottom: 14px; }
+.ne-inp { width: 100%; background: var(--bg3); border: 1px solid var(--border); border-radius: 10px; color: var(--t1); font-family: 'DM Mono', monospace; font-size: 13px; padding: 10px 12px; outline: none; }
+.ne-inp:focus { border-color: rgba(79,142,247,0.5); }
+.ne-inp::placeholder { color: var(--t3); font-family: 'DM Sans', sans-serif; }
+.ne-textarea { width: 100%; background: var(--bg3); border: 1px solid var(--border); border-radius: 10px; color: var(--t1); font-family: 'DM Mono', monospace; font-size: 13px; padding: 10px 12px; outline: none; resize: none; line-height: 1.6; }
+.ne-textarea:focus { border-color: rgba(79,142,247,0.5); }
+.ne-textarea::placeholder { color: var(--t3); font-family: 'DM Sans', sans-serif; }
+.ne-select { width: 100%; background: var(--bg3); border: 1px solid var(--border); border-radius: 10px; color: var(--t1); font-family: inherit; font-size: 13px; padding: 10px 12px; outline: none; appearance: none; }
+.ne-row2 { display: flex; gap: 10px; }
+.ne-row2 > div { flex: 1; }
+.export-btn { padding: 6px 14px; border-radius: 8px; background: var(--bg3); border: 1px solid var(--border); color: var(--t2); font-family: inherit; font-size: 12px; cursor: pointer; white-space: nowrap; display: flex; align-items: center; gap: 5px; }
+.export-btn svg { width: 13px; height: 13px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.local-count-badge { padding: 3px 8px; border-radius: 10px; background: rgba(79,142,247,0.15); border: 1px solid rgba(79,142,247,0.3); color: var(--acc); font-size: 11px; font-weight: 600; }
 
 /* ═══════════════════════════════════════
    BOARDS PAGE
 ═══════════════════════════════════════ */
-.boards-grid {
-  display: grid; grid-template-columns: 1fr 1fr;
-  gap: 10px; padding: 16px;
-}
-.board-card {
-  border-radius: 14px; overflow: hidden;
-  background: var(--bg3); cursor: pointer;
-  transition: transform 0.15s; position: relative;
-}
+.boards-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 0 16px 16px; }
+.board-card { border-radius: 14px; overflow: hidden; background: var(--bg3); cursor: pointer; transition: transform 0.15s; }
 .board-card:active { transform: scale(0.97); }
-.board-cover {
-  height: 100px; background: var(--bg2);
-  display: flex; gap: 2px;
-}
+.board-cover { height: 100px; background: var(--bg2); display: flex; gap: 2px; }
 .cover-main { flex: 2; overflow: hidden; }
 .cover-side { flex: 1; display: flex; flex-direction: column; gap: 2px; }
 .cover-sm { flex: 1; overflow: hidden; }
 .cover-img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .board-info { padding: 10px 12px; }
-.board-name { font-size: 13px; font-weight: 600; margin-bottom: 2px; }
+.board-name { font-size: 13px; font-weight: 600; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .board-count { font-size: 11px; color: var(--t2); }
 
 /* ═══════════════════════════════════════
    SETTINGS PAGE
 ═══════════════════════════════════════ */
-.settings-wrap { padding: 16px; display: flex; flex-direction: column; gap: 12px; }
-
-.setting-card {
-  background: var(--bg2); border: 1px solid var(--border);
-  border-radius: 16px; overflow: hidden;
-}
-.setting-header {
-  padding: 14px 16px 10px;
-  font-size: 10px; font-weight: 700; letter-spacing: 1.5px;
-  text-transform: uppercase; color: var(--t3);
-}
-.setting-row {
-  display: flex; align-items: center; gap: 12px;
-  padding: 12px 16px; border-top: 1px solid var(--border);
-}
-.setting-row:first-of-type { border-top: none; }
-.setting-info { flex: 1; }
+.settings-wrap { padding: 0 16px 16px; display: flex; flex-direction: column; gap: 12px; }
+.setting-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; }
+.setting-header { padding: 14px 16px 10px; font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--t3); }
+.setting-row { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-top: 1px solid var(--border); }
 .setting-name { font-size: 14px; font-weight: 500; margin-bottom: 2px; }
 .setting-desc { font-size: 11px; color: var(--t2); line-height: 1.4; }
-
-.setting-inp {
-  width: 100%; background: var(--bg3);
-  border: 1px solid var(--border); border-radius: 10px;
-  color: var(--t1); font-family: 'DM Mono', monospace; font-size: 12px;
-  padding: 10px 12px; outline: none; margin-top: 8px;
-}
-.setting-inp:focus { border-color: rgba(79,142,247,0.5); }
-.setting-inp::placeholder { color: var(--t3); }
-
-.btn-sync {
-  width: 100%; padding: 14px; border-radius: 12px;
-  background: rgba(79,142,247,0.15); border: 1px solid rgba(79,142,247,0.3);
-  color: var(--acc); font-family: inherit; font-size: 14px; font-weight: 600;
-  cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
-  transition: all 0.2s; margin-top: 4px;
-}
+.setting-inp-field { width: 100%; background: var(--bg3); border: 1px solid var(--border); border-radius: 10px; color: var(--t1); font-family: 'DM Mono', monospace; font-size: 12px; padding: 10px 12px; outline: none; margin-top: 8px; }
+.setting-inp-field:focus { border-color: rgba(79,142,247,0.5); }
+.setting-inp-field::placeholder { color: var(--t3); }
+.btn-sync { width: 100%; padding: 14px; border-radius: 12px; background: rgba(79,142,247,0.15); border: 1px solid rgba(79,142,247,0.3); color: var(--acc); font-family: inherit; font-size: 14px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s; margin-top: 8px; }
 .btn-sync:active { background: rgba(79,142,247,0.25); }
 .btn-sync svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .btn-sync:disabled { opacity: 0.5; }
-
-.sync-status {
-  margin-top: 8px; padding: 10px 14px; border-radius: 10px;
-  font-size: 12px; line-height: 1.5; display: none;
-}
-.sync-status.ok   { background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.2); color: #6ee7b7; display: block; }
+.sync-status { margin-top: 8px; padding: 10px 14px; border-radius: 10px; font-size: 12px; line-height: 1.5; display: none; }
+.sync-status.ok   { background: rgba(16,185,129,0.1);  border: 1px solid rgba(16,185,129,0.2);  color: #6ee7b7; display: block; }
 .sync-status.err  { background: rgba(248,113,113,0.1); border: 1px solid rgba(248,113,113,0.2); color: #fca5a5; display: block; }
 .sync-status.info { background: rgba(79,142,247,0.1);  border: 1px solid rgba(79,142,247,0.2);  color: #93c5fd; display: block; }
-
-.stat-row {
-  display: flex; justify-content: space-between; align-items: center;
-  padding: 10px 16px; border-top: 1px solid var(--border);
-  font-size: 13px; color: var(--t2);
-}
+.stat-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 16px; border-top: 1px solid var(--border); font-size: 13px; color: var(--t2); }
 .stat-num { font-weight: 600; color: var(--t1); font-family: 'DM Mono', monospace; }
-.stat-jimeng  { color: var(--jimeng); }
-.stat-mj      { color: var(--mj); }
-.stat-banana  { color: var(--banana); }
+.stat-jimeng { color: var(--jimeng); }
+.stat-mj     { color: var(--mj); }
+.stat-banana { color: var(--banana); }
+.stat-local  { color: var(--acc); }
 
 /* ═══════════════════════════════════════
    DETAIL OVERLAY
 ═══════════════════════════════════════ */
-.detail-overlay {
-  position: fixed; inset: 0; z-index: 300;
-  background: #000;
-  display: flex; flex-direction: column;
-  transform: translateY(100%);
-  transition: transform 0.4s cubic-bezier(0.19,1,0.22,1);
-}
+.detail-overlay { position: fixed; inset: 0; z-index: 300; background: #000; display: flex; flex-direction: column; transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.19,1,0.22,1); }
 .detail-overlay.open { transform: translateY(0); }
-
-.detail-top {
-  position: absolute; top: 0; left: 0; right: 0;
-  padding: calc(var(--safe-t) + 10px) 16px 10px;
-  display: flex; align-items: center; justify-content: space-between;
-  z-index: 10;
-  background: linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, transparent 100%);
-}
-
-.detail-close {
-  width: 36px; height: 36px; border-radius: 50%;
-  background: rgba(0,0,0,0.5); backdrop-filter: blur(8px);
-  display: flex; align-items: center; justify-content: center;
-  cursor: pointer;
-}
+.detail-top { position: absolute; top: 0; left: 0; right: 0; padding: calc(var(--safe-t) + 10px) 16px 10px; display: flex; align-items: center; justify-content: space-between; z-index: 10; background: linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, transparent 100%); }
+.detail-close { width: 36px; height: 36px; border-radius: 50%; background: rgba(0,0,0,0.5); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; cursor: pointer; }
 .detail-close svg { width: 18px; height: 18px; stroke: #fff; fill: none; stroke-width: 2; stroke-linecap: round; }
-
-.detail-source-badge {
-  padding: 4px 10px; border-radius: 20px;
-  font-size: 11px; font-weight: 600; letter-spacing: 0.5px;
-}
-.badge-jimeng    { background: rgba(6,182,212,0.25);  color: var(--jimeng); }
+.detail-source-badge { padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; letter-spacing: 0.5px; }
+.badge-jimeng     { background: rgba(6,182,212,0.25);  color: var(--jimeng); }
 .badge-midjourney { background: rgba(79,142,247,0.25); color: var(--mj); }
 .badge-nanobanana { background: rgba(245,158,11,0.25); color: var(--banana); }
-
-.detail-media {
-  flex: 1; position: relative;
-  display: flex; align-items: center; justify-content: center;
-  overflow: hidden; background: #000;
-}
-.detail-img {
-  max-width: 100%; max-height: 100%;
-  object-fit: contain; display: block;
-}
-.detail-video {
-  max-width: 100%; max-height: 100%;
-  object-fit: contain; display: none;
-}
-
-.play-btn {
-  position: absolute; top: 50%; left: 50%;
-  transform: translate(-50%, -50%);
-  width: 56px; height: 56px; border-radius: 50%;
-  background: rgba(255,255,255,0.15); backdrop-filter: blur(8px);
-  border: 2px solid rgba(255,255,255,0.3);
-  display: flex; align-items: center; justify-content: center;
-  cursor: pointer; transition: all 0.2s;
-}
+.badge-local      { background: rgba(79,142,247,0.25); color: var(--acc); }
+.detail-media { flex: 1; position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden; background: #000; }
+.detail-img { max-width: 100%; max-height: 100%; object-fit: contain; display: block; }
+.detail-video { max-width: 100%; max-height: 100%; object-fit: contain; display: none; }
+.play-btn { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 56px; height: 56px; border-radius: 50%; background: rgba(255,255,255,0.15); backdrop-filter: blur(8px); border: 2px solid rgba(255,255,255,0.3); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; }
 .play-btn:active { background: rgba(255,255,255,0.25); }
 .play-btn svg { width: 20px; height: 20px; fill: #fff; margin-left: 3px; }
 .play-btn.hidden { display: none; }
-
-.detail-sheet {
-  background: rgba(10,14,22,0.98);
-  border-top: 1px solid rgba(255,255,255,0.08);
-  padding: 16px 20px calc(16px + var(--safe-b));
-  max-height: 55%;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-}
-
-.detail-meta-row {
-  display: flex; align-items: center; gap: 8px; margin-bottom: 12px;
-}
-.detail-author {
-  font-size: 13px; color: var(--t2); flex: 1;
-  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-}
-.detail-version {
-  font-size: 11px; color: var(--t3); font-family: 'DM Mono', monospace;
-  background: var(--bg3); padding: 3px 8px; border-radius: 6px;
-}
-
-.detail-prompt {
-  font-size: 13px; line-height: 1.7; color: rgba(255,255,255,0.75);
-  font-family: 'DM Mono', monospace;
-  margin-bottom: 16px; white-space: pre-wrap;
-}
-
-.detail-actions {
-  display: flex; gap: 10px;
-}
-.detail-btn {
-  flex: 1; padding: 12px 8px; border-radius: 12px;
-  background: var(--bg3); border: 1px solid var(--border);
-  color: var(--t2); font-family: inherit; font-size: 12px; font-weight: 500;
-  cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;
-  transition: all 0.2s;
-}
+.detail-sheet { background: rgba(10,14,22,0.98); border-top: 1px solid rgba(255,255,255,0.08); padding: 16px 20px calc(16px + var(--safe-b)); max-height: 55%; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+.detail-meta-row { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+.detail-author { font-size: 13px; color: var(--t2); }
+.detail-version { font-size: 11px; color: var(--t3); font-family: 'DM Mono', monospace; background: var(--bg3); padding: 3px 8px; border-radius: 6px; }
+.detail-title { font-size: 14px; font-weight: 600; margin-bottom: 8px; }
+.detail-prompt { font-size: 13px; line-height: 1.7; color: rgba(255,255,255,0.75); font-family: 'DM Mono', monospace; margin-bottom: 16px; white-space: pre-wrap; }
+.detail-actions { display: flex; gap: 10px; }
+.detail-btn { flex: 1; padding: 12px 8px; border-radius: 12px; background: var(--bg3); border: 1px solid var(--border); color: var(--t2); font-family: inherit; font-size: 12px; font-weight: 500; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.2s; }
 .detail-btn:active { background: rgba(255,255,255,0.1); color: var(--t1); }
 .detail-btn.pri { background: rgba(79,142,247,0.15); border-color: rgba(79,142,247,0.3); color: var(--acc); }
 .detail-btn svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-
-.detail-params {
-  margin-top: 12px; padding: 10px 12px; border-radius: 10px;
-  background: rgba(79,142,247,0.06); border: 1px solid rgba(79,142,247,0.15);
-  font-size: 11px; font-family: 'DM Mono', monospace; color: #93c5fd;
-  line-height: 1.6; display: none;
-}
+.detail-params { margin-top: 12px; padding: 10px 12px; border-radius: 10px; background: rgba(79,142,247,0.06); border: 1px solid rgba(79,142,247,0.15); font-size: 11px; font-family: 'DM Mono', monospace; color: #93c5fd; line-height: 1.6; }
 
 /* ═══════════════════════════════════════
    TOAST
 ═══════════════════════════════════════ */
-.toast {
-  position: fixed; bottom: calc(var(--tab-h) + var(--safe-b) + 16px); left: 50%;
-  transform: translateX(-50%) translateY(20px);
-  background: rgba(20,28,44,0.95); border: 1px solid var(--border);
-  color: var(--t1); font-size: 13px; padding: 10px 18px;
-  border-radius: 20px; z-index: 500;
-  opacity: 0; pointer-events: none;
-  transition: all 0.3s cubic-bezier(0.19,1,0.22,1);
-  white-space: nowrap; backdrop-filter: blur(10px);
-}
+.toast { position: fixed; bottom: calc(var(--tab-h) + var(--safe-b) + 16px); left: 50%; transform: translateX(-50%) translateY(20px); background: rgba(20,28,44,0.95); border: 1px solid var(--border); color: var(--t1); font-size: 13px; padding: 10px 18px; border-radius: 20px; z-index: 500; opacity: 0; pointer-events: none; transition: all 0.3s cubic-bezier(0.19,1,0.22,1); white-space: nowrap; backdrop-filter: blur(10px); }
 .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
 /* ═══════════════════════════════════════
    TAB BAR
 ═══════════════════════════════════════ */
-.tab-bar {
-  position: fixed; bottom: 0; left: 0; right: 0;
-  height: calc(var(--tab-h) + var(--safe-b));
-  background: rgba(8,12,20,0.92);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-top: 1px solid var(--border);
-  display: flex; align-items: flex-start; justify-content: space-around;
-  padding-top: 8px; z-index: 100;
-}
-.tab-item {
-  display: flex; flex-direction: column; align-items: center; gap: 3px;
-  cursor: pointer; padding: 0 20px; color: var(--t3);
-  transition: color 0.2s; flex: 1;
-}
+.tab-bar { position: fixed; bottom: 0; left: 0; right: 0; height: calc(var(--tab-h) + var(--safe-b)); background: rgba(8,12,20,0.92); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-top: 1px solid var(--border); display: flex; align-items: flex-start; justify-content: space-around; padding-top: 8px; z-index: 100; }
+.tab-item { display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; padding: 0 16px; color: var(--t3); transition: color 0.2s; flex: 1; }
 .tab-item.active { color: var(--t1); }
 .tab-item svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 .tab-label { font-size: 10px; font-weight: 500; }
+.tab-new-btn { width: 46px; height: 46px; border-radius: 50%; background: var(--acc); display: flex; align-items: center; justify-content: center; cursor: pointer; margin-top: -16px; box-shadow: 0 4px 16px rgba(79,142,247,0.4); transition: transform 0.2s; flex-shrink: 0; }
+.tab-new-btn:active { transform: scale(0.93); }
+.tab-new-btn svg { width: 22px; height: 22px; stroke: #fff; fill: none; stroke-width: 2; stroke-linecap: round; }
 
-/* Boards page header */
-.page-inner-header {
-  padding: calc(var(--safe-t) + var(--header-h) - 46px + 16px) 16px 12px;
-  position: sticky; top: 0; z-index: 10;
-}
+/* page inner header */
+.page-inner-header { padding: calc(var(--safe-t) + var(--header-h) - 46px + 16px) 16px 12px; }
 .page-inner-title { font-size: 20px; font-weight: 700; letter-spacing: -0.5px; }
 
-/* Scrollbar hidden */
-* { scrollbar-width: none; }
-*::-webkit-scrollbar { display: none; }
+@keyframes spin { to { transform: rotate(360deg); } }
 </style>
 </head>
 <body>
-
 <div class="app">
 
   <!-- HEADER -->
@@ -574,15 +272,9 @@ html, body {
     </div>
     <div class="source-tabs" id="sourceTabs">
       <div class="src-tab active-all" data-src="all" onclick="setSource('all')">全部</div>
-      <div class="src-tab" data-src="jimeng" onclick="setSource('jimeng')">
-        <span class="src-dot dot-jimeng"></span>即梦
-      </div>
-      <div class="src-tab" data-src="midjourney" onclick="setSource('midjourney')">
-        <span class="src-dot dot-mj"></span>MJ
-      </div>
-      <div class="src-tab" data-src="nanobanana" onclick="setSource('nanobanana')">
-        <span class="src-dot dot-banana"></span>Banana
-      </div>
+      <div class="src-tab" data-src="jimeng" onclick="setSource('jimeng')"><span class="src-dot dot-jimeng"></span>即梦</div>
+      <div class="src-tab" data-src="midjourney" onclick="setSource('midjourney')"><span class="src-dot dot-mj"></span>MJ</div>
+      <div class="src-tab" data-src="nanobanana" onclick="setSource('nanobanana')"><span class="src-dot dot-banana"></span>Banana</div>
     </div>
   </div>
 
@@ -595,33 +287,27 @@ html, body {
       <div class="empty-state" id="emptyState" style="display:none">
         <div class="empty-icon">📭</div>
         <div class="empty-title">没有找到内容</div>
-        <div class="empty-sub">请先在设置页配置 COS 并同步数据</div>
+        <div class="empty-sub">请在设置页配置 COS 并同步数据，或新建提示词</div>
       </div>
     </div>
 
     <!-- BOARDS -->
     <div class="page" id="page-boards">
-      <div style="padding: calc(var(--safe-t) + var(--header-h) - 46px + 16px) 16px 8px">
-        <div style="font-size:20px;font-weight:700;letter-spacing:-0.5px">我的画板</div>
-      </div>
+      <div class="page-inner-header"><div class="page-inner-title">我的画板</div></div>
       <div class="boards-grid" id="boardsGrid"></div>
     </div>
 
     <!-- SETTINGS -->
     <div class="page" id="page-settings">
-      <div style="padding: calc(var(--safe-t) + var(--header-h) - 46px + 16px) 16px 8px">
-        <div style="font-size:20px;font-weight:700;letter-spacing:-0.5px">设置</div>
-      </div>
+      <div class="page-inner-header"><div class="page-inner-title">设置</div></div>
       <div class="settings-wrap">
 
         <div class="setting-card">
           <div class="setting-header">腾讯云 COS 配置</div>
           <div class="setting-row" style="flex-direction:column;align-items:stretch">
-            <div style="font-size:12px;color:var(--t2);line-height:1.6;margin-bottom:4px">
-              需要将 unified_meta.json 设置为公有读。填写 Bucket 名称和地域后点击同步。
-            </div>
-            <input class="setting-inp" id="inp-bucket" placeholder="Bucket（如 my-bucket-1234567890）">
-            <input class="setting-inp" id="inp-region" placeholder="地域（如 ap-guangzhou）" style="margin-top:8px">
+            <div style="font-size:12px;color:var(--t2);line-height:1.6">需要将 unified_meta.json 设为公有读，填写 Bucket 和地域后点同步。</div>
+            <input class="setting-inp-field" id="inp-bucket" placeholder="Bucket（如 my-bucket-1234567890）">
+            <input class="setting-inp-field" id="inp-region" placeholder="地域（如 ap-guangzhou）" style="margin-top:8px">
             <button class="btn-sync" onclick="syncData()" id="syncBtn">
               <svg viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.93"/></svg>
               同步数据
@@ -632,32 +318,30 @@ html, body {
 
         <div class="setting-card" id="statsCard" style="display:none">
           <div class="setting-header">数据统计</div>
-          <div class="stat-row">
-            <span>全部采集</span>
-            <span class="stat-num" id="stat-total">—</span>
-          </div>
-          <div class="stat-row">
-            <span>即梦</span>
-            <span class="stat-num stat-jimeng" id="stat-jimeng">—</span>
-          </div>
-          <div class="stat-row">
-            <span>Midjourney</span>
-            <span class="stat-num stat-mj" id="stat-mj">—</span>
-          </div>
-          <div class="stat-row">
-            <span>Nano Banana</span>
-            <span class="stat-num stat-banana" id="stat-banana">—</span>
-          </div>
-          <div class="stat-row">
-            <span>视频</span>
-            <span class="stat-num" id="stat-video">—</span>
+          <div class="stat-row"><span>全部采集</span><span class="stat-num" id="stat-total">—</span></div>
+          <div class="stat-row"><span>即梦</span><span class="stat-num stat-jimeng" id="stat-jimeng">—</span></div>
+          <div class="stat-row"><span>Midjourney</span><span class="stat-num stat-mj" id="stat-mj">—</span></div>
+          <div class="stat-row"><span>Nano Banana</span><span class="stat-num stat-banana" id="stat-banana">—</span></div>
+          <div class="stat-row"><span>视频</span><span class="stat-num" id="stat-video">—</span></div>
+          <div class="stat-row"><span>手机新建</span><span class="stat-num stat-local" id="stat-local">—</span></div>
+        </div>
+
+        <div class="setting-card" id="localCard" style="display:none">
+          <div class="setting-header">手机端本地记录</div>
+          <div class="setting-row" style="flex-direction:column;align-items:stretch;gap:8px">
+            <div style="font-size:12px;color:var(--t2);line-height:1.6">手机端新建的提示词存储在本地，导出 JSON 后在电脑端灵感库导入即可合并。</div>
+            <button class="btn-sync" onclick="exportLocal()" style="background:rgba(255,255,255,0.05);border-color:var(--border);color:var(--t2)">
+              <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              导出本地记录
+            </button>
+            <button onclick="clearLocal()" style="width:100%;padding:10px;border-radius:10px;background:none;border:1px solid rgba(248,113,113,0.2);color:#fca5a5;font-family:inherit;font-size:13px;cursor:pointer">清空本地记录</button>
           </div>
         </div>
 
         <div class="setting-card">
           <div class="setting-header">关于</div>
           <div class="setting-row">
-            <div class="setting-info">
+            <div>
               <div class="setting-name">AIGC Vault Mobile</div>
               <div class="setting-desc">v1.1.0 · 即梦 / MJ / Banana 三合一灵感库手机端</div>
             </div>
@@ -678,6 +362,9 @@ html, body {
     <div class="tab-item" id="tab-boards" onclick="switchTab('boards')">
       <svg viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
       <span class="tab-label">画板</span>
+    </div>
+    <div class="tab-new-btn" onclick="openNewEntry()">
+      <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
     </div>
     <div class="tab-item" id="tab-settings" onclick="switchTab('settings')">
       <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
@@ -702,8 +389,8 @@ html, body {
 </div>
 
 <!-- FILTER SHEET -->
-<div class="sheet-bg" id="sheetBg" onclick="closeFilter()"></div>
-<div class="filter-sheet" id="filterSheet">
+<div class="sheet-bg" id="filterBg" onclick="closeFilter()"></div>
+<div class="bottom-sheet" id="filterSheet">
   <div class="sheet-handle"></div>
   <div class="sheet-title">筛选</div>
   <div class="filter-section">
@@ -724,6 +411,83 @@ html, body {
   </div>
 </div>
 
+<!-- NEW ENTRY SHEET -->
+<div class="sheet-bg" id="newBg" onclick="closeNewEntry()"></div>
+<div class="bottom-sheet" id="newSheet">
+  <div class="sheet-handle"></div>
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+    <div style="font-size:16px;font-weight:600">新建提示词</div>
+    <div style="display:flex;align-items:center;gap:8px">
+      <span class="local-count-badge" id="localCountBadge" style="display:none"></span>
+    </div>
+  </div>
+
+  <!-- 来源 -->
+  <div class="ne-field">
+    <span class="filter-lbl">来源平台</span>
+    <div class="ne-src-row">
+      <div class="ne-src active" data-src="jimeng"    onclick="setNeSrc(this,'jimeng')">即梦</div>
+      <div class="ne-src"        data-src="midjourney" onclick="setNeSrc(this,'midjourney')">MJ</div>
+      <div class="ne-src"        data-src="nanobanana" onclick="setNeSrc(this,'nanobanana')">Banana</div>
+    </div>
+  </div>
+
+  <!-- 标题 -->
+  <div class="ne-field">
+    <span class="filter-lbl">标题（选填）</span>
+    <input class="ne-inp" id="ne-title" placeholder="给这条提示词起个名字…">
+  </div>
+
+  <!-- 提示词 -->
+  <div class="ne-field">
+    <span class="filter-lbl">提示词 <span style="color:#ef4444">*</span></span>
+    <textarea class="ne-textarea" id="ne-prompt" placeholder="粘贴提示词内容…" rows="4"></textarea>
+  </div>
+
+  <!-- 版本 + 画幅（即梦） -->
+  <div class="ne-field ne-row2" id="ne-jimeng-fields">
+    <div>
+      <span class="filter-lbl">版本（选填）</span>
+      <input class="ne-inp" id="ne-version" placeholder="图片 4.1">
+    </div>
+    <div>
+      <span class="filter-lbl">画幅（选填）</span>
+      <input class="ne-inp" id="ne-ratio" placeholder="9:16">
+    </div>
+  </div>
+
+  <!-- 图片链接 -->
+  <div class="ne-field">
+    <span class="filter-lbl">图片链接（选填）</span>
+    <input class="ne-inp" id="ne-image" placeholder="https://…" type="url">
+  </div>
+
+  <!-- 来源链接 -->
+  <div class="ne-field">
+    <span class="filter-lbl">来源链接（选填）</span>
+    <input class="ne-inp" id="ne-url" placeholder="https://…" type="url">
+  </div>
+
+  <!-- 画板 -->
+  <div class="ne-field">
+    <span class="filter-lbl">存入画板（选填）</span>
+    <select class="ne-select" id="ne-board">
+      <option value="手机入库">手机入库</option>
+    </select>
+  </div>
+
+  <!-- 标签 -->
+  <div class="ne-field">
+    <span class="filter-lbl">标签，空格分隔（选填）</span>
+    <input class="ne-inp" id="ne-tags" placeholder="人物 风景 赛博朋克…">
+  </div>
+
+  <div class="sheet-footer">
+    <button class="btn-reset" onclick="closeNewEntry()">取消</button>
+    <button class="btn-apply" onclick="saveNewEntry()">存入本地</button>
+  </div>
+</div>
+
 <!-- DETAIL OVERLAY -->
 <div class="detail-overlay" id="detailOverlay">
   <div class="detail-top">
@@ -735,23 +499,24 @@ html, body {
   <div class="detail-media" id="detailMedia">
     <img class="detail-img" id="detailImg" src="">
     <video class="detail-video" id="detailVideo" controls playsinline></video>
-    <div class="play-btn" id="playBtn" onclick="playVideo()">
+    <div class="play-btn hidden" id="playBtn" onclick="playVideo()">
       <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3" fill="white"/></svg>
     </div>
   </div>
   <div class="detail-sheet">
+    <div class="detail-title" id="detailTitle" style="display:none"></div>
     <div class="detail-meta-row">
       <div class="detail-author" id="detailAuthor"></div>
       <div class="detail-version" id="detailVersion"></div>
     </div>
     <div class="detail-prompt" id="detailPrompt"></div>
-    <div class="detail-params" id="detailParams"></div>
+    <div class="detail-params" id="detailParams" style="display:none"></div>
     <div class="detail-actions">
       <button class="detail-btn pri" onclick="copyDetailPrompt()">
         <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
         复制提示词
       </button>
-      <button class="detail-btn" onclick="openOriginal()">
+      <button class="detail-btn" id="detailOriginalBtn" onclick="openOriginal()" style="display:none">
         <svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
         原链接
       </button>
@@ -766,33 +531,52 @@ html, body {
 // ═══════════════════════════════════════
 // STATE
 // ═══════════════════════════════════════
-let allData      = [];
+let cloudData    = [];   // 从 COS 同步的数据
 let boards       = [];
 let currentSrc   = 'all';
-let currentBoard = null;   // null = 全部, string = 画板名
+let currentBoard = null;
 let displayLimit = 40;
-let activeFilters = { version: new Set(), ratio: new Set(), tags: new Set() };
+let activeFilters  = { version: new Set(), ratio: new Set(), tags: new Set() };
 let pendingFilters = { version: new Set(), ratio: new Set(), tags: new Set() };
 let currentItem  = null;
-let isPlaying    = false;
+let neSource     = 'jimeng';
 
+const LOCAL_KEY  = 'aigc_mobile_local';
 const SOURCE_LABELS = { jimeng: '即梦', midjourney: 'MJ', nanobanana: 'Banana' };
+
+// ═══════════════════════════════════════
+// LOCAL ENTRIES
+// ═══════════════════════════════════════
+function getLocalEntries() {
+  try { return JSON.parse(localStorage.getItem(LOCAL_KEY) || '[]'); } catch(e) { return []; }
+}
+function saveLocalEntries(arr) {
+  localStorage.setItem(LOCAL_KEY, JSON.stringify(arr));
+}
+
+// Combined data = cloud + local
+function getAllData() {
+  const local = getLocalEntries().map(i => ({ ...i, _isLocal: true }));
+  return [...local, ...cloudData];
+}
 
 // ═══════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════
 window.addEventListener('DOMContentLoaded', () => {
   loadConfig();
-  const cached = sessionStorage.getItem('aigc_mobile_cache');
-  if (cached) {
-    try {
-      const parsed = JSON.parse(cached);
-      allData = parsed.data || [];
-      boards  = parsed.boards || [];
-      render();
-      updateStats();
-    } catch(e) {}
-  }
+  // Load cached cloud data
+  try {
+    const cached = sessionStorage.getItem('aigc_mobile_cache');
+    if (cached) {
+      const p = JSON.parse(cached);
+      cloudData = (p.data || []).map(normalizeItem);
+      boards    = p.boards || [];
+    }
+  } catch(e) {}
+  render();
+  updateStats();
+  updateLocalUI();
 });
 
 // ═══════════════════════════════════════
@@ -803,7 +587,6 @@ function loadConfig() {
   if (cfg.bucket) document.getElementById('inp-bucket').value = cfg.bucket;
   if (cfg.region) document.getElementById('inp-region').value = cfg.region;
 }
-
 function saveConfig() {
   const bucket = document.getElementById('inp-bucket').value.trim();
   const region = document.getElementById('inp-region').value.trim();
@@ -812,45 +595,34 @@ function saveConfig() {
 }
 
 // ═══════════════════════════════════════
-// SYNC FROM COS
+// SYNC
 // ═══════════════════════════════════════
 async function syncData() {
   const { bucket, region } = saveConfig();
-  if (!bucket || !region) {
-    showSyncStatus('⚠ 请填写 Bucket 名称和地域', 'err');
-    return;
-  }
+  if (!bucket || !region) { showSyncStatus('⚠ 请填写 Bucket 名称和地域', 'err'); return; }
 
   const btn = document.getElementById('syncBtn');
   btn.disabled = true;
   btn.innerHTML = `<svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;animation:spin 1s linear infinite"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.93"/></svg> 同步中…`;
-
-  const style = document.createElement('style');
-  style.textContent = '@keyframes spin { to { transform: rotate(360deg); } }';
-  document.head.appendChild(style);
-
   showSyncStatus('正在读取云端数据…', 'info');
 
   try {
     const url = `https://${bucket}.cos.${region}.myqcloud.com/unified_meta.json?t=${Date.now()}`;
     const res = await fetch(url);
-
-    if (res.status === 403) throw new Error('访问被拒绝（403）。请将 unified_meta.json 设置为公有读，或检查 Bucket 名称是否正确。');
-    if (res.status === 404) throw new Error('未找到数据文件（404）。请先在插件端执行「上传同步」操作。');
+    if (res.status === 403) throw new Error('访问被拒绝（403）。请将 unified_meta.json 设置为公有读。');
+    if (res.status === 404) throw new Error('未找到数据文件（404）。请先在插件端执行「上传同步」。');
     if (!res.ok) throw new Error(`服务器错误：${res.status}`);
 
     const json = await res.json();
-    allData = (json.data || []).map(normalizeItem);
-    boards  = json.boards || [...new Set(allData.map(i => i.board).filter(Boolean))];
+    cloudData = (json.data || []).map(normalizeItem);
+    boards    = json.boards || [...new Set(cloudData.map(i => i.board).filter(Boolean))];
 
-    // 缓存到 sessionStorage
-    sessionStorage.setItem('aigc_mobile_cache', JSON.stringify({ data: allData, boards }));
+    sessionStorage.setItem('aigc_mobile_cache', JSON.stringify({ data: cloudData, boards }));
 
     render();
     renderBoards();
     updateStats();
-
-    showSyncStatus(`✅ 同步完成！共 ${allData.length} 条记录`, 'ok');
+    showSyncStatus(`✅ 同步完成！共 ${cloudData.length} 条云端记录`, 'ok');
   } catch(e) {
     showSyncStatus('❌ ' + e.message, 'err');
   } finally {
@@ -862,16 +634,17 @@ async function syncData() {
 function normalizeItem(item) {
   return {
     ...item,
-    id:         String(item.id || ''),
-    imageUrl:   item.thumbBlobBase64 || item.cosThumbUrl || item.cosUrl || item.imageUrl || item.localThumb || item.mainImage || '',
-    promptText: item.promptText || item.prompt || '',
-    metaVersion:item.metaVersion || item.version || '',
-    arType:     item.arType || item.ratio || '',
-    author:     item.author || item.authorName || '',
-    tags:       Array.isArray(item.tags) ? item.tags : [],
-    source:     item.source || 'jimeng',
-    videoUrl:   item.videoUrl || '',
-    originalUrl:item.originalUrl || item.url || '',
+    id:          String(item.id || ''),
+    imageUrl:    item.thumbBlobBase64 || item.cosThumbUrl || item.cosUrl || item.imageUrl || item.localThumb || item.mainImage || '',
+    promptText:  item.promptText || item.prompt || '',
+    metaVersion: item.metaVersion || item.version || '',
+    arType:      item.arType || item.ratio || '',
+    author:      item.author || item.authorName || '',
+    tags:        Array.isArray(item.tags) ? item.tags : [],
+    source:      item.source || 'jimeng',
+    videoUrl:    item.videoUrl || '',
+    originalUrl: item.originalUrl || item.url || '',
+    title:       item.title || '',
   };
 }
 
@@ -882,35 +655,43 @@ function showSyncStatus(msg, type) {
 }
 
 function updateStats() {
-  const j = allData.filter(i => i.source === 'jimeng').length;
-  const m = allData.filter(i => i.source === 'midjourney').length;
-  const b = allData.filter(i => i.source === 'nanobanana').length;
-  const v = allData.filter(i => i.videoUrl).length;
-  document.getElementById('stat-total').textContent  = allData.length;
+  const all = getAllData();
+  const local = getLocalEntries();
+  const j = cloudData.filter(i => i.source === 'jimeng').length;
+  const m = cloudData.filter(i => i.source === 'midjourney').length;
+  const b = cloudData.filter(i => i.source === 'nanobanana').length;
+  const v = cloudData.filter(i => i.videoUrl).length;
+  document.getElementById('stat-total').textContent  = all.length;
   document.getElementById('stat-jimeng').textContent = j;
   document.getElementById('stat-mj').textContent     = m;
   document.getElementById('stat-banana').textContent = b;
   document.getElementById('stat-video').textContent  = v;
-  document.getElementById('statsCard').style.display = allData.length ? '' : 'none';
+  document.getElementById('stat-local').textContent  = local.length;
+  document.getElementById('statsCard').style.display = all.length ? '' : 'none';
+}
+
+function updateLocalUI() {
+  const local = getLocalEntries();
+  const badge = document.getElementById('localCountBadge');
+  if (local.length > 0) {
+    badge.textContent = `本地 ${local.length} 条`;
+    badge.style.display = 'block';
+  } else {
+    badge.style.display = 'none';
+  }
+  document.getElementById('localCard').style.display = local.length ? '' : 'none';
 }
 
 // ═══════════════════════════════════════
-// FILTERING
+// FILTER DATA
 // ═══════════════════════════════════════
 function getFilteredData() {
-  let data = allData;
-
-  // Source filter
+  let data = getAllData();
   if (currentSrc !== 'all') data = data.filter(i => i.source === currentSrc);
-
-  // Board filter
   if (currentBoard) data = data.filter(i => i.board === currentBoard);
-
-  // Active filters
   if (activeFilters.version.size) data = data.filter(i => activeFilters.version.has(i.metaVersion));
   if (activeFilters.ratio.size)   data = data.filter(i => activeFilters.ratio.has(i.arType));
   if (activeFilters.tags.size)    data = data.filter(i => (i.tags||[]).some(t => activeFilters.tags.has(t)));
-
   return data;
 }
 
@@ -918,7 +699,7 @@ function getFilteredData() {
 // RENDER GALLERY
 // ═══════════════════════════════════════
 function render() {
-  const data = getFilteredData();
+  const data    = getFilteredData();
   const masonry = document.getElementById('masonry');
   const empty   = document.getElementById('emptyState');
 
@@ -928,23 +709,23 @@ function render() {
     return;
   }
   empty.style.display = 'none';
-
-  const visible = data.slice(0, displayLimit);
-  masonry.innerHTML = visible.map((item, idx) => cardHTML(item, idx)).join('');
+  masonry.innerHTML = data.slice(0, displayLimit).map((item, idx) => cardHTML(item, idx)).join('');
 }
 
 function cardHTML(item, idx) {
-  const src = item.imageUrl;
   const isVideo = !!item.videoUrl;
-  const sourceClass = `stripe-${item.source}`;
-
+  const isLocal = !!item._isLocal;
   return `
     <div class="card" onclick="openDetail(${idx})">
-      <div class="card-stripe ${sourceClass}"></div>
-      ${src ? `<img src="${escH(src)}" loading="lazy" onerror="this.style.display='none'">` : `<div style="height:140px;background:var(--bg3)"></div>`}
+      <div class="card-stripe stripe-${item.source || 'jimeng'}"></div>
+      ${item.imageUrl
+        ? `<img src="${escH(item.imageUrl)}" loading="lazy" onerror="this.style.display='none'">`
+        : `<div style="height:${80 + Math.random()*80|0}px;background:var(--bg3)"></div>`
+      }
       ${isVideo ? `<div class="video-badge"><svg viewBox="0 0 24 24" fill="white" width="10" height="10"><polygon points="5 3 19 12 5 21 5 3"/></svg></div>` : ''}
+      ${isLocal ? `<div class="local-badge">本地</div>` : ''}
       <div class="card-overlay">
-        <div class="card-prompt">${escH(item.promptText || item.title || '')}</div>
+        <div class="card-prompt">${escH(item.title || item.promptText || '')}</div>
       </div>
     </div>
   `;
@@ -954,30 +735,33 @@ function onHomeScroll(el) {
   const { scrollTop, scrollHeight, clientHeight } = el;
   if (scrollTop + clientHeight >= scrollHeight - 600) {
     const data = getFilteredData();
-    if (displayLimit < data.length) {
-      displayLimit += 40;
-      render();
-    }
+    if (displayLimit < data.length) { displayLimit += 40; render(); }
   }
 }
 
 // ═══════════════════════════════════════
-// RENDER BOARDS
+// BOARDS
 // ═══════════════════════════════════════
 function renderBoards() {
   const grid = document.getElementById('boardsGrid');
-  if (!boards.length) { grid.innerHTML = ''; return; }
+  // Combine cloud boards + local boards
+  const local = getLocalEntries();
+  const localBoards = [...new Set(local.map(i => i.board).filter(Boolean))];
+  const allBoards = [...new Set([...boards, ...localBoards])];
+  const allData = getAllData();
 
-  grid.innerHTML = boards.map(board => {
+  if (!allBoards.length) { grid.innerHTML = ''; return; }
+
+  grid.innerHTML = allBoards.map(board => {
     const items = allData.filter(i => i.board === board);
     const imgs  = items.slice(0, 3).map(i => i.imageUrl).filter(Boolean);
     return `
       <div class="board-card" onclick="filterByBoard('${escH(board)}')">
         <div class="board-cover">
-          <div class="cover-main">${imgs[0] ? `<img class="cover-img" src="${escH(imgs[0])}" loading="lazy">` : ''}</div>
+          <div class="cover-main">${imgs[0] ? `<img class="cover-img" src="${escH(imgs[0])}" loading="lazy">` : '<div style="width:100%;height:100%;background:var(--bg3)"></div>'}</div>
           <div class="cover-side">
-            <div class="cover-sm">${imgs[1] ? `<img class="cover-img" src="${escH(imgs[1])}" loading="lazy">` : ''}</div>
-            <div class="cover-sm">${imgs[2] ? `<img class="cover-img" src="${escH(imgs[2])}" loading="lazy">` : ''}</div>
+            <div class="cover-sm">${imgs[1] ? `<img class="cover-img" src="${escH(imgs[1])}" loading="lazy">` : '<div style="width:100%;height:100%;background:var(--bg2)"></div>'}</div>
+            <div class="cover-sm">${imgs[2] ? `<img class="cover-img" src="${escH(imgs[2])}" loading="lazy">` : '<div style="width:100%;height:100%;background:var(--bg2)"></div>'}</div>
           </div>
         </div>
         <div class="board-info">
@@ -1003,14 +787,13 @@ function setSource(src) {
   currentSrc   = src;
   currentBoard = null;
   displayLimit = 40;
-
   document.querySelectorAll('.src-tab').forEach(el => {
     el.className = 'src-tab';
     if (el.dataset.src === src) {
-      el.classList.add('active-' + (src === 'all' ? 'all' : src === 'midjourney' ? 'mj' : src));
+      const cls = src === 'all' ? 'all' : src === 'nanobanana' ? 'nanobanana' : src === 'midjourney' ? 'mj' : src;
+      el.classList.add('active-' + cls);
     }
   });
-
   render();
 }
 
@@ -1022,42 +805,44 @@ function openDetail(idx) {
   const item = data[idx];
   if (!item) return;
   currentItem = item;
-  isPlaying   = false;
 
-  // Badge
   const badge = document.getElementById('detailBadge');
-  badge.textContent = SOURCE_LABELS[item.source] || item.source;
-  badge.className = `detail-source-badge badge-${item.source}`;
+  if (item._isLocal) {
+    badge.textContent = '本地新建';
+    badge.className = 'detail-source-badge badge-local';
+  } else {
+    badge.textContent = SOURCE_LABELS[item.source] || item.source;
+    badge.className = `detail-source-badge badge-${item.source}`;
+  }
 
   // Media
-  const img   = document.getElementById('detailImg');
-  const video = document.getElementById('detailVideo');
+  const img    = document.getElementById('detailImg');
+  const video  = document.getElementById('detailVideo');
   const playBtn = document.getElementById('playBtn');
-
   img.src = item.imageUrl || '';
   video.src = '';
   video.style.display = 'none';
   img.style.display = 'block';
+  playBtn.className = item.videoUrl ? 'play-btn' : 'play-btn hidden';
 
-  if (item.videoUrl) {
-    playBtn.classList.remove('hidden');
-  } else {
-    playBtn.classList.add('hidden');
-  }
+  // Title
+  const titleEl = document.getElementById('detailTitle');
+  if (item.title) { titleEl.textContent = item.title; titleEl.style.display = 'block'; }
+  else { titleEl.style.display = 'none'; }
 
   // Meta
   document.getElementById('detailAuthor').textContent = item.author ? `@${item.author}` : '';
   document.getElementById('detailVersion').textContent = [item.metaVersion, item.arType].filter(Boolean).join(' · ');
-  document.getElementById('detailPrompt').textContent = item.promptText || item.title || '—';
+  document.getElementById('detailPrompt').textContent  = item.promptText || '—';
 
-  // MJ params
+  // Params
   const paramsEl = document.getElementById('detailParams');
-  if (item.paramsText) {
-    paramsEl.textContent = item.paramsText;
-    paramsEl.style.display = 'block';
-  } else {
-    paramsEl.style.display = 'none';
-  }
+  if (item.paramsText) { paramsEl.textContent = item.paramsText; paramsEl.style.display = 'block'; }
+  else { paramsEl.style.display = 'none'; }
+
+  // Original link button
+  const origBtn = document.getElementById('detailOriginalBtn');
+  origBtn.style.display = item.originalUrl ? '' : 'none';
 
   document.getElementById('detailOverlay').classList.add('open');
   document.body.style.overflow = 'hidden';
@@ -1065,9 +850,7 @@ function openDetail(idx) {
 
 function closeDetail() {
   const video = document.getElementById('detailVideo');
-  video.pause();
-  video.src = '';
-  isPlaying = false;
+  video.pause(); video.src = '';
   document.getElementById('detailOverlay').classList.remove('open');
   document.body.style.overflow = '';
 }
@@ -1077,18 +860,16 @@ function playVideo() {
   const img   = document.getElementById('detailImg');
   const video = document.getElementById('detailVideo');
   const playBtn = document.getElementById('playBtn');
-
   video.src = currentItem.videoUrl;
   video.style.display = 'block';
   img.style.display   = 'none';
-  playBtn.classList.add('hidden');
+  playBtn.className   = 'play-btn hidden';
   video.play();
-  isPlaying = true;
 }
 
 function copyDetailPrompt() {
   if (!currentItem) return;
-  const text = [currentItem.promptText || currentItem.title || '', currentItem.paramsText || ''].join(' ').trim();
+  const text = [currentItem.promptText || '', currentItem.paramsText || ''].join(' ').trim();
   navigator.clipboard.writeText(text).then(() => showToast('📋 已复制提示词'));
 }
 
@@ -1103,104 +884,92 @@ function openSearch() {
   document.getElementById('searchOverlay').classList.add('open');
   setTimeout(() => document.getElementById('searchInput').focus(), 300);
 }
-
 function closeSearch() {
   document.getElementById('searchOverlay').classList.remove('open');
   document.getElementById('searchInput').value = '';
   document.getElementById('searchMasonry').innerHTML = '';
 }
-
 function onSearch() {
   const q = document.getElementById('searchInput').value.trim().toLowerCase();
   const masonry = document.getElementById('searchMasonry');
   if (!q) { masonry.innerHTML = ''; return; }
 
-  const results = allData.filter(item => {
-    const hay = [item.promptText, item.title, item.author, ...(item.tags || [])].join(' ').toLowerCase();
+  const results = getAllData().filter(item => {
+    const hay = [item.promptText, item.title, item.author, ...(item.tags||[])].join(' ').toLowerCase();
     return hay.includes(q);
-  }).slice(0, 40);
+  }).slice(0, 60);
 
   masonry.innerHTML = results.map((item, idx) => {
-    const src = item.imageUrl;
     const isVideo = !!item.videoUrl;
-    const sourceClass = `stripe-${item.source}`;
+    const isLocal = !!item._isLocal;
     return `
-      <div class="card" onclick="openDetailFromSearch(${allData.indexOf(item)})">
-        <div class="card-stripe ${sourceClass}"></div>
-        ${src ? `<img src="${escH(src)}" loading="lazy" onerror="this.style.display='none'">` : `<div style="height:120px;background:var(--bg3)"></div>`}
+      <div class="card" onclick="openDetailFromItem('${escH(item.id)}')">
+        <div class="card-stripe stripe-${item.source}"></div>
+        ${item.imageUrl ? `<img src="${escH(item.imageUrl)}" loading="lazy" onerror="this.style.display='none'">` : `<div style="height:120px;background:var(--bg3)"></div>`}
         ${isVideo ? `<div class="video-badge"><svg viewBox="0 0 24 24" fill="white" width="10" height="10"><polygon points="5 3 19 12 5 21 5 3"/></svg></div>` : ''}
-        <div class="card-overlay">
-          <div class="card-prompt">${escH(item.promptText || item.title || '')}</div>
-        </div>
+        ${isLocal ? `<div class="local-badge">本地</div>` : ''}
+        <div class="card-overlay"><div class="card-prompt">${escH(item.title || item.promptText || '')}</div></div>
       </div>
     `;
   }).join('');
 }
 
-function openDetailFromSearch(realIdx) {
+function openDetailFromItem(id) {
   closeSearch();
-  const item = allData[realIdx];
-  if (!item) return;
-  // find index in filtered
-  const filtered = getFilteredData();
-  const idx = filtered.indexOf(item);
+  const data = getFilteredData();
+  const idx = data.findIndex(i => i.id === id);
   if (idx >= 0) openDetail(idx);
-  else { currentItem = item; openDetail(0); }
+  else {
+    const item = getAllData().find(i => i.id === id);
+    if (item) { currentItem = item; /* open directly */ openDetailDirect(item); }
+  }
+}
+
+function openDetailDirect(item) {
+  const data = getAllData();
+  const idx = data.findIndex(i => i.id === item.id);
+  // temporarily set filter to all
+  const savedSrc = currentSrc; const savedBoard = currentBoard;
+  currentSrc = 'all'; currentBoard = null;
+  openDetail(getFilteredData().findIndex(i => i.id === item.id));
+  currentSrc = savedSrc; currentBoard = savedBoard;
 }
 
 // ═══════════════════════════════════════
 // FILTER
 // ═══════════════════════════════════════
 function openFilter() {
-  // Build filter options from current source data
-  const data = currentSrc === 'all' ? allData : allData.filter(i => i.source === currentSrc);
-
+  const data = getAllData().filter(i => currentSrc === 'all' || i.source === currentSrc);
   const versions = [...new Set(data.map(i => i.metaVersion).filter(Boolean))].sort();
   const ratios   = [...new Set(data.map(i => i.arType).filter(Boolean).filter(r => /\d+:\d+/.test(r)))].sort();
-  const versionSet = new Set(versions);
-  const arSet = new Set(['landscape','portrait','square','横板','竖版','方板','16:9','9:16','1:1','4:3','3:4']);
-  const tags = [...new Set(data.flatMap(i => (i.tags||[]).filter(t => !versionSet.has(t) && !arSet.has(t))))].sort().slice(0, 30);
+  const vSet     = new Set(versions);
+  const arSet    = new Set(['landscape','portrait','square','横板','竖版','方板','16:9','9:16','1:1','4:3','3:4']);
+  const tags     = [...new Set(data.flatMap(i => (i.tags||[]).filter(t => !vSet.has(t) && !arSet.has(t))))].sort().slice(0, 30);
 
-  // Copy active to pending
-  pendingFilters = {
-    version: new Set(activeFilters.version),
-    ratio:   new Set(activeFilters.ratio),
-    tags:    new Set(activeFilters.tags),
-  };
+  pendingFilters = { version: new Set(activeFilters.version), ratio: new Set(activeFilters.ratio), tags: new Set(activeFilters.tags) };
 
   renderChips('chip-version', versions, 'version');
   renderChips('chip-ratio',   ratios,   'ratio');
   renderChips('chip-tags',    tags,     'tags');
-
   document.getElementById('filter-tags-section').style.display = tags.length ? '' : 'none';
 
-  document.getElementById('sheetBg').classList.add('open');
+  document.getElementById('filterBg').classList.add('open');
   document.getElementById('filterSheet').classList.add('open');
 }
 
-function renderChips(containerId, values, type) {
-  const el = document.getElementById(containerId);
-  el.innerHTML = values.map(v => `
-    <div class="chip ${pendingFilters[type].has(v) ? 'active' : ''}" onclick="toggleChip(this,'${type}','${escH(v)}')">${escH(v)}</div>
-  `).join('');
+function renderChips(id, values, type) {
+  document.getElementById(id).innerHTML = values.map(v =>
+    `<div class="chip ${pendingFilters[type].has(v)?'active':''}" onclick="toggleChip(this,'${type}','${escH(v)}')">${escH(v)}</div>`
+  ).join('');
 }
 
 function toggleChip(el, type, val) {
-  if (pendingFilters[type].has(val)) {
-    pendingFilters[type].delete(val);
-    el.classList.remove('active');
-  } else {
-    pendingFilters[type].add(val);
-    el.classList.add('active');
-  }
+  if (pendingFilters[type].has(val)) { pendingFilters[type].delete(val); el.classList.remove('active'); }
+  else { pendingFilters[type].add(val); el.classList.add('active'); }
 }
 
 function applyFilter() {
-  activeFilters = {
-    version: new Set(pendingFilters.version),
-    ratio:   new Set(pendingFilters.ratio),
-    tags:    new Set(pendingFilters.tags),
-  };
+  activeFilters = { version: new Set(pendingFilters.version), ratio: new Set(pendingFilters.ratio), tags: new Set(pendingFilters.tags) };
   displayLimit = 40;
   closeFilter();
   render();
@@ -1208,12 +977,120 @@ function applyFilter() {
 
 function resetFilter() {
   pendingFilters = { version: new Set(), ratio: new Set(), tags: new Set() };
-  document.querySelectorAll('.chip.active').forEach(c => c.classList.remove('active'));
+  document.querySelectorAll('#filterSheet .chip.active').forEach(c => c.classList.remove('active'));
 }
 
 function closeFilter() {
-  document.getElementById('sheetBg').classList.remove('open');
+  document.getElementById('filterBg').classList.remove('open');
   document.getElementById('filterSheet').classList.remove('open');
+}
+
+// ═══════════════════════════════════════
+// NEW ENTRY
+// ═══════════════════════════════════════
+function openNewEntry() {
+  // Reset form
+  neSource = 'jimeng';
+  document.querySelectorAll('.ne-src').forEach(el => el.classList.toggle('active', el.dataset.src === 'jimeng'));
+  document.getElementById('ne-jimeng-fields').style.display = 'flex';
+  ['ne-title','ne-prompt','ne-version','ne-ratio','ne-image','ne-url','ne-tags'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+
+  // Populate boards
+  const select = document.getElementById('ne-board');
+  const allBoards = [...new Set([...boards, ...getLocalEntries().map(i => i.board).filter(Boolean), '手机入库'])];
+  select.innerHTML = allBoards.map(b => `<option value="${escH(b)}">${escH(b)}</option>`).join('');
+
+  // Update badge
+  updateLocalUI();
+
+  document.getElementById('newBg').classList.add('open');
+  document.getElementById('newSheet').classList.add('open');
+  setTimeout(() => document.getElementById('ne-prompt').focus(), 400);
+}
+
+function closeNewEntry() {
+  document.getElementById('newBg').classList.remove('open');
+  document.getElementById('newSheet').classList.remove('open');
+}
+
+function setNeSrc(el, src) {
+  neSource = src;
+  document.querySelectorAll('.ne-src').forEach(e => e.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('ne-jimeng-fields').style.display = src === 'jimeng' ? 'flex' : 'none';
+}
+
+function saveNewEntry() {
+  const prompt = document.getElementById('ne-prompt').value.trim();
+  if (!prompt) { showToast('⚠ 请填写提示词'); return; }
+
+  const entry = {
+    id:          'mobile_' + Date.now() + '_' + (Math.random()*9999|0),
+    _mobileLocal: true,
+    source:      neSource,
+    promptText:  prompt,
+    title:       document.getElementById('ne-title').value.trim(),
+    imageUrl:    document.getElementById('ne-image').value.trim(),
+    originalUrl: document.getElementById('ne-url').value.trim(),
+    board:       document.getElementById('ne-board').value || '手机入库',
+    tags:        document.getElementById('ne-tags').value.trim().split(/\s+/).filter(Boolean),
+    metaVersion: document.getElementById('ne-version').value.trim(),
+    arType:      document.getElementById('ne-ratio').value.trim(),
+    isFavorite:  false,
+    isMine:      true,
+    collectTime: new Date().toLocaleString('zh-CN'),
+  };
+
+  const entries = getLocalEntries();
+  entries.unshift(entry);
+  saveLocalEntries(entries);
+
+  updateStats();
+  updateLocalUI();
+  render();
+  closeNewEntry();
+  showToast(`✅ 已存入本地（共 ${entries.length} 条）`);
+}
+
+// ═══════════════════════════════════════
+// EXPORT / CLEAR LOCAL
+// ═══════════════════════════════════════
+function exportLocal() {
+  const entries = getLocalEntries();
+  if (!entries.length) { showToast('暂无本地新建记录'); return; }
+
+  // 只导出手机端新建的，不混入云端数据
+  const payload = {
+    version:    'AIGCVault_v1',
+    exportDate: new Date().toISOString(),
+    source:     'mobile_local',
+    boards:     [...new Set(entries.map(i => i.board).filter(Boolean))],
+    data:       entries.map(i => {
+      const c = { ...i };
+      delete c._mobileLocal;
+      delete c._isLocal;
+      return c;
+    }),
+  };
+
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `aigc_mobile_${Date.now()}.json`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+  showToast(`📦 已导出 ${entries.length} 条本地记录`);
+}
+
+function clearLocal() {
+  if (!confirm(`确认清空本地 ${getLocalEntries().length} 条记录？此操作不可恢复。`)) return;
+  localStorage.removeItem(LOCAL_KEY);
+  updateStats();
+  updateLocalUI();
+  render();
+  showToast('🗑 已清空本地记录');
 }
 
 // ═══════════════════════════════════════
@@ -1223,9 +1100,10 @@ function switchTab(tab) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
   document.getElementById('page-' + tab).classList.add('active');
-  document.getElementById('tab-' + tab).classList.add('active');
-
+  const tabEl = document.getElementById('tab-' + tab);
+  if (tabEl) tabEl.classList.add('active');
   if (tab === 'boards') renderBoards();
+  if (tab === 'settings') updateStats();
 }
 
 // ═══════════════════════════════════════
@@ -1246,19 +1124,17 @@ function showToast(msg) {
 
 // Swipe down to close detail
 let touchStartY = 0;
-document.getElementById('detailOverlay').addEventListener('touchstart', e => {
-  touchStartY = e.touches[0].clientY;
-}, { passive: true });
+document.getElementById('detailOverlay').addEventListener('touchstart', e => { touchStartY = e.touches[0].clientY; }, { passive: true });
 document.getElementById('detailOverlay').addEventListener('touchend', e => {
-  const dy = e.changedTouches[0].clientY - touchStartY;
-  if (dy > 80) closeDetail();
+  if (e.changedTouches[0].clientY - touchStartY > 80) closeDetail();
 }, { passive: true });
 
-// Keyboard
+// Keyboard shortcuts
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') {
     if (document.getElementById('searchOverlay').classList.contains('open')) closeSearch();
     else if (document.getElementById('filterSheet').classList.contains('open')) closeFilter();
+    else if (document.getElementById('newSheet').classList.contains('open')) closeNewEntry();
     else if (document.getElementById('detailOverlay').classList.contains('open')) closeDetail();
   }
 });
