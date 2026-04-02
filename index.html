@@ -305,7 +305,7 @@ html, body { height: 100%; width: 100%; background: var(--bg); color: var(--t1);
         <div class="setting-card">
           <div class="setting-header">腾讯云 COS 配置</div>
           <div class="setting-row" style="flex-direction:column;align-items:stretch">
-            <div style="font-size:12px;color:var(--t2);line-height:1.6">需要将 unified_meta.json 设为公有读，填写 Bucket 和地域后点同步。</div>
+            <div style="font-size:12px;color:var(--t2);line-height:1.6">需要将 mobile_meta.json 设为公有读，填写 Bucket 和地域后点同步。</div>
             <input class="setting-inp-field" id="inp-bucket" placeholder="Bucket（如 my-bucket-1234567890）">
             <input class="setting-inp-field" id="inp-region" placeholder="地域（如 ap-guangzhou）" style="margin-top:8px">
             <button class="btn-sync" onclick="syncData()" id="syncBtn">
@@ -607,9 +607,9 @@ async function syncData() {
   showSyncStatus('正在读取云端数据…', 'info');
 
   try {
-    const url = `https://${bucket}.cos.${region}.myqcloud.com/unified_meta.json?t=${Date.now()}`;
+    const url = `https://${bucket}.cos.${region}.myqcloud.com/mobile_meta.json?t=${Date.now()}`;
     const res = await fetch(url);
-    if (res.status === 403) throw new Error('访问被拒绝（403）。请将 unified_meta.json 设置为公有读。');
+    if (res.status === 403) throw new Error('访问被拒绝（403）。请将 mobile_meta.json 设置为公有读。');
     if (res.status === 404) throw new Error('未找到数据文件（404）。请先在插件端执行「上传同步」。');
     if (!res.ok) throw new Error(`服务器错误：${res.status}`);
 
