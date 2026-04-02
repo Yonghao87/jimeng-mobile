@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <title>即梦灵感库</title>
+    <title>AIGC Vault 移动画廊</title>
     <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
     <style>
         /* --- 1. CSS 变量与主题定义 --- */
@@ -26,6 +26,10 @@
             --safe-bottom: env(safe-area-inset-bottom);
             --safe-top: env(safe-area-inset-top);
             --nav-height: 55px;
+            /* 平台颜色 */
+            --jimeng: #06b6d4;
+            --mj: #4f8ef7;
+            --banana: #f59e0b;
         }
 
         [data-theme="dark"] {
@@ -94,14 +98,25 @@
             border-radius: 12px; overflow: hidden; position: relative;
             box-shadow: 0 2px 8px rgba(0,0,0,0.02);
         }
+        /* 来源顶部条 */
+        .pin-source-stripe { position: absolute; top: 0; left: 0; width: 100%; height: 3px; z-index: 2; }
+        .stripe-jimeng { background: var(--jimeng); }
+        .stripe-midjourney { background: var(--mj); }
+        .stripe-nanobanana { background: var(--banana); }
+        
+        /* 视频角标 */
+        .pin-video-badge {
+            position: absolute; top: 8px; left: 8px; background: rgba(0,0,0,0.6);
+            color: #fff; padding: 3px 6px; border-radius: 6px; font-size: 10px; font-weight: 600;
+            display: flex; align-items: center; gap: 4px; backdrop-filter: blur(4px); z-index: 2;
+        }
+
         .pin img { width: 100%; display: block; min-height: 100px; background: var(--bg-color); object-fit: cover; }
         .pin-tag {
             position: absolute; bottom: 6px; right: 6px; background: rgba(0,0,0,0.6);
             color: #fff; font-size: 10px; padding: 2px 8px; border-radius: 6px;
             backdrop-filter: blur(4px); max-width: 90%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
         }
-
-        /* 图片加载失败占位 */
         .pin-broken {
             width: 100%; aspect-ratio: 1/1; background: var(--bg-color);
             display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -156,14 +171,12 @@
         .btn-full:disabled { opacity: 0.4; cursor: not-allowed; }
         .btn-outline { background: var(--btn-sub-bg); color: var(--btn-sub-text); border: 1px solid var(--border-color); }
 
-        /* 进度条 */
         .progress-wrap { margin-top: 12px; display: none; }
         .progress-wrap.show { display: block; }
         .progress-bar-bg { height: 4px; background: var(--border-color); border-radius: 2px; overflow: hidden; }
         .progress-bar-fill { height: 100%; background: var(--accent); border-radius: 2px; transition: width 0.3s; width: 0%; }
         .progress-text { font-size: 11px; color: var(--text-sub); margin-top: 6px; text-align: center; }
 
-        /* 状态徽章 */
         .status-badge {
             display: inline-flex; align-items: center; gap: 5px;
             font-size: 12px; padding: 4px 10px; border-radius: 20px;
@@ -179,7 +192,7 @@
             flex-direction: column; animation: fadeIn 0.2s ease-out;
         }
         .detail-img-box { flex: 1; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-        .detail-img { max-width: 100%; max-height: 100%; object-fit: contain; }
+        .detail-img, .detail-video { max-width: 100%; max-height: 100%; object-fit: contain; }
         .detail-bar { background: rgba(20,20,20,0.95); padding: 20px 20px calc(20px + var(--safe-bottom)) 20px; color: #fff; border-top: 1px solid #333; }
         .detail-close {
             position: absolute; top: max(15px, var(--safe-top)); right: 15px;
@@ -189,27 +202,18 @@
         }
         .d-prompt { font-size: 14px; color: #ccc; line-height: 1.6; max-height: 150px; overflow-y: auto; margin-bottom: 15px; background: #333; padding: 15px; border-radius: 10px; }
 
-        /* 页面切换 */
         .page { display: none; height: 100%; flex-direction: column; }
         .page.active { display: flex; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* 空状态 */
         .empty-hint { text-align: center; color: var(--text-sub); margin-top: 80px; display: none; }
         .empty-hint i { font-size: 48px; opacity: 0.4; display: block; margin-bottom: 12px; }
-
-        /* 加载中骨架 */
-        .skeleton-grid { column-count: 2; column-gap: 12px; }
-        .skeleton-card { break-inside: avoid; margin-bottom: 12px; border-radius: 12px; overflow: hidden; background: var(--card-bg); }
-        .skeleton-img { background: linear-gradient(90deg, var(--bg-color) 25%, var(--border-color) 50%, var(--bg-color) 75%); background-size: 200% 100%; animation: shimmer 1.2s infinite; }
-        @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
     </style>
 </head>
 <body>
 
     <div class="mask-overlay" id="mask-overlay" onclick="toggleFilter(false)"></div>
 
-    <!-- 筛选面板（全局浮层） -->
     <div class="filter-panel" id="filter-panel">
         <div class="filter-section">
             <div class="filter-title"><i class="ri-git-branch-line"></i> 模型版本</div>
@@ -229,7 +233,6 @@
         </div>
     </div>
 
-    <!-- 首页 -->
     <div id="page-home" class="page active">
         <div class="top-bar">
             <div class="top-left-btn" id="home-back-btn" onclick="goBackToAll()">
@@ -245,25 +248,22 @@
             <div id="gallery" class="waterfall"></div>
             <div class="empty-hint" id="empty-hint">
                 <i class="ri-inbox-2-line"></i>
-                暂无内容，请前往「设置」加载数据
+                暂无内容，请前往「设置」同步数据
             </div>
         </div>
     </div>
 
-    <!-- 画板页 -->
     <div id="page-boards" class="page">
-        <div class="top-bar">画板管理</div>
+        <div class="top-bar">我的画板</div>
         <div class="content-area">
             <div id="board-grid" class="board-grid"></div>
         </div>
     </div>
 
-    <!-- 设置页 -->
     <div id="page-settings" class="page">
-        <div class="top-bar">设置</div>
+        <div class="top-bar">设置中心</div>
         <div class="content-area settings-page">
 
-            <!-- 外观 -->
             <div class="setting-group">
                 <div class="s-title"><i class="ri-palette-line"></i> 外观设置</div>
                 <button class="btn-full btn-outline" id="theme-btn" onclick="toggleTheme()">
@@ -271,18 +271,17 @@
                 </button>
             </div>
 
-            <!-- 腾讯云 COS -->
             <div class="setting-group">
-                <div class="s-title"><i class="ri-cloud-line"></i> 腾讯云 COS 同步</div>
+                <div class="s-title"><i class="ri-cloud-line"></i> 云端数据同步 (V1.0)</div>
                 <p style="font-size:13px; color:var(--text-sub); margin: 0 0 15px 0; line-height:1.5;">
-                    填入插件端配置的同一个 Bucket，一键拉取元数据。图片直接从 COS 加载，无大小限制。
+                    请填入插件端配置的腾讯云 Bucket，点击拉取即可瞬间同步桌面端的所有最新灵感。
                 </p>
                 <div class="s-row">
                     <div class="s-label">Bucket 名称</div>
-                    <input id="cos-bucket" class="s-input" placeholder="jimeng-1234567890" autocomplete="off">
+                    <input id="cos-bucket" class="s-input" placeholder="my-bucket-1234567890" autocomplete="off">
                 </div>
                 <div class="s-row">
-                    <div class="s-label">Region</div>
+                    <div class="s-label">地域 (Region)</div>
                     <input id="cos-region" class="s-input" placeholder="ap-guangzhou" autocomplete="off">
                 </div>
 
@@ -291,48 +290,19 @@
                     <div class="progress-text" id="cos-progress-text">正在拉取元数据...</div>
                 </div>
 
-                <div style="margin-top:5px; margin-bottom:15px;" id="cos-status-area"></div>
+                <div style="margin-top:5px; margin-bottom:15px; text-align:center;" id="cos-status-area"></div>
 
                 <button class="btn-full" id="cos-sync-btn" onclick="syncFromCOS()">
-                    <i class="ri-download-cloud-2-line"></i> 从 COS 加载数据
-                </button>
-            </div>
-
-            <!-- WebDAV（保留作备用） -->
-            <div class="setting-group">
-                <div class="s-title"><i class="ri-server-line"></i> WebDAV 备用同步</div>
-                <p style="font-size:13px; color:var(--text-sub); margin: 0 0 15px 0; line-height:1.5;">
-                    适合小数据量场景（&lt;5MB）。数据量大时推荐改用上方 COS 方式。
-                </p>
-                <div class="s-row"><input id="dav-url" class="s-input" value="https://dav.jianguoyun.com/dav/jimeng/" placeholder="服务器地址"></div>
-                <div class="s-row"><input id="dav-user" class="s-input" placeholder="账号"></div>
-                <div class="s-row"><input id="dav-pass" class="s-input" type="password" placeholder="密码 / 应用授权码"></div>
-                <div style="display:flex; gap:10px;">
-                    <button class="btn-full btn-outline" onclick="syncWebDAV('download')"><i class="ri-download-cloud-2-line"></i> 下载</button>
-                    <button class="btn-full btn-outline" onclick="syncWebDAV('upload')"><i class="ri-upload-cloud-2-line"></i> 上传</button>
-                </div>
-            </div>
-
-            <!-- 本地文件 -->
-            <div class="setting-group">
-                <div class="s-title"><i class="ri-folder-open-line"></i> 本地文件导入</div>
-                <input type="file" id="file-input" accept=".json" style="display:none" onchange="importLocalFile(event)">
-                <button class="btn-full btn-outline" onclick="document.getElementById('file-input').click()">
-                    <i class="ri-file-upload-line"></i> 导入本地 JSON 备份
+                    <i class="ri-loop-right-line"></i> 拉取最新云端数据
                 </button>
                 <div style="height:10px"></div>
                 <button class="btn-full btn-outline" style="color:#ff4d4f; border-color: rgba(255,0,0,0.15);" onclick="clearCache()">
-                    <i class="ri-delete-bin-line"></i> 清空所有本地缓存
+                    <i class="ri-delete-bin-line"></i> 清除本地缓存
                 </button>
-                <div style="text-align:center; margin-top:12px;">
-                    <span class="status-badge" id="data-status"></span>
-                </div>
             </div>
-
         </div>
     </div>
 
-    <!-- 底部导航 -->
     <div class="tab-bar">
         <div class="tab-item active" onclick="switchTab('home')">
             <i class="ri-home-4-fill ri-lg"></i>
@@ -348,11 +318,11 @@
         </div>
     </div>
 
-    <!-- 详情弹窗 -->
     <div class="detail-overlay" id="detail-overlay">
         <div class="detail-close" onclick="closeDetail()"><i class="ri-close-line"></i></div>
         <div class="detail-img-box">
             <img id="d-img" class="detail-img" onerror="this.style.display='none'">
+            <video id="d-video" class="detail-video" autoplay loop controls playsinline style="display:none;"></video>
         </div>
         <div class="detail-bar">
             <div class="d-prompt" id="d-prompt"></div>
@@ -361,14 +331,14 @@
                     <i class="ri-file-copy-line"></i> 复制提示词
                 </button>
                 <button class="btn-full btn-outline" style="flex:1;" onclick="openOriginal()">
-                    <i class="ri-external-link-line"></i> 原页面
+                    <i class="ri-external-link-line"></i> 访问原链
                 </button>
             </div>
         </div>
     </div>
 
     <script>
-        // ==================== 状态 ====================
+        // ==================== 全局状态 ====================
         let allData = [];
         let currentFilterBoard = 'all';
         let activeFilters = { version: new Set(), ratio: new Set(), tags: new Set() };
@@ -378,28 +348,19 @@
 
         // ==================== 初始化 ====================
         window.onload = () => {
-            // 主题
-            if (localStorage.getItem('jm_theme') === 'dark') toggleTheme(true);
+            if (localStorage.getItem('vault_theme') === 'dark') toggleTheme(true);
 
-            // 恢复 WebDAV 配置
-            if (localStorage.getItem('jm_dav_user')) {
-                document.getElementById('dav-user').value = localStorage.getItem('jm_dav_user') || '';
-                document.getElementById('dav-pass').value = localStorage.getItem('jm_dav_pass') || '';
-            }
-
-            // 恢复 COS 配置
             const cosCfg = loadCosConfig();
             if (cosCfg.bucket) document.getElementById('cos-bucket').value = cosCfg.bucket;
             if (cosCfg.region) document.getElementById('cos-region').value = cosCfg.region;
 
-            // 加载缓存数据
-            const cached = sessionStorage.getItem('jm_meta_cache') || localStorage.getItem('jm_mobile_data');
+            const cached = sessionStorage.getItem('vault_meta_cache') || localStorage.getItem('vault_mobile_data');
             if (cached) {
                 try {
                     const parsed = JSON.parse(cached);
                     if (Array.isArray(parsed) && parsed.length > 0) {
                         allData = parsed;
-                        updateStatus(`缓存 ${allData.length} 条`, 'ok');
+                        updateStatus(`已加载 ${allData.length} 条缓存`, 'ok');
                         initUI();
                         return;
                     }
@@ -408,14 +369,21 @@
             switchTab('settings');
         };
 
-        // ==================== COS 核心逻辑 ====================
+        // ==================== COS V1.0 核心逻辑 ====================
         function loadCosConfig() {
-            try { return JSON.parse(localStorage.getItem('jm_cos_config') || '{}'); } 
+            try { return JSON.parse(localStorage.getItem('vault_cos_config') || '{}'); } 
             catch (e) { return {}; }
         }
 
         function saveCosConfig(bucket, region) {
-            localStorage.setItem('jm_cos_config', JSON.stringify({ bucket, region }));
+            localStorage.setItem('vault_cos_config', JSON.stringify({ bucket, region }));
+        }
+
+        // 修复部分缺少 https 的残缺链接
+        function fixUrl(url) {
+            if (!url) return '';
+            if (url.startsWith('http') || url.startsWith('data:') || url.startsWith('blob:')) return url;
+            return 'https://' + url;
         }
 
         async function syncFromCOS() {
@@ -423,7 +391,7 @@
             const region = document.getElementById('cos-region').value.trim();
 
             if (!bucket || !region) {
-                return setCosStatus('请先填写 Bucket 和 Region', 'err');
+                return setCosStatus('请先填写完整的 Bucket 和 Region', 'err');
             }
 
             saveCosConfig(bucket, region);
@@ -431,56 +399,44 @@
             const btn = document.getElementById('cos-sync-btn');
             btn.disabled = true;
             btn.innerHTML = '<i class="ri-loader-4-line"></i> 拉取中...';
-            showCosProgress(true, '正在连接 COS...');
+            showCosProgress(true, '正在连接腾讯云 COS...');
 
             try {
-                // jimeng_meta.json 需要在 COS 控制台设置为"公有读"，或使用签名URL
-                // 公有读是最简单的方案，手机端无需任何密钥
-                const metaUrl = `https://${bucket}.cos.${region}.myqcloud.com/jimeng_meta.json?t=${Date.now()}`;
+                // 🚀 核心更新 1：读取新的大一统元数据文件 unified_meta.json
+                const metaUrl = `https://${bucket}.cos.${region}.myqcloud.com/unified_meta.json?t=${Date.now()}`;
 
-                showCosProgress(true, '正在下载元数据...');
+                showCosProgress(true, '正在下载最新同步数据...');
                 const res = await fetch(metaUrl);
 
-                if (res.status === 403) {
-                    throw new Error('访问被拒绝（403）。\n\n请在腾讯云 COS 控制台将 jimeng_meta.json 设置为「公有读」，或检查 Bucket 名称是否正确。');
-                }
-                if (res.status === 404) {
-                    throw new Error('未找到数据文件（404）。\n\n请先在插件端执行「上传到 COS」操作，生成 jimeng_meta.json 文件。');
-                }
-                if (!res.ok) {
-                    throw new Error(`服务器返回错误：${res.status} ${res.statusText}`);
-                }
+                if (res.status === 403) throw new Error('访问被拒绝(403)。请检查跨域CORS，并将 unified_meta.json 设为公有读。');
+                if (res.status === 404) throw new Error('未找到文件(404)。请先在电脑插件端点击「上传同步」。');
+                if (!res.ok) throw new Error(`服务器返回错误：${res.status}`);
 
-                showCosProgress(true, '正在解析数据...');
-                const metaArr = await res.json();
+                showCosProgress(true, '正在解析 1.0 架构数据...');
+                const metaObj = await res.json();
+                
+                // 兼容嵌套的 data 结构
+                const rawArr = Array.isArray(metaObj) ? metaObj : (metaObj.data || []);
+                
+                if (rawArr.length === 0) throw new Error('云端数据为空。');
 
-                if (!Array.isArray(metaArr)) {
-                    throw new Error('数据格式异常，请重新从插件端上传。');
-                }
-
-                // 数据适配：兼容插件端字段名（cosUrl/cosThumbUrl）与旧版字段（mainImage）
-                allData = metaArr.map(item => ({
+                // 🚀 核心更新 2：适配 1.0 版本的新字段映射
+                allData = rawArr.map(item => ({
                     ...item,
-                    // 优先使用 COS 图片URL，其次是原始 imageUrl，最后是旧字段 mainImage
-                    mainImage: item.cosThumbUrl || item.cosUrl || item.imageUrl || item.mainImage || '',
-                    fullImage: item.cosUrl || item.imageUrl || item.mainImage || '',
-                    // 兼容字段名差异（插件用 promptText，旧版用 prompt）
-                    prompt: item.promptText || item.prompt || '',
-                    // 兼容 isFavorite/favorite
+                    mainImage: fixUrl(item.cosThumbUrl) || fixUrl(item.imageUrl) || '',
+                    fullImage: fixUrl(item.cosUrl) || fixUrl(item.imageUrl) || '',
+                    prompt: item.promptText || item.title || item.originalPrompt || item.prompt || '',
                     favorite: item.isFavorite || item.favorite || false,
+                    source: item.source || 'jimeng',
+                    videoUrl: item.videoUrl || ''
                 }));
 
-                // 缓存到 sessionStorage（会话内有效，避免每次刷新重新拉取）
-                // 不存 localStorage 是因为数据可能超过 5MB 限制
                 try {
-                    sessionStorage.setItem('jm_meta_cache', JSON.stringify(allData));
-                } catch (e) {
-                    // sessionStorage 也满了就不缓存，每次拉取即可
-                    console.warn('sessionStorage 存储失败，将不缓存:', e.message);
-                }
+                    sessionStorage.setItem('vault_meta_cache', JSON.stringify(allData));
+                } catch (e) {}
 
-                showCosProgress(true, `解析完成，共 ${allData.length} 条`);
-                setCosStatus(`✓ 已加载 ${allData.length} 条数据`, 'ok');
+                showCosProgress(true, `数据整合完毕！共 ${allData.length} 条`);
+                setCosStatus(`✓ 成功同步 ${allData.length} 条数据`, 'ok');
 
                 initUI();
                 switchTab('home');
@@ -490,7 +446,7 @@
                 console.error('COS 拉取失败:', e);
             } finally {
                 btn.disabled = false;
-                btn.innerHTML = '<i class="ri-download-cloud-2-line"></i> 从 COS 加载数据';
+                btn.innerHTML = '<i class="ri-loop-right-line"></i> 拉取最新云端数据';
                 setTimeout(() => showCosProgress(false), 2000);
             }
         }
@@ -500,15 +456,12 @@
             const textEl = document.getElementById('cos-progress-text');
             wrap.classList.toggle('show', show);
             if (text) textEl.textContent = text;
-            // 进度条动画（元数据拉取很快，用模拟进度即可）
             const bar = document.getElementById('cos-progress-bar');
             if (show) {
                 bar.style.width = '0%';
                 setTimeout(() => bar.style.width = '60%', 100);
                 setTimeout(() => bar.style.width = '90%', 500);
-            } else {
-                bar.style.width = '100%';
-            }
+            } else { bar.style.width = '100%'; }
         }
 
         function setCosStatus(msg, type) {
@@ -516,90 +469,17 @@
             area.innerHTML = `<span class="status-badge ${type || ''}">${msg}</span>`;
         }
 
-        // ==================== WebDAV 备用同步 ====================
-        async function syncWebDAV(action) {
-            const u = document.getElementById('dav-user').value.trim();
-            const p = document.getElementById('dav-pass').value.trim();
-            const url = document.getElementById('dav-url').value.trim() + 'jimeng_backup.json';
-            if (!u || !p) return alert('请先填写 WebDAV 账号密码');
-            localStorage.setItem('jm_dav_user', u);
-            localStorage.setItem('jm_dav_pass', p);
-
-            const btn = event.target;
-            const txt = btn.innerHTML;
-            btn.innerHTML = '⏳ 处理中...';
-            btn.disabled = true;
-
-            try {
-                if (action === 'download') {
-                    const res = await fetch(url, { headers: { 'Authorization': 'Basic ' + btoa(u + ':' + p) } });
-                    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-                    const json = await res.json();
-                    const list = Array.isArray(json) ? json : (json.jimengCollections || []);
-                    loadDataIntoApp(list);
-                    alert(`✅ 下载成功，共 ${list.length} 条`);
-                } else {
-                    if (allData.length === 0) return alert('暂无数据可上传');
-                    const res = await fetch(url, {
-                        method: 'PUT',
-                        headers: { 'Authorization': 'Basic ' + btoa(u + ':' + p), 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ jimengCollections: allData })
-                    });
-                    if (res.ok || res.status === 201 || res.status === 204) alert('✅ 上传成功');
-                    else throw new Error(`HTTP ${res.status}`);
-                }
-            } catch (e) {
-                alert('操作失败：' + e.message + '\n\n（可能是跨域限制，大数据量建议改用 COS 方案）');
-            } finally {
-                btn.innerHTML = txt;
-                btn.disabled = false;
-            }
-        }
-
-        // ==================== 本地文件导入 ====================
-        function importLocalFile(e) {
-            const f = e.target.files[0];
-            if (!f) return;
-            const r = new FileReader();
-            r.onload = (ev) => {
-                try {
-                    const j = JSON.parse(ev.target.result);
-                    const list = Array.isArray(j) ? j : (j.jimengCollections || []);
-                    loadDataIntoApp(list);
-                } catch (err) { alert('格式错误：' + err.message); }
-            };
-            r.readAsText(f);
-            e.target.value = '';
-        }
-
-        function loadDataIntoApp(list) {
-            allData = list.map(item => ({
-                ...item,
-                mainImage: item.cosThumbUrl || item.cosUrl || item.imageUrl || item.mainImage || '',
-                fullImage: item.cosUrl || item.imageUrl || item.mainImage || '',
-                prompt: item.promptText || item.prompt || '',
-                favorite: item.isFavorite || item.favorite || false,
-            }));
-            try { localStorage.setItem('jm_mobile_data', JSON.stringify(allData)); } catch (e) {}
-            updateStatus(`本地 ${allData.length} 条`, 'ok');
-            initUI();
-            switchTab('home');
-        }
-
         function clearCache() {
-            if (!confirm('确定清空所有本地缓存数据？')) return;
-            localStorage.removeItem('jm_mobile_data');
-            sessionStorage.removeItem('jm_meta_cache');
+            if (!confirm('确定清空手机端的所有缓存数据？（不会删除云端数据）')) return;
+            localStorage.removeItem('vault_mobile_data');
+            sessionStorage.removeItem('vault_meta_cache');
             allData = [];
             initUI();
-            updateStatus('已清空', '');
+            updateStatus('缓存已清空', '');
         }
 
         function updateStatus(msg, type) {
-            const el = document.getElementById('data-status');
-            el.textContent = msg;
-            el.className = 'status-badge ' + (type || '');
-            el.style.display = msg ? 'inline-flex' : 'none';
+            setCosStatus(msg, type);
         }
 
         // ==================== UI 渲染 ====================
@@ -619,13 +499,13 @@
                 if (!['all', 'fav', 'mine'].includes(currentFilterBoard) && item.board !== currentFilterBoard) return false;
 
                 if (searchTerm) {
-                    const hay = ((item.prompt || '') + ' ' + (item.author || '')).toLowerCase();
+                    const hay = ((item.prompt || '') + ' ' + (item.authorName || '')).toLowerCase();
                     if (!hay.includes(searchTerm.toLowerCase())) return false;
                 }
 
                 const tags = item.tags || [];
-                if (activeFilters.version.size > 0 && !tags.some(t => activeFilters.version.has(t))) return false;
-                if (activeFilters.ratio.size > 0 && !tags.some(t => activeFilters.ratio.has(t))) return false;
+                if (activeFilters.version.size > 0 && !activeFilters.version.has(item.metaVersion)) return false;
+                if (activeFilters.ratio.size > 0 && !activeFilters.ratio.has(item.arType)) return false;
                 if (activeFilters.tags.size > 0 && !tags.some(t => activeFilters.tags.has(t))) return false;
 
                 return true;
@@ -635,11 +515,28 @@
             if (filtered.length === 0) { emptyHint.style.display = 'block'; return; }
             emptyHint.style.display = 'none';
 
-            filtered.sort((a, b) => (b.id || 0) - (a.id || 0));
+            filtered.sort((a, b) => {
+                const ta = a.collectTime || '';
+                const tb = b.collectTime || '';
+                return tb.localeCompare(ta);
+            });
 
             filtered.forEach(item => {
                 const div = document.createElement('div');
                 div.className = 'pin';
+
+                // 🚀 新增：来源颜色顶部条
+                const stripe = document.createElement('div');
+                stripe.className = `pin-source-stripe stripe-${item.source}`;
+                div.appendChild(stripe);
+
+                // 🚀 新增：视频角标
+                if (item.videoUrl || (item.metaVersion && item.metaVersion.includes('视频'))) {
+                    const vBadge = document.createElement('div');
+                    vBadge.className = 'pin-video-badge';
+                    vBadge.innerHTML = '<i class="ri-play-circle-fill"></i> 视频';
+                    div.appendChild(vBadge);
+                }
 
                 const imgSrc = item.mainImage;
                 if (imgSrc) {
@@ -647,11 +544,12 @@
                     img.loading = 'lazy';
                     img.src = imgSrc;
                     img.onerror = function() {
-                        this.parentNode.innerHTML = `<div class="pin-broken"><i class="ri-image-line" style="font-size:28px;opacity:0.3"></i><span>图片失效</span></div>`;
+                        this.parentNode.innerHTML += `<div class="pin-broken"><i class="ri-image-line" style="font-size:28px;opacity:0.3"></i><span>资源失效</span></div>`;
+                        this.style.display = 'none';
                     };
                     div.appendChild(img);
                 } else {
-                    div.innerHTML = `<div class="pin-broken"><i class="ri-image-line" style="font-size:28px;opacity:0.3"></i><span>无图片</span></div>`;
+                    div.innerHTML += `<div class="pin-broken"><i class="ri-image-line" style="font-size:28px;opacity:0.3"></i><span>无图片</span></div>`;
                 }
 
                 const tag = document.createElement('div');
@@ -674,14 +572,9 @@
                 boardCounts[b] = (boardCounts[b] || 0) + 1;
             });
 
-            const mineCount = allData.filter(i => i.isMine).length;
             const favCount = allData.filter(i => i.favorite).length;
-
-            if (mineCount > 0) {
-                container.appendChild(createBoardCard('我的作品', mineCount, null, true, () => enterBoard('mine', '我的作品')));
-            }
             if (favCount > 0) {
-                container.appendChild(createBoardCard('❤️ 收藏', favCount, allData.find(i => i.favorite)?.mainImage, false, () => enterBoard('fav', '我的收藏')));
+                container.appendChild(createBoardCard('❤️ 我的收藏', favCount, allData.find(i => i.favorite)?.mainImage, false, () => enterBoard('fav', '我的收藏')));
             }
 
             Object.keys(boardCounts).forEach(b => {
@@ -693,9 +586,7 @@
         function createBoardCard(title, count, imgUrl, isMine, onClick) {
             const div = document.createElement('div');
             div.className = `b-card ${isMine ? 'my-works' : ''}`;
-            const imgContent = isMine
-                ? `<i class="ri-user-smile-line" style="font-size:32px"></i>`
-                : (imgUrl ? `<img src="${imgUrl}" loading="lazy" onerror="this.style.display='none'">` : '');
+            const imgContent = imgUrl ? `<img src="${imgUrl}" loading="lazy" onerror="this.style.display='none'">` : '';
             div.innerHTML = `
                 <div class="b-cover-wrap">${imgContent}</div>
                 <div class="b-info">
@@ -710,14 +601,11 @@
         function renderFilterTags() {
             const sets = { version: new Set(), ratio: new Set(), tags: new Set() };
             allData.forEach(item => {
-                (item.tags || []).forEach(t => {
-                    if (t.includes('图片') || t.includes('4.0') || t.includes('Image')) sets.version.add(t);
-                    else if (/\d:\d/.test(t)) sets.ratio.add(t);
-                    else sets.tags.add(t);
-                });
-                // 也从专用字段读取
                 if (item.metaVersion) sets.version.add(item.metaVersion);
                 if (item.arType) sets.ratio.add(item.arType);
+                (item.tags || []).forEach(t => {
+                    if (!sets.version.has(t) && !sets.ratio.has(t)) sets.tags.add(t);
+                });
             });
             renderChips('filter-version', sets.version, activeFilters.version);
             renderChips('filter-ratio', sets.ratio, activeFilters.ratio);
@@ -728,6 +616,7 @@
             const c = document.getElementById(cid);
             c.innerHTML = '';
             Array.from(dSet).sort().forEach(val => {
+                if (!val) return;
                 const chip = document.createElement('div');
                 chip.className = `f-chip ${aSet.has(val) ? 'active' : ''}`;
                 chip.textContent = val;
@@ -784,7 +673,7 @@
         }
 
         function showSearch() {
-            const t = prompt('🔍 搜索关键词:');
+            const t = prompt('🔍 搜索关键词 (作者/提示词):');
             if (t !== null) {
                 searchTerm = t.trim();
                 renderGallery();
@@ -797,15 +686,29 @@
             currentDetailItem = item;
             const overlay = document.getElementById('detail-overlay');
             overlay.style.display = 'flex';
+            
             const img = document.getElementById('d-img');
-            // 优先加载高清原图
-            img.style.display = 'block';
-            img.src = item.fullImage || item.mainImage || '';
+            const video = document.getElementById('d-video');
+            
+            // 🚀 新增：视频与图片分离播放逻辑
+            if (item.videoUrl) {
+                img.style.display = 'none';
+                video.style.display = 'block';
+                video.src = item.videoUrl;
+                video.play().catch(()=>{});
+            } else {
+                video.style.display = 'none';
+                video.pause();
+                img.style.display = 'block';
+                img.src = item.fullImage || item.mainImage || '';
+            }
+
             document.getElementById('d-prompt').textContent = item.prompt || '暂无提示词';
         }
 
         function closeDetail() {
             document.getElementById('detail-overlay').style.display = 'none';
+            document.getElementById('d-video').pause(); // 关弹窗时停播视频
             currentDetailItem = null;
         }
 
@@ -813,7 +716,6 @@
             const text = document.getElementById('d-prompt').textContent;
             if (!text || text === '暂无提示词') return alert('没有可复制的提示词');
             navigator.clipboard.writeText(text).then(() => alert('✅ 已复制！')).catch(() => {
-                // 降级方案
                 const ta = document.createElement('textarea');
                 ta.value = text; document.body.appendChild(ta); ta.select();
                 document.execCommand('copy'); document.body.removeChild(ta);
@@ -836,12 +738,12 @@
                 body.setAttribute('data-theme', 'dark');
                 btn.innerHTML = '<i class="ri-sun-line"></i> 切换至白天模式';
                 isDarkMode = true;
-                localStorage.setItem('jm_theme', 'dark');
+                localStorage.setItem('vault_theme', 'dark');
             } else {
                 body.removeAttribute('data-theme');
                 btn.innerHTML = '<i class="ri-moon-line"></i> 切换至深色模式';
                 isDarkMode = false;
-                localStorage.setItem('jm_theme', 'light');
+                localStorage.setItem('vault_theme', 'light');
             }
         }
     </script>
