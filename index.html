@@ -84,8 +84,8 @@ html, body { height: 100%; width: 100%; background: var(--bg); color: var(--t1);
 /* ═══════════════════════════════════════
    MASONRY
 ═══════════════════════════════════════ */
-.masonry { columns: 2; column-gap: 6px; padding: 0 6px; }
-.card { break-inside: avoid; margin-bottom: 6px; border-radius: 12px; overflow: hidden; position: relative; cursor: pointer; background: var(--bg3); transform: translateZ(0); transition: transform 0.15s; }
+.masonry { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; padding: 0 6px; align-items: start; }
+.card { margin-bottom: 0; border-radius: 12px; overflow: hidden; position: relative; cursor: pointer; background: var(--bg3); transform: translateZ(0); transition: transform 0.15s; }
 .card:active { transform: scale(0.97); }
 .card img { width: 100%; display: block; object-fit: cover; min-height: 80px; background: var(--bg3); }
 .card-stripe { position: absolute; top: 0; left: 0; right: 0; height: 2px; }
@@ -117,7 +117,7 @@ html, body { height: 100%; width: 100%; background: var(--bg); color: var(--t1);
 .search-input::placeholder { color: var(--t3); }
 .search-cancel { color: var(--acc); font-size: 14px; font-weight: 500; cursor: pointer; white-space: nowrap; }
 .search-results { flex: 1; overflow-y: auto; padding: 0 16px 16px; -webkit-overflow-scrolling: touch; }
-.search-results .masonry { padding: 0; }
+.search-results .masonry { padding: 0; gap: 6px; }
 
 /* ═══════════════════════════════════════
    SHEET (Filter + New Entry)
@@ -271,10 +271,10 @@ html, body { height: 100%; width: 100%; background: var(--bg); color: var(--t1);
       </div>
     </div>
     <div class="source-tabs" id="sourceTabs">
-      <div class="src-tab active-all" data-src="all" onclick="setSource('all')">全部</div>
+      <div class="src-tab" data-src="all" onclick="setSource('all')">全部</div>
       <div class="src-tab" data-src="jimeng" onclick="setSource('jimeng')"><span class="src-dot dot-jimeng"></span>即梦</div>
       <div class="src-tab" data-src="midjourney" onclick="setSource('midjourney')"><span class="src-dot dot-mj"></span>MJ</div>
-      <div class="src-tab" data-src="nanobanana" onclick="setSource('nanobanana')"><span class="src-dot dot-banana"></span>Banana</div>
+      <div class="src-tab active-nanobanana" data-src="nanobanana" onclick="setSource('nanobanana')"><span class="src-dot dot-banana"></span>Banana</div>
     </div>
   </div>
 
@@ -569,7 +569,7 @@ async function idbGet(key) {
 // ═══════════════════════════════════════
 let cloudData    = [];   // 从 COS 同步的数据
 let boards       = [];
-let currentSrc   = 'all';
+let currentSrc   = 'nanobanana';
 let currentBoard = null;
 let displayLimit = 40;
 let activeFilters  = { version: new Set(), ratio: new Set(), tags: new Set() };
@@ -670,7 +670,7 @@ function normalizeItem(item) {
   return {
     ...item,
     id:          String(item.id || ''),
-    imageUrl: item.cosThumbUrl || item.cosUrl || item.imageUrl || '',
+    imageUrl:    item.thumbBlobBase64 || item.cosThumbUrl || item.cosUrl || item.imageUrl || item.localThumb || item.mainImage || '',
     promptText:  item.promptText || item.prompt || '',
     metaVersion: item.metaVersion || item.version || '',
     arType:      item.arType || item.ratio || '',
@@ -744,7 +744,13 @@ function render() {
     return;
   }
   empty.style.display = 'none';
-  masonry.innerHTML = data.slice(0, displayLimit).map((item, idx) => cardHTML(item, idx)).join('');
+  const visible = data.slice(0, displayLimit);
+  const left  = visible.filter((_, i) => i % 2 === 0);
+  const right = visible.filter((_, i) => i % 2 === 1);
+  masonry.innerHTML = `
+    <div style="display:flex;flex-direction:column;gap:6px">${left.map((item, i) => cardHTML(item, i * 2)).join('')}</div>
+    <div style="display:flex;flex-direction:column;gap:6px">${right.map((item, i) => cardHTML(item, i * 2 + 1)).join('')}</div>
+  `;
 }
 
 function cardHTML(item, idx) {
@@ -934,7 +940,10 @@ function onSearch() {
     return hay.includes(q);
   }).slice(0, 60);
 
-  masonry.innerHTML = results.map((item, idx) => {
+  const left  = results.filter((_, i) => i % 2 === 0);
+  const right = results.filter((_, i) => i % 2 === 1);
+
+  const makeCard = (item) => {
     const isVideo = !!item.videoUrl;
     const isLocal = !!item._isLocal;
     return `
@@ -946,7 +955,12 @@ function onSearch() {
         <div class="card-overlay"><div class="card-prompt">${escH(item.title || item.promptText || '')}</div></div>
       </div>
     `;
-  }).join('');
+  };
+
+  masonry.innerHTML = `
+    <div style="display:flex;flex-direction:column;gap:6px">${left.map(makeCard).join('')}</div>
+    <div style="display:flex;flex-direction:column;gap:6px">${right.map(makeCard).join('')}</div>
+  `;
 }
 
 function openDetailFromItem(id) {
