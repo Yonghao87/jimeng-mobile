@@ -80,6 +80,7 @@ html, body { height: 100%; width: 100%; background: var(--bg); color: var(--t1);
 .page-home     { padding-top: calc(var(--safe-t) + var(--header-h) + 46px); padding-bottom: calc(var(--tab-h) + var(--safe-b) + 16px); }
 .page-boards   { padding-top: calc(var(--safe-t) + var(--header-h) - 46px + 16px); padding-bottom: calc(var(--tab-h) + var(--safe-b) + 16px); }
 .page-settings { padding-top: calc(var(--safe-t) + var(--header-h) - 46px + 16px); padding-bottom: calc(var(--tab-h) + var(--safe-b) + 16px); }
+.page-fav      { padding-top: calc(var(--safe-t) + var(--header-h) - 46px + 16px); padding-bottom: calc(var(--tab-h) + var(--safe-b) + 16px); }
 
 /* ═══════════════════════════════════════
    MASONRY
@@ -297,6 +298,20 @@ html, body { height: 100%; width: 100%; background: var(--bg); color: var(--t1);
       <div class="boards-grid" id="boardsGrid"></div>
     </div>
 
+    <!-- FAV -->
+    <div class="page page-fav" id="page-fav" onscroll="onFavScroll(this)">
+      <div class="page-inner-header" style="padding-bottom:8px">
+        <div class="page-inner-title">我的收藏</div>
+        <div style="font-size:12px;color:var(--t2);margin-top:4px" id="favCount"></div>
+      </div>
+      <div class="masonry" id="favMasonry"></div>
+      <div class="empty-state" id="favEmpty" style="display:none">
+        <div class="empty-icon">⭐</div>
+        <div class="empty-title">还没有收藏</div>
+        <div class="empty-sub">在灵感库详情页点击星标收藏，同步后在这里查看</div>
+      </div>
+    </div>
+
     <!-- SETTINGS -->
     <div class="page" id="page-settings">
       <div class="page-inner-header"><div class="page-inner-title">设置</div></div>
@@ -359,12 +374,16 @@ html, body { height: 100%; width: 100%; background: var(--bg); color: var(--t1);
       <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
       <span class="tab-label">画廊</span>
     </div>
-    <div class="tab-item" id="tab-boards" onclick="switchTab('boards')">
-      <svg viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
-      <span class="tab-label">画板</span>
+    <div class="tab-item" id="tab-fav" onclick="switchTab('fav')">
+      <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+      <span class="tab-label">收藏</span>
     </div>
     <div class="tab-new-btn" onclick="openNewEntry()">
       <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    </div>
+    <div class="tab-item" id="tab-boards" onclick="switchTab('boards')">
+      <svg viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+      <span class="tab-label">画板</span>
     </div>
     <div class="tab-item" id="tab-settings" onclick="switchTab('settings')">
       <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
@@ -657,6 +676,7 @@ async function syncData() {
     render();
     renderBoards();
     updateStats();
+    favLimit = 40;
     showSyncStatus(`✅ 同步完成！共 ${cloudData.length} 条云端记录`, 'ok');
   } catch(e) {
     showSyncStatus('❌ ' + e.message, 'err');
@@ -1151,8 +1171,69 @@ function switchTab(tab) {
   document.getElementById('page-' + tab).classList.add('active');
   const tabEl = document.getElementById('tab-' + tab);
   if (tabEl) tabEl.classList.add('active');
-  if (tab === 'boards') renderBoards();
+  if (tab === 'boards')   renderBoards();
   if (tab === 'settings') updateStats();
+  if (tab === 'fav')      renderFav();
+}
+
+// ═══════════════════════════════════════
+// FAV PAGE
+// ═══════════════════════════════════════
+let favLimit = 40;
+
+function renderFav() {
+  const favData = getAllData().filter(i => i.isFavorite);
+  const masonry = document.getElementById('favMasonry');
+  const empty   = document.getElementById('favEmpty');
+  const count   = document.getElementById('favCount');
+
+  count.textContent = favData.length ? `共 ${favData.length} 个收藏` : '';
+
+  if (!favData.length) {
+    masonry.innerHTML = '';
+    empty.style.display = '';
+    return;
+  }
+  empty.style.display = 'none';
+
+  const visible = favData.slice(0, favLimit);
+  const left  = visible.filter((_, i) => i % 2 === 0);
+  const right = visible.filter((_, i) => i % 2 === 1);
+
+  masonry.innerHTML = `
+    <div style="display:flex;flex-direction:column;gap:6px">${left.map(item => favCardHTML(item)).join('')}</div>
+    <div style="display:flex;flex-direction:column;gap:6px">${right.map(item => favCardHTML(item)).join('')}</div>
+  `;
+}
+
+function favCardHTML(item) {
+  const isVideo = !!item.videoUrl;
+  const isLocal = !!item._isLocal;
+  return `
+    <div class="card" onclick="openDetailFromItem('${escH(item.id)}')">
+      <div class="card-stripe stripe-${item.source || 'jimeng'}"></div>
+      ${item.imageUrl
+        ? `<img src="${escH(item.imageUrl)}" loading="lazy" onerror="this.style.display='none'">`
+        : `<div style="height:${80 + Math.random()*80|0}px;background:var(--bg3)"></div>`
+      }
+      <div style="position:absolute;top:6px;right:6px;width:20px;height:20px;display:flex;align-items:center;justify-content:center">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="#f59e0b" stroke="#f59e0b" stroke-width="1.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+      </div>
+      ${isVideo ? `<div class="video-badge" style="right:30px"><svg viewBox="0 0 24 24" fill="white" width="10" height="10"><polygon points="5 3 19 12 5 21 5 3"/></svg></div>` : ''}
+      ${isLocal ? `<div class="local-badge">本地</div>` : ''}
+      <div class="card-overlay">
+        <div class="card-prompt">${escH(item.title || item.promptText || '')}</div>
+      </div>
+    </div>
+  `;
+}
+
+function onFavScroll(el) {
+  const { scrollTop, scrollHeight, clientHeight } = el;
+  if (scrollTop + clientHeight >= scrollHeight - 600) {
+    const favData = getAllData().filter(i => i.isFavorite);
+    if (favLimit < favData.length) { favLimit += 40; renderFav(); }
+  }
 }
 
 // ═══════════════════════════════════════
