@@ -1,1273 +1,1100 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="theme-color" content="#080c14">
-<title>AIGC Vault</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-<style>
-/* ═══════════════════════════════════════
-   ROOT & TOKENS
-═══════════════════════════════════════ */
-:root {
-  --bg:       #080c14;
-  --bg2:      #0f1520;
-  --bg3:      #161e2e;
-  --glass:    rgba(255,255,255,0.04);
-  --border:   rgba(255,255,255,0.08);
-  --t1:       #f0f4ff;
-  --t2:       #7a8aaa;
-  --t3:       #3a4a6a;
-  --acc:      #4f8ef7;
-  --jimeng:   #06b6d4;
-  --mj:       #4f8ef7;
-  --banana:   #f59e0b;
-  --safe-t:   env(safe-area-inset-top);
-  --safe-b:   env(safe-area-inset-bottom);
-  --tab-h:    60px;
-  --header-h: 56px;
-}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <title>即梦灵感库</title>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <style>
+        /* --- 1. CSS 变量与主题定义 --- */
+        :root {
+            --bg-color: #f7f8fa;
+            --card-bg: #ffffff;
+            --text-main: #333333;
+            --text-sub: #999999;
+            --border-color: rgba(0,0,0,0.05);
+            --nav-bg: rgba(255,255,255,0.95);
+            --primary: #111111;
+            --accent: #2563eb;
+            --btn-bg: #111111;
+            --btn-text: #ffffff;
+            --btn-sub-bg: #f0f0f0;
+            --btn-sub-text: #333333;
+            --shadow: 0 4px 20px rgba(0,0,0,0.04);
+            --safe-bottom: env(safe-area-inset-bottom);
+            --safe-top: env(safe-area-inset-top);
+            --nav-height: 55px;
+        }
 
-* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-html, body { height: 100%; width: 100%; background: var(--bg); color: var(--t1); font-family: 'DM Sans', system-ui, sans-serif; overflow: hidden; -webkit-font-smoothing: antialiased; }
-* { scrollbar-width: none; }
-*::-webkit-scrollbar { display: none; }
+        [data-theme="dark"] {
+            --bg-color: #121212;
+            --card-bg: #1e1e1e;
+            --text-main: #e0e0e0;
+            --text-sub: #777777;
+            --border-color: #333333;
+            --nav-bg: rgba(30,30,30,0.95);
+            --primary: #ffffff;
+            --accent: #4dabf7;
+            --btn-bg: #ffffff;
+            --btn-text: #000000;
+            --btn-sub-bg: #333333;
+            --btn-sub-text: #ffffff;
+            --shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
 
-/* ═══════════════════════════════════════
-   LAYOUT
-═══════════════════════════════════════ */
-.app { display: flex; flex-direction: column; height: 100%; width: 100%; position: relative; }
+        body { margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif; background: var(--bg-color); color: var(--text-main); height: 100vh; overflow: hidden; display: flex; flex-direction: column; transition: background 0.3s; }
+        * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
+        i.ri-lg { font-size: 20px; }
 
-/* ═══════════════════════════════════════
-   HEADER
-═══════════════════════════════════════ */
-.header {
-  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-  padding-top: var(--safe-t);
-  background: rgba(8,12,20,0.88);
-  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-  border-bottom: 1px solid var(--border);
-}
-.header-inner { display: flex; align-items: center; gap: 10px; padding: 10px 16px; height: var(--header-h); }
-.logo { width: 28px; height: 28px; border-radius: 7px; background: linear-gradient(135deg, #4f8ef7, #a78bfa); display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: #fff; flex-shrink: 0; }
-.header-title { font-size: 16px; font-weight: 600; letter-spacing: -0.3px; flex: 1; }
-.header-btn { width: 36px; height: 36px; border-radius: 10px; background: var(--glass); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; transition: background 0.2s; }
-.header-btn:active { background: rgba(255,255,255,0.1); }
-.header-btn svg { width: 18px; height: 18px; stroke: var(--t2); fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+        /* --- 2. 顶部导航 --- */
+        .top-bar {
+            height: 50px; background: var(--nav-bg); backdrop-filter: blur(10px);
+            display: flex; align-items: center; justify-content: center;
+            position: sticky; top: 0; z-index: 20; border-bottom: 1px solid var(--border-color);
+            padding-top: var(--safe-top); font-weight: 700; font-size: 17px;
+            padding-left: 15px; padding-right: 15px; transition: background 0.3s;
+        }
+        .top-left-btn, .top-right-group { position: absolute; top: calc(var(--safe-top) + 13px); display: flex; gap: 18px; }
+        .top-left-btn { left: 15px; cursor: pointer; display: none; }
+        .top-right-group { right: 15px; }
+        .top-icon-btn { cursor: pointer; color: var(--text-main); font-size: 20px; }
 
-.source-tabs { display: flex; gap: 6px; padding: 0 16px 10px; overflow-x: auto; }
-.src-tab { display: flex; align-items: center; gap: 5px; padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 500; border: 1px solid var(--border); background: var(--glass); color: var(--t2); cursor: pointer; white-space: nowrap; transition: all 0.2s; flex-shrink: 0; }
-.src-tab.active-all      { background: rgba(255,255,255,0.1);  border-color: rgba(255,255,255,0.15); color: var(--t1); }
-.src-tab.active-jimeng   { background: rgba(6,182,212,0.15);   border-color: rgba(6,182,212,0.3);   color: var(--jimeng); }
-.src-tab.active-mj       { background: rgba(79,142,247,0.15);  border-color: rgba(79,142,247,0.3);  color: var(--mj); }
-.src-tab.active-nanobanana { background: rgba(245,158,11,0.15); border-color: rgba(245,158,11,0.3); color: var(--banana); }
-.src-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
-.dot-jimeng   { background: var(--jimeng); }
-.dot-mj       { background: var(--mj); }
-.dot-banana   { background: var(--banana); }
+        /* --- 3. 筛选面板 --- */
+        .filter-panel {
+            position: absolute; top: calc(50px + var(--safe-top)); left: 0; width: 100%;
+            background: var(--card-bg); z-index: 19; padding: 0 20px 20px 20px;
+            box-shadow: var(--shadow);
+            transform: translateY(-150%); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            max-height: 70vh; overflow-y: auto; border-bottom-left-radius: 20px; border-bottom-right-radius: 20px;
+        }
+        .filter-panel.open { transform: translateY(0); }
+        .filter-title { font-size: 12px; color: var(--text-sub); margin: 20px 0 10px 0; font-weight: 600; text-transform: uppercase; }
+        .filter-tags { display: flex; flex-wrap: wrap; gap: 8px; }
+        .f-chip {
+            padding: 6px 14px; background: var(--bg-color); border-radius: 20px; font-size: 12px;
+            color: var(--text-main); cursor: pointer; transition: 0.2s; border: 1px solid transparent;
+        }
+        .f-chip.active { background: var(--primary); color: var(--bg-color); }
+        .mask-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 15; display: none; opacity: 0; transition: opacity 0.3s; }
+        .mask-overlay.show { display: block; opacity: 1; }
 
-/* ═══════════════════════════════════════
-   PAGES
-═══════════════════════════════════════ */
-.pages { flex: 1; position: relative; }
-.page { position: absolute; inset: 0; overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; display: none; }
-.page.active { display: block; }
-.page-home     { padding-top: calc(var(--safe-t) + var(--header-h) + 46px); padding-bottom: calc(var(--tab-h) + var(--safe-b) + 16px); }
-.page-boards   { padding-top: calc(var(--safe-t) + var(--header-h) - 46px + 16px); padding-bottom: calc(var(--tab-h) + var(--safe-b) + 16px); }
-.page-settings { padding-top: calc(var(--safe-t) + var(--header-h) - 46px + 16px); padding-bottom: calc(var(--tab-h) + var(--safe-b) + 16px); }
-.page-fav      { padding-top: calc(var(--safe-t) + var(--header-h) - 46px + 16px); padding-bottom: calc(var(--tab-h) + var(--safe-b) + 16px); }
+        /* --- 4. 内容区 --- */
+        .content-area {
+            flex: 1; overflow-y: auto; overflow-x: hidden;
+            padding: 15px 15px calc(var(--nav-height) + var(--safe-bottom) + 40px) 15px;
+            -webkit-overflow-scrolling: touch;
+        }
 
-/* ═══════════════════════════════════════
-   MASONRY
-═══════════════════════════════════════ */
-.masonry { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; padding: 0 6px; align-items: start; }
-.card { margin-bottom: 0; border-radius: 12px; overflow: hidden; position: relative; cursor: pointer; background: var(--bg3); transform: translateZ(0); transition: transform 0.15s; }
-.card:active { transform: scale(0.97); }
-.card img { width: 100%; display: block; object-fit: cover; min-height: 80px; background: var(--bg3); }
-.card-stripe { position: absolute; top: 0; left: 0; right: 0; height: 2px; }
-.stripe-jimeng     { background: var(--jimeng); }
-.stripe-midjourney { background: var(--mj); }
-.stripe-nanobanana { background: var(--banana); }
-.card-overlay { position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(to top, rgba(0,0,0,0.75) 0%, transparent 100%); padding: 24px 8px 8px; }
-.card-prompt { font-size: 10px; line-height: 1.4; color: rgba(255,255,255,0.8); font-family: 'DM Mono', monospace; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-.video-badge { position: absolute; top: 6px; right: 6px; width: 22px; height: 22px; border-radius: 50%; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; }
-.local-badge { position: absolute; top: 6px; left: 6px; padding: 2px 6px; border-radius: 6px; background: rgba(79,142,247,0.7); font-size: 9px; font-weight: 600; color: #fff; letter-spacing: 0.5px; }
+        /* 瀑布流 */
+        .waterfall { column-count: 2; column-gap: 12px; }
+        .pin {
+            break-inside: avoid; margin-bottom: 12px; background: var(--card-bg);
+            border-radius: 12px; overflow: hidden; position: relative;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+        }
+        .pin img { width: 100%; display: block; min-height: 100px; background: var(--bg-color); object-fit: cover; }
+        .pin-tag {
+            position: absolute; bottom: 6px; right: 6px; background: rgba(0,0,0,0.6);
+            color: #fff; font-size: 10px; padding: 2px 8px; border-radius: 6px;
+            backdrop-filter: blur(4px); max-width: 90%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
 
-/* ═══════════════════════════════════════
-   EMPTY / SKELETON
-═══════════════════════════════════════ */
-.empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 60px 40px; gap: 12px; text-align: center; }
-.empty-icon { font-size: 40px; opacity: 0.3; }
-.empty-title { font-size: 16px; font-weight: 500; color: var(--t2); }
-.empty-sub { font-size: 13px; color: var(--t3); line-height: 1.6; }
+        /* 图片加载失败占位 */
+        .pin-broken {
+            width: 100%; aspect-ratio: 1/1; background: var(--bg-color);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            color: var(--text-sub); font-size: 11px; gap: 6px;
+        }
 
-/* ═══════════════════════════════════════
-   SEARCH OVERLAY
-═══════════════════════════════════════ */
-.search-overlay { position: fixed; inset: 0; z-index: 200; background: rgba(8,12,20,0.97); backdrop-filter: blur(20px); display: flex; flex-direction: column; padding-top: var(--safe-t); transform: translateY(-100%); transition: transform 0.3s cubic-bezier(0.19,1,0.22,1); }
-.search-overlay.open { transform: translateY(0); }
-.search-bar { display: flex; align-items: center; gap: 10px; padding: 12px 16px; }
-.search-input-wrap { flex: 1; display: flex; align-items: center; gap: 8px; background: var(--bg3); border: 1px solid var(--border); border-radius: 12px; padding: 10px 14px; }
-.search-input-wrap svg { width: 16px; height: 16px; stroke: var(--t3); fill: none; stroke-width: 2; stroke-linecap: round; flex-shrink: 0; }
-.search-input { flex: 1; background: none; border: none; outline: none; color: var(--t1); font-family: inherit; font-size: 15px; }
-.search-input::placeholder { color: var(--t3); }
-.search-cancel { color: var(--acc); font-size: 14px; font-weight: 500; cursor: pointer; white-space: nowrap; }
-.search-results { flex: 1; overflow-y: auto; padding: 0 16px 16px; -webkit-overflow-scrolling: touch; }
-.search-results .masonry { padding: 0; gap: 6px; }
+        /* 画板列表 */
+        .board-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .b-card {
+            background: var(--card-bg); border-radius: 12px; overflow: hidden;
+            display: flex; flex-direction: column; aspect-ratio: 1 / 1.1;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.02); position: relative; border: 1px solid var(--border-color);
+        }
+        .b-cover-wrap { flex: 2; position: relative; background: var(--bg-color); overflow: hidden; }
+        .b-cover-wrap img { width: 100%; height: 100%; object-fit: cover; }
+        .b-card.my-works .b-cover-wrap { background: linear-gradient(135deg, #333 0%, #000 100%); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 32px; }
+        .b-info { flex: 1; padding: 10px; display: flex; flex-direction: column; justify-content: center; background: var(--card-bg); }
+        .b-title { font-weight: 700; font-size: 14px; margin-bottom: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-main); }
+        .b-count { font-size: 11px; color: var(--text-sub); }
 
-/* ═══════════════════════════════════════
-   SHEET (Filter + New Entry)
-═══════════════════════════════════════ */
-.sheet-bg { position: fixed; inset: 0; z-index: 150; background: rgba(0,0,0,0.6); opacity: 0; pointer-events: none; transition: opacity 0.3s; }
-.sheet-bg.open { opacity: 1; pointer-events: auto; }
-.bottom-sheet { position: fixed; bottom: 0; left: 0; right: 0; z-index: 160; background: var(--bg2); border-radius: 20px 20px 0 0; border-top: 1px solid var(--border); padding: 0 20px calc(20px + var(--safe-b)); transform: translateY(100%); transition: transform 0.35s cubic-bezier(0.19,1,0.22,1); max-height: 92vh; overflow-y: auto; -webkit-overflow-scrolling: touch; }
-.bottom-sheet.open { transform: translateY(0); }
-.sheet-handle { width: 36px; height: 4px; border-radius: 2px; background: var(--t3); margin: 12px auto 16px; }
-.sheet-title { font-size: 16px; font-weight: 600; margin-bottom: 16px; }
-.filter-section { margin-bottom: 20px; }
-.filter-lbl { font-size: 10px; font-weight: 600; color: var(--t3); letter-spacing: 1.2px; text-transform: uppercase; margin-bottom: 10px; display: block; }
-.filter-chips { display: flex; flex-wrap: wrap; gap: 8px; }
-.chip { padding: 6px 14px; border-radius: 20px; font-size: 12px; border: 1px solid var(--border); background: var(--glass); color: var(--t2); cursor: pointer; transition: all 0.2s; }
-.chip.active { background: rgba(79,142,247,0.15); border-color: rgba(79,142,247,0.4); color: var(--acc); }
-.sheet-footer { display: flex; gap: 10px; margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border); }
-.btn-reset { flex: 1; padding: 13px; border-radius: 12px; background: var(--glass); border: 1px solid var(--border); color: var(--t2); font-family: inherit; font-size: 14px; cursor: pointer; }
-.btn-apply { flex: 2; padding: 13px; border-radius: 12px; background: var(--acc); border: none; color: #fff; font-family: inherit; font-size: 14px; font-weight: 600; cursor: pointer; }
+        /* --- 5. 底部导航 --- */
+        .tab-bar {
+            height: calc(var(--nav-height) + var(--safe-bottom));
+            background: var(--nav-bg); border-top: 1px solid var(--border-color);
+            backdrop-filter: blur(10px);
+            display: flex; position: fixed; bottom: 0; width: 100%; z-index: 30;
+            padding-bottom: var(--safe-bottom);
+        }
+        .tab-item {
+            flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+            color: var(--text-sub); font-size: 10px; gap: 4px; transition: 0.2s; cursor: pointer;
+        }
+        .tab-item i { font-size: 22px; margin-bottom: 2px; }
+        .tab-item.active { color: var(--text-main); font-weight: 600; }
 
-/* New Entry specific */
-.ne-src-row { display: flex; gap: 8px; }
-.ne-src { padding: 7px 16px; border-radius: 20px; font-size: 13px; border: 1px solid var(--border); background: var(--glass); color: var(--t2); cursor: pointer; transition: all 0.2s; }
-.ne-src.active { background: rgba(79,142,247,0.15); border-color: rgba(79,142,247,0.3); color: var(--acc); }
-.ne-field { margin-bottom: 14px; }
-.ne-inp { width: 100%; background: var(--bg3); border: 1px solid var(--border); border-radius: 10px; color: var(--t1); font-family: 'DM Mono', monospace; font-size: 13px; padding: 10px 12px; outline: none; }
-.ne-inp:focus { border-color: rgba(79,142,247,0.5); }
-.ne-inp::placeholder { color: var(--t3); font-family: 'DM Sans', sans-serif; }
-.ne-textarea { width: 100%; background: var(--bg3); border: 1px solid var(--border); border-radius: 10px; color: var(--t1); font-family: 'DM Mono', monospace; font-size: 13px; padding: 10px 12px; outline: none; resize: none; line-height: 1.6; }
-.ne-textarea:focus { border-color: rgba(79,142,247,0.5); }
-.ne-textarea::placeholder { color: var(--t3); font-family: 'DM Sans', sans-serif; }
-.ne-select { width: 100%; background: var(--bg3); border: 1px solid var(--border); border-radius: 10px; color: var(--t1); font-family: inherit; font-size: 13px; padding: 10px 12px; outline: none; appearance: none; }
-.ne-row2 { display: flex; gap: 10px; }
-.ne-row2 > div { flex: 1; }
-.export-btn { padding: 6px 14px; border-radius: 8px; background: var(--bg3); border: 1px solid var(--border); color: var(--t2); font-family: inherit; font-size: 12px; cursor: pointer; white-space: nowrap; display: flex; align-items: center; gap: 5px; }
-.export-btn svg { width: 13px; height: 13px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-.local-count-badge { padding: 3px 8px; border-radius: 10px; background: rgba(79,142,247,0.15); border: 1px solid rgba(79,142,247,0.3); color: var(--acc); font-size: 11px; font-weight: 600; }
+        /* --- 6. 设置页 --- */
+        .settings-page { padding: 15px; }
+        .setting-group { background: var(--card-bg); border-radius: 16px; padding: 20px; margin-bottom: 15px; box-shadow: var(--shadow); }
+        .s-title { font-size: 15px; font-weight: 700; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; color: var(--text-main); }
+        .s-label { font-size: 11px; color: var(--text-sub); margin-bottom: 5px; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; }
+        .s-row { margin-bottom: 12px; }
+        .s-input { width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 10px; font-size: 14px; box-sizing: border-box; background: var(--bg-color); color: var(--text-main); outline: none; transition: border-color 0.2s; }
+        .s-input:focus { border-color: var(--accent); }
 
-/* ═══════════════════════════════════════
-   BOARDS PAGE
-═══════════════════════════════════════ */
-.boards-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 0 16px 16px; }
-.board-card { border-radius: 14px; overflow: hidden; background: var(--bg3); cursor: pointer; transition: transform 0.15s; }
-.board-card:active { transform: scale(0.97); }
-.board-cover { height: 100px; background: var(--bg2); display: flex; gap: 2px; }
-.cover-main { flex: 2; overflow: hidden; }
-.cover-side { flex: 1; display: flex; flex-direction: column; gap: 2px; }
-.cover-sm { flex: 1; overflow: hidden; }
-.cover-img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.board-info { padding: 10px 12px; }
-.board-name { font-size: 13px; font-weight: 600; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.board-count { font-size: 11px; color: var(--t2); }
+        .btn-full {
+            background: var(--btn-bg); color: var(--btn-text); width: 100%; padding: 14px;
+            border-radius: 10px; border: none; font-size: 15px; font-weight: 600;
+            display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer;
+            transition: opacity 0.2s;
+        }
+        .btn-full:active { opacity: 0.7; }
+        .btn-full:disabled { opacity: 0.4; cursor: not-allowed; }
+        .btn-outline { background: var(--btn-sub-bg); color: var(--btn-sub-text); border: 1px solid var(--border-color); }
 
-/* ═══════════════════════════════════════
-   SETTINGS PAGE
-═══════════════════════════════════════ */
-.settings-wrap { padding: 0 16px 16px; display: flex; flex-direction: column; gap: 12px; }
-.setting-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; }
-.setting-header { padding: 14px 16px 10px; font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--t3); }
-.setting-row { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-top: 1px solid var(--border); }
-.setting-name { font-size: 14px; font-weight: 500; margin-bottom: 2px; }
-.setting-desc { font-size: 11px; color: var(--t2); line-height: 1.4; }
-.setting-inp-field { width: 100%; background: var(--bg3); border: 1px solid var(--border); border-radius: 10px; color: var(--t1); font-family: 'DM Mono', monospace; font-size: 12px; padding: 10px 12px; outline: none; margin-top: 8px; }
-.setting-inp-field:focus { border-color: rgba(79,142,247,0.5); }
-.setting-inp-field::placeholder { color: var(--t3); }
-.btn-sync { width: 100%; padding: 14px; border-radius: 12px; background: rgba(79,142,247,0.15); border: 1px solid rgba(79,142,247,0.3); color: var(--acc); font-family: inherit; font-size: 14px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s; margin-top: 8px; }
-.btn-sync:active { background: rgba(79,142,247,0.25); }
-.btn-sync svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-.btn-sync:disabled { opacity: 0.5; }
-.sync-status { margin-top: 8px; padding: 10px 14px; border-radius: 10px; font-size: 12px; line-height: 1.5; display: none; }
-.sync-status.ok   { background: rgba(16,185,129,0.1);  border: 1px solid rgba(16,185,129,0.2);  color: #6ee7b7; display: block; }
-.sync-status.err  { background: rgba(248,113,113,0.1); border: 1px solid rgba(248,113,113,0.2); color: #fca5a5; display: block; }
-.sync-status.info { background: rgba(79,142,247,0.1);  border: 1px solid rgba(79,142,247,0.2);  color: #93c5fd; display: block; }
-.stat-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 16px; border-top: 1px solid var(--border); font-size: 13px; color: var(--t2); }
-.stat-num { font-weight: 600; color: var(--t1); font-family: 'DM Mono', monospace; }
-.stat-jimeng { color: var(--jimeng); }
-.stat-mj     { color: var(--mj); }
-.stat-banana { color: var(--banana); }
-.stat-local  { color: var(--acc); }
+        /* 进度条 */
+        .progress-wrap { margin-top: 12px; display: none; }
+        .progress-wrap.show { display: block; }
+        .progress-bar-bg { height: 4px; background: var(--border-color); border-radius: 2px; overflow: hidden; }
+        .progress-bar-fill { height: 100%; background: var(--accent); border-radius: 2px; transition: width 0.3s; width: 0%; }
+        .progress-text { font-size: 11px; color: var(--text-sub); margin-top: 6px; text-align: center; }
 
-/* ═══════════════════════════════════════
-   DETAIL OVERLAY
-═══════════════════════════════════════ */
-.detail-overlay { position: fixed; inset: 0; z-index: 300; background: #000; display: flex; flex-direction: column; transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.19,1,0.22,1); }
-.detail-overlay.open { transform: translateY(0); }
-.detail-top { position: absolute; top: 0; left: 0; right: 0; padding: calc(var(--safe-t) + 10px) 16px 10px; display: flex; align-items: center; justify-content: space-between; z-index: 10; background: linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, transparent 100%); }
-.detail-close { width: 36px; height: 36px; border-radius: 50%; background: rgba(0,0,0,0.5); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; cursor: pointer; }
-.detail-close svg { width: 18px; height: 18px; stroke: #fff; fill: none; stroke-width: 2; stroke-linecap: round; }
-.detail-source-badge { padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; letter-spacing: 0.5px; }
-.badge-jimeng     { background: rgba(6,182,212,0.25);  color: var(--jimeng); }
-.badge-midjourney { background: rgba(79,142,247,0.25); color: var(--mj); }
-.badge-nanobanana { background: rgba(245,158,11,0.25); color: var(--banana); }
-.badge-local      { background: rgba(79,142,247,0.25); color: var(--acc); }
-.detail-media { flex: 1; position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden; background: #000; }
-.detail-img { max-width: 100%; max-height: 100%; object-fit: contain; display: block; }
-.detail-video { max-width: 100%; max-height: 100%; object-fit: contain; display: none; }
-.play-btn { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 56px; height: 56px; border-radius: 50%; background: rgba(255,255,255,0.15); backdrop-filter: blur(8px); border: 2px solid rgba(255,255,255,0.3); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; }
-.play-btn:active { background: rgba(255,255,255,0.25); }
-.play-btn svg { width: 20px; height: 20px; fill: #fff; margin-left: 3px; }
-.play-btn.hidden { display: none; }
-.detail-sheet { background: rgba(10,14,22,0.98); border-top: 1px solid rgba(255,255,255,0.08); padding: 16px 20px calc(16px + var(--safe-b)); max-height: 55%; overflow-y: auto; -webkit-overflow-scrolling: touch; }
-.detail-meta-row { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
-.detail-author { font-size: 13px; color: var(--t2); }
-.detail-version { font-size: 11px; color: var(--t3); font-family: 'DM Mono', monospace; background: var(--bg3); padding: 3px 8px; border-radius: 6px; }
-.detail-title { font-size: 14px; font-weight: 600; margin-bottom: 8px; }
-.detail-prompt { font-size: 13px; line-height: 1.7; color: rgba(255,255,255,0.75); font-family: 'DM Mono', monospace; margin-bottom: 16px; white-space: pre-wrap; }
-.detail-actions { display: flex; gap: 10px; }
-.detail-btn { flex: 1; padding: 12px 8px; border-radius: 12px; background: var(--bg3); border: 1px solid var(--border); color: var(--t2); font-family: inherit; font-size: 12px; font-weight: 500; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.2s; }
-.detail-btn:active { background: rgba(255,255,255,0.1); color: var(--t1); }
-.detail-btn.pri { background: rgba(79,142,247,0.15); border-color: rgba(79,142,247,0.3); color: var(--acc); }
-.detail-btn svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-.detail-params { margin-top: 12px; padding: 10px 12px; border-radius: 10px; background: rgba(79,142,247,0.06); border: 1px solid rgba(79,142,247,0.15); font-size: 11px; font-family: 'DM Mono', monospace; color: #93c5fd; line-height: 1.6; }
+        /* 状态徽章 */
+        .status-badge {
+            display: inline-flex; align-items: center; gap: 5px;
+            font-size: 12px; padding: 4px 10px; border-radius: 20px;
+            background: var(--btn-sub-bg); color: var(--text-sub); margin-top: 10px;
+        }
+        .status-badge.ok { background: rgba(34,197,94,0.1); color: #16a34a; }
+        .status-badge.err { background: rgba(239,68,68,0.1); color: #dc2626; }
 
-/* ═══════════════════════════════════════
-   TOAST
-═══════════════════════════════════════ */
-.toast { position: fixed; bottom: calc(var(--tab-h) + var(--safe-b) + 16px); left: 50%; transform: translateX(-50%) translateY(20px); background: rgba(20,28,44,0.95); border: 1px solid var(--border); color: var(--t1); font-size: 13px; padding: 10px 18px; border-radius: 20px; z-index: 500; opacity: 0; pointer-events: none; transition: all 0.3s cubic-bezier(0.19,1,0.22,1); white-space: nowrap; backdrop-filter: blur(10px); }
-.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+        /* --- 7. 详情弹窗 --- */
+        .detail-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #000; z-index: 100; display: none;
+            flex-direction: column; animation: fadeIn 0.2s ease-out;
+        }
+        .detail-img-box { flex: 1; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        .detail-img { max-width: 100%; max-height: 100%; object-fit: contain; }
+        .detail-bar { background: rgba(20,20,20,0.95); padding: 20px 20px calc(20px + var(--safe-bottom)) 20px; color: #fff; border-top: 1px solid #333; }
+        .detail-close {
+            position: absolute; top: max(15px, var(--safe-top)); right: 15px;
+            width: 40px; height: 40px; background: rgba(255,255,255,0.15);
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            color: #fff; z-index: 101; backdrop-filter: blur(4px); font-size: 24px; cursor: pointer;
+        }
+        .d-prompt { font-size: 14px; color: #ccc; line-height: 1.6; max-height: 150px; overflow-y: auto; margin-bottom: 15px; background: #333; padding: 15px; border-radius: 10px; }
 
-/* ═══════════════════════════════════════
-   TAB BAR
-═══════════════════════════════════════ */
-.tab-bar { position: fixed; bottom: 0; left: 0; right: 0; height: calc(var(--tab-h) + var(--safe-b)); background: rgba(8,12,20,0.92); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-top: 1px solid var(--border); display: flex; align-items: flex-start; justify-content: space-around; padding-top: 8px; z-index: 100; }
-.tab-item { display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; padding: 0 16px; color: var(--t3); transition: color 0.2s; flex: 1; }
-.tab-item.active { color: var(--t1); }
-.tab-item svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
-.tab-label { font-size: 10px; font-weight: 500; }
-.tab-new-btn { width: 46px; height: 46px; border-radius: 50%; background: var(--acc); display: flex; align-items: center; justify-content: center; cursor: pointer; margin-top: -16px; box-shadow: 0 4px 16px rgba(79,142,247,0.4); transition: transform 0.2s; flex-shrink: 0; }
-.tab-new-btn:active { transform: scale(0.93); }
-.tab-new-btn svg { width: 22px; height: 22px; stroke: #fff; fill: none; stroke-width: 2; stroke-linecap: round; }
+        /* 页面切换 */
+        .page { display: none; height: 100%; flex-direction: column; }
+        .page.active { display: flex; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-/* page inner header */
-.page-inner-header { padding: calc(var(--safe-t) + var(--header-h) - 46px + 16px) 16px 12px; }
-.page-inner-title { font-size: 20px; font-weight: 700; letter-spacing: -0.5px; }
+        /* 空状态 */
+        .empty-hint { text-align: center; color: var(--text-sub); margin-top: 80px; display: none; }
+        .empty-hint i { font-size: 48px; opacity: 0.4; display: block; margin-bottom: 12px; }
 
-@keyframes spin { to { transform: rotate(360deg); } }
-</style>
+        /* 加载中骨架 */
+        .skeleton-grid { column-count: 2; column-gap: 12px; }
+        .skeleton-card { break-inside: avoid; margin-bottom: 12px; border-radius: 12px; overflow: hidden; background: var(--card-bg); }
+        .skeleton-img { background: linear-gradient(90deg, var(--bg-color) 25%, var(--border-color) 50%, var(--bg-color) 75%); background-size: 200% 100%; animation: shimmer 1.2s infinite; }
+        @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+        /* --- 采集页 --- */
+        .capture-page { padding: 15px; }
+        .cp-card { background: var(--card-bg); border-radius: 16px; padding: 20px; margin-bottom: 15px; box-shadow: var(--shadow); }
+        .cp-card-title { font-size: 14px; font-weight: 700; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; color: var(--text-main); }
+        .cp-label { font-size: 11px; color: var(--text-sub); margin-bottom: 5px; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; }
+        .cp-input { width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 10px; font-size: 14px; background: var(--bg-color); color: var(--text-main); outline: none; font-family: inherit; margin-bottom: 12px; transition: border-color 0.2s; }
+        .cp-input:focus { border-color: var(--accent); }
+        .cp-textarea { width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 10px; font-size: 14px; background: var(--bg-color); color: var(--text-main); outline: none; font-family: inherit; margin-bottom: 12px; resize: vertical; min-height: 80px; transition: border-color 0.2s; line-height: 1.6; }
+        .cp-textarea:focus { border-color: var(--accent); }
+        .cp-hint { font-size: 12px; color: var(--text-sub); margin: -6px 0 12px 0; line-height: 1.5; }
+        .cp-row { display: flex; gap: 10px; }
+        .cp-row > * { flex: 1; }
+        .cp-toast { position: fixed; top: 60px; left: 50%; transform: translateX(-50%); z-index: 200; background: var(--primary); color: var(--bg-color); padding: 10px 24px; border-radius: 20px; font-size: 13px; font-weight: 600; opacity: 0; pointer-events: none; transition: opacity 0.3s; white-space: nowrap; }
+        .cp-toast.show { opacity: 1; }
+        .cp-loading { display: none; align-items: center; gap: 8px; color: var(--text-sub); font-size: 13px; margin-bottom: 12px; }
+        .cp-loading.show { display: flex; }
+        .cp-spinner { width: 16px; height: 16px; border: 3px solid var(--border-color); border-top-color: var(--accent); border-radius: 50%; animation: cp-spin 0.8s linear infinite; }
+        @keyframes cp-spin { to { transform: rotate(360deg); } }
+    </style>
 </head>
 <body>
-<div class="app">
 
-  <!-- HEADER -->
-  <div class="header">
-    <div class="header-inner">
-      <div class="logo">AI</div>
-      <div class="header-title">AIGC Vault</div>
-      <div class="header-btn" onclick="openSearch()">
-        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-      </div>
-      <div class="header-btn" onclick="openFilter()">
-        <svg viewBox="0 0 24 24"><line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/></svg>
-      </div>
-    </div>
-    <div class="source-tabs" id="sourceTabs">
-      <div class="src-tab" data-src="all" onclick="setSource('all')">全部</div>
-      <div class="src-tab" data-src="jimeng" onclick="setSource('jimeng')"><span class="src-dot dot-jimeng"></span>即梦</div>
-      <div class="src-tab" data-src="midjourney" onclick="setSource('midjourney')"><span class="src-dot dot-mj"></span>MJ</div>
-      <div class="src-tab active-nanobanana" data-src="nanobanana" onclick="setSource('nanobanana')"><span class="src-dot dot-banana"></span>Banana</div>
-    </div>
-  </div>
+    <div class="mask-overlay" id="mask-overlay" onclick="toggleFilter(false)"></div>
 
-  <!-- PAGES -->
-  <div class="pages">
-
-    <!-- HOME -->
-    <div class="page page-home active" id="page-home" onscroll="onHomeScroll(this)">
-      <div class="masonry" id="masonry"></div>
-      <div class="empty-state" id="emptyState" style="display:none">
-        <div class="empty-icon">📭</div>
-        <div class="empty-title">没有找到内容</div>
-        <div class="empty-sub">请在设置页配置 COS 并同步数据，或新建提示词</div>
-      </div>
-    </div>
-
-    <!-- BOARDS -->
-    <div class="page" id="page-boards">
-      <div class="page-inner-header"><div class="page-inner-title">我的画板</div></div>
-      <div class="boards-grid" id="boardsGrid"></div>
-    </div>
-
-    <!-- FAV -->
-    <div class="page page-fav" id="page-fav" onscroll="onFavScroll(this)">
-      <div class="page-inner-header" style="padding-bottom:8px">
-        <div class="page-inner-title">我的收藏</div>
-        <div style="font-size:12px;color:var(--t2);margin-top:4px" id="favCount"></div>
-      </div>
-      <div class="masonry" id="favMasonry"></div>
-      <div class="empty-state" id="favEmpty" style="display:none">
-        <div class="empty-icon">⭐</div>
-        <div class="empty-title">还没有收藏</div>
-        <div class="empty-sub">在灵感库详情页点击星标收藏，同步后在这里查看</div>
-      </div>
-    </div>
-
-    <!-- SETTINGS -->
-    <div class="page" id="page-settings">
-      <div class="page-inner-header"><div class="page-inner-title">设置</div></div>
-      <div class="settings-wrap">
-
-        <div class="setting-card">
-          <div class="setting-header">腾讯云 COS 配置</div>
-          <div class="setting-row" style="flex-direction:column;align-items:stretch">
-            <div style="font-size:12px;color:var(--t2);line-height:1.6">需要将 mobile_meta.json 设为公有读，填写 Bucket 和地域后点同步。</div>
-            <input class="setting-inp-field" id="inp-bucket" placeholder="Bucket（如 my-bucket-1234567890）">
-            <input class="setting-inp-field" id="inp-region" placeholder="地域（如 ap-guangzhou）" style="margin-top:8px">
-            <button class="btn-sync" onclick="syncData()" id="syncBtn">
-              <svg viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.93"/></svg>
-              同步数据
-            </button>
-            <div class="sync-status" id="syncStatus"></div>
-          </div>
+    <!-- 筛选面板（全局浮层） -->
+    <div class="filter-panel" id="filter-panel">
+        <div class="filter-section">
+            <div class="filter-title"><i class="ri-git-branch-line"></i> 模型版本</div>
+            <div class="filter-tags" id="filter-version"></div>
         </div>
-
-        <div class="setting-card" id="statsCard" style="display:none">
-          <div class="setting-header">数据统计</div>
-          <div class="stat-row"><span>全部采集</span><span class="stat-num" id="stat-total">—</span></div>
-          <div class="stat-row"><span>即梦</span><span class="stat-num stat-jimeng" id="stat-jimeng">—</span></div>
-          <div class="stat-row"><span>Midjourney</span><span class="stat-num stat-mj" id="stat-mj">—</span></div>
-          <div class="stat-row"><span>Nano Banana</span><span class="stat-num stat-banana" id="stat-banana">—</span></div>
-          <div class="stat-row"><span>视频</span><span class="stat-num" id="stat-video">—</span></div>
-          <div class="stat-row"><span>手机新建</span><span class="stat-num stat-local" id="stat-local">—</span></div>
+        <div class="filter-section">
+            <div class="filter-title"><i class="ri-aspect-ratio-line"></i> 画面比例</div>
+            <div class="filter-tags" id="filter-ratio"></div>
         </div>
-
-        <div class="setting-card" id="localCard" style="display:none">
-          <div class="setting-header">手机端本地记录</div>
-          <div class="setting-row" style="flex-direction:column;align-items:stretch;gap:8px">
-            <div style="font-size:12px;color:var(--t2);line-height:1.6">手机端新建的提示词存储在本地，导出 JSON 后在电脑端灵感库导入即可合并。</div>
-            <button class="btn-sync" onclick="exportLocal()" style="background:rgba(255,255,255,0.05);border-color:var(--border);color:var(--t2)">
-              <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-              导出本地记录
-            </button>
-            <button onclick="clearLocal()" style="width:100%;padding:10px;border-radius:10px;background:none;border:1px solid rgba(248,113,113,0.2);color:#fca5a5;font-family:inherit;font-size:13px;cursor:pointer">清空本地记录</button>
-          </div>
+        <div class="filter-section">
+            <div class="filter-title"><i class="ri-price-tag-3-line"></i> 内容标签</div>
+            <div class="filter-tags" id="filter-tags"></div>
         </div>
+        <div style="margin-top:25px; display:flex; gap:10px;">
+            <button class="btn-full btn-outline" onclick="resetFilters()">重置</button>
+            <button class="btn-full" onclick="toggleFilter(false)">确定</button>
+        </div>
+    </div>
 
-        <div class="setting-card">
-          <div class="setting-header">关于</div>
-          <div class="setting-row">
-            <div>
-              <div class="setting-name">AIGC Vault Mobile</div>
-              <div class="setting-desc">v1.1.0 · 即梦 / MJ / Banana 三合一灵感库手机端</div>
+    <!-- 采集页 -->
+    <div id="page-capture" class="page">
+        <div class="top-bar">快速采集</div>
+        <div class="content-area capture-page">
+
+            <div class="cp-toast" id="cp-toast"></div>
+
+            <!-- 方式一：链接自动解析 -->
+            <div class="cp-card">
+                <div class="cp-card-title"><i class="ri-link"></i> 粘贴链接自动解析</div>
+                <div class="cp-label">笔记 / 推文链接</div>
+                <input class="cp-input" id="cp-url" placeholder="https://x.com/xxx/status/xxx 或小红书链接…" oninput="onUrlInput()">
+                <div class="cp-loading" id="cp-loading">
+                    <div class="cp-spinner"></div> 正在解析链接...
+                </div>
+                <div class="cp-hint">支持 X/Twitter 推文链接，自动提取标题、作者和文案。</div>
             </div>
-          </div>
+
+            <!-- 解析结果 / 手动填写 -->
+            <div class="cp-card" id="cp-form-card">
+                <div class="cp-card-title"><i class="ri-edit-line"></i> 信息补充</div>
+
+                <div class="cp-label">标题</div>
+                <input class="cp-input" id="cp-title" placeholder="作品标题">
+
+                <div class="cp-row" style="margin-bottom:12px">
+                    <div style="flex:1">
+                        <div class="cp-label">作者</div>
+                        <input class="cp-input" id="cp-author" placeholder="@作者" style="margin-bottom:0">
+                    </div>
+                    <div style="flex:1">
+                        <div class="cp-label">来源</div>
+                        <select class="cp-input" id="cp-source" style="margin-bottom:0">
+                            <option value="nanobanana">多模态</option>
+                            <option value="midjourney">Midjourney</option>
+                            <option value="jimeng">即梦</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="cp-label">提示词</div>
+                <textarea class="cp-textarea" id="cp-prompt" placeholder="粘贴提示词内容…"></textarea>
+
+                <div class="cp-label">图片链接（可多行，一行一个）</div>
+                <textarea class="cp-textarea" id="cp-images" placeholder="https://..." style="min-height:50px"></textarea>
+
+                <div class="cp-label">标签（空格分隔）</div>
+                <input class="cp-input" id="cp-tags" placeholder="AI生图 Midjourney…">
+
+                <div class="cp-label">存入画板</div>
+                <input class="cp-input" id="cp-board" placeholder="快速采集" value="快速采集">
+
+                <button class="btn-full" onclick="submitCapture()" style="margin-top:8px">
+                    <i class="ri-save-line"></i> 存入本地灵感库
+                </button>
+            </div>
+
+            <!-- 已采集列表 + 导出 -->
+            <div class="cp-card">
+                <div class="cp-card-title"><i class="ri-smartphone-line"></i> 手机端已采集</div>
+                <div class="cp-hint" style="margin-bottom:12px" id="cp-local-count">暂无本地采集数据</div>
+                <div style="display:flex;gap:10px">
+                    <button class="btn-full btn-outline" onclick="exportMobileData()" style="flex:2">
+                        <i class="ri-download-2-line"></i> 导出 JSON（合并用）
+                    </button>
+                    <button class="btn-full btn-outline" style="flex:1;color:#ff4d4f;border-color:rgba(255,0,0,0.15)" onclick="clearMobileCaptures()">
+                        <i class="ri-delete-bin-line"></i> 清空
+                    </button>
+                </div>
+                <div class="cp-hint" style="margin-top:10px">
+                    导出后在桌面端灵感库「设置」→「导入 JSON」合并到主库。
+                </div>
+            </div>
+
         </div>
-
-      </div>
     </div>
 
-  </div>
-
-  <!-- TAB BAR -->
-  <div class="tab-bar">
-    <div class="tab-item active" id="tab-home" onclick="switchTab('home')">
-      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
-      <span class="tab-label">画廊</span>
-    </div>
-    <div class="tab-item" id="tab-fav" onclick="switchTab('fav')">
-      <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-      <span class="tab-label">收藏</span>
-    </div>
-    <div class="tab-new-btn" onclick="openNewEntry()">
-      <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-    </div>
-    <div class="tab-item" id="tab-boards" onclick="switchTab('boards')">
-      <svg viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
-      <span class="tab-label">画板</span>
-    </div>
-    <div class="tab-item" id="tab-settings" onclick="switchTab('settings')">
-      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-      <span class="tab-label">设置</span>
-    </div>
-  </div>
-
-</div>
-
-<!-- SEARCH OVERLAY -->
-<div class="search-overlay" id="searchOverlay">
-  <div class="search-bar">
-    <div class="search-input-wrap">
-      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-      <input class="search-input" id="searchInput" placeholder="搜索提示词、作者、标签…" oninput="onSearch()" autocomplete="off">
-    </div>
-    <div class="search-cancel" onclick="closeSearch()">取消</div>
-  </div>
-  <div class="search-results">
-    <div class="masonry" id="searchMasonry"></div>
-  </div>
-</div>
-
-<!-- FILTER SHEET -->
-<div class="sheet-bg" id="filterBg" onclick="closeFilter()"></div>
-<div class="bottom-sheet" id="filterSheet">
-  <div class="sheet-handle"></div>
-  <div class="sheet-title">筛选</div>
-  <div class="filter-section">
-    <div class="filter-lbl">版本</div>
-    <div class="filter-chips" id="chip-version"></div>
-  </div>
-  <div class="filter-section">
-    <div class="filter-lbl">画幅</div>
-    <div class="filter-chips" id="chip-ratio"></div>
-  </div>
-  <div class="filter-section" id="filter-tags-section">
-    <div class="filter-lbl">标签</div>
-    <div class="filter-chips" id="chip-tags"></div>
-  </div>
-  <div class="sheet-footer">
-    <button class="btn-reset" onclick="resetFilter()">重置</button>
-    <button class="btn-apply" onclick="applyFilter()">确认</button>
-  </div>
-</div>
-
-<!-- NEW ENTRY SHEET -->
-<div class="sheet-bg" id="newBg" onclick="closeNewEntry()"></div>
-<div class="bottom-sheet" id="newSheet">
-  <div class="sheet-handle"></div>
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
-    <div style="font-size:16px;font-weight:600">新建提示词</div>
-    <div style="display:flex;align-items:center;gap:8px">
-      <span class="local-count-badge" id="localCountBadge" style="display:none"></span>
-    </div>
-  </div>
-
-  <!-- 来源 -->
-  <div class="ne-field">
-    <span class="filter-lbl">来源平台</span>
-    <div class="ne-src-row">
-      <div class="ne-src active" data-src="jimeng"    onclick="setNeSrc(this,'jimeng')">即梦</div>
-      <div class="ne-src"        data-src="midjourney" onclick="setNeSrc(this,'midjourney')">MJ</div>
-      <div class="ne-src"        data-src="nanobanana" onclick="setNeSrc(this,'nanobanana')">Banana</div>
-    </div>
-  </div>
-
-  <!-- 标题 -->
-  <div class="ne-field">
-    <span class="filter-lbl">标题（选填）</span>
-    <input class="ne-inp" id="ne-title" placeholder="给这条提示词起个名字…">
-  </div>
-
-  <!-- 提示词 -->
-  <div class="ne-field">
-    <span class="filter-lbl">提示词 <span style="color:#ef4444">*</span></span>
-    <textarea class="ne-textarea" id="ne-prompt" placeholder="粘贴提示词内容…" rows="4"></textarea>
-  </div>
-
-  <!-- 版本 + 画幅（即梦） -->
-  <div class="ne-field ne-row2" id="ne-jimeng-fields">
-    <div>
-      <span class="filter-lbl">版本（选填）</span>
-      <input class="ne-inp" id="ne-version" placeholder="图片 4.1">
-    </div>
-    <div>
-      <span class="filter-lbl">画幅（选填）</span>
-      <input class="ne-inp" id="ne-ratio" placeholder="9:16">
-    </div>
-  </div>
-
-  <!-- 图片链接 -->
-  <div class="ne-field">
-    <span class="filter-lbl">图片链接（选填）</span>
-    <input class="ne-inp" id="ne-image" placeholder="https://…" type="url">
-  </div>
-
-  <!-- 来源链接 -->
-  <div class="ne-field">
-    <span class="filter-lbl">来源链接（选填）</span>
-    <input class="ne-inp" id="ne-url" placeholder="https://…" type="url">
-  </div>
-
-  <!-- 画板 -->
-  <div class="ne-field">
-    <span class="filter-lbl">存入画板（选填）</span>
-    <select class="ne-select" id="ne-board">
-      <option value="手机入库">手机入库</option>
-    </select>
-  </div>
-
-  <!-- 标签 -->
-  <div class="ne-field">
-    <span class="filter-lbl">标签，空格分隔（选填）</span>
-    <input class="ne-inp" id="ne-tags" placeholder="人物 风景 赛博朋克…">
-  </div>
-
-  <div class="sheet-footer">
-    <button class="btn-reset" onclick="closeNewEntry()">取消</button>
-    <button class="btn-apply" onclick="saveNewEntry()">存入本地</button>
-  </div>
-</div>
-
-<!-- DETAIL OVERLAY -->
-<div class="detail-overlay" id="detailOverlay">
-  <div class="detail-top">
-    <div class="detail-close" onclick="closeDetail()">
-      <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-    </div>
-    <div class="detail-source-badge" id="detailBadge">—</div>
-  </div>
-  <div class="detail-media" id="detailMedia">
-    <img class="detail-img" id="detailImg" src="">
-    <video class="detail-video" id="detailVideo" controls playsinline></video>
-    <div class="play-btn hidden" id="playBtn" onclick="playVideo()">
-      <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3" fill="white"/></svg>
-    </div>
-  </div>
-  <div class="detail-sheet">
-    <div class="detail-title" id="detailTitle" style="display:none"></div>
-    <div class="detail-meta-row">
-      <div class="detail-author" id="detailAuthor"></div>
-      <div class="detail-version" id="detailVersion"></div>
-    </div>
-    <div class="detail-prompt" id="detailPrompt"></div>
-    <div class="detail-params" id="detailParams" style="display:none"></div>
-    <div class="detail-actions">
-      <button class="detail-btn pri" onclick="copyDetailPrompt()">
-        <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-        复制提示词
-      </button>
-      <button class="detail-btn" id="detailOriginalBtn" onclick="openOriginal()" style="display:none">
-        <svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-        原链接
-      </button>
-    </div>
-  </div>
-</div>
-
-<!-- TOAST -->
-<div class="toast" id="toast"></div>
-
-<script>
-// ═══════════════════════════════════════
-// INDEXED DB CACHE
-// ═══════════════════════════════════════
-const IDB_NAME    = 'aigc_mobile_db';
-const IDB_VERSION = 1;
-const IDB_STORE   = 'cache';
-
-function openIDB() {
-  return new Promise((resolve, reject) => {
-    const req = indexedDB.open(IDB_NAME, IDB_VERSION);
-    req.onupgradeneeded = e => e.target.result.createObjectStore(IDB_STORE);
-    req.onsuccess = e => resolve(e.target.result);
-    req.onerror   = e => reject(e.target.error);
-  });
-}
-
-async function idbSet(key, value) {
-  const db = await openIDB();
-  return new Promise((resolve, reject) => {
-    const tx  = db.transaction(IDB_STORE, 'readwrite');
-    const req = tx.objectStore(IDB_STORE).put(value, key);
-    req.onsuccess = () => resolve();
-    req.onerror   = e => reject(e.target.error);
-  });
-}
-
-async function idbGet(key) {
-  const db = await openIDB();
-  return new Promise((resolve, reject) => {
-    const tx  = db.transaction(IDB_STORE, 'readonly');
-    const req = tx.objectStore(IDB_STORE).get(key);
-    req.onsuccess = e => resolve(e.target.result);
-    req.onerror   = e => reject(e.target.error);
-  });
-}
-
-// ═══════════════════════════════════════
-// STATE
-// ═══════════════════════════════════════
-let cloudData    = [];   // 从 COS 同步的数据
-let boards       = [];
-let currentSrc   = 'nanobanana';
-let currentBoard = null;
-let displayLimit = 40;
-let activeFilters  = { version: new Set(), ratio: new Set(), tags: new Set() };
-let pendingFilters = { version: new Set(), ratio: new Set(), tags: new Set() };
-let currentItem  = null;
-let neSource     = 'jimeng';
-
-const LOCAL_KEY  = 'aigc_mobile_local';
-const SOURCE_LABELS = { jimeng: '即梦', midjourney: 'MJ', nanobanana: 'Banana' };
-
-// ═══════════════════════════════════════
-// LOCAL ENTRIES
-// ═══════════════════════════════════════
-function getLocalEntries() {
-  try { return JSON.parse(localStorage.getItem(LOCAL_KEY) || '[]'); } catch(e) { return []; }
-}
-function saveLocalEntries(arr) {
-  localStorage.setItem(LOCAL_KEY, JSON.stringify(arr));
-}
-
-// Combined data = cloud + local
-function getAllData() {
-  const local = getLocalEntries().map(i => ({ ...i, _isLocal: true }));
-  return [...local, ...cloudData];
-}
-
-// ═══════════════════════════════════════
-// INIT
-// ═══════════════════════════════════════
-window.addEventListener('DOMContentLoaded', async () => {
-  loadConfig();
-  // Load cached cloud data from IndexedDB
-  try {
-    const cached = await idbGet('cloud_cache');
-    if (cached) {
-      cloudData = (cached.data || []).map(normalizeItem);
-      boards    = cached.boards || [];
-    }
-  } catch(e) {}
-  render();
-  updateStats();
-  updateLocalUI();
-});
-
-// ═══════════════════════════════════════
-// CONFIG
-// ═══════════════════════════════════════
-function loadConfig() {
-  const cfg = JSON.parse(localStorage.getItem('aigc_mobile_cos') || '{}');
-  if (cfg.bucket) document.getElementById('inp-bucket').value = cfg.bucket;
-  if (cfg.region) document.getElementById('inp-region').value = cfg.region;
-}
-function saveConfig() {
-  const bucket = document.getElementById('inp-bucket').value.trim();
-  const region = document.getElementById('inp-region').value.trim();
-  localStorage.setItem('aigc_mobile_cos', JSON.stringify({ bucket, region }));
-  return { bucket, region };
-}
-
-// ═══════════════════════════════════════
-// SYNC
-// ═══════════════════════════════════════
-async function syncData() {
-  const { bucket, region } = saveConfig();
-  if (!bucket || !region) { showSyncStatus('⚠ 请填写 Bucket 名称和地域', 'err'); return; }
-
-  const btn = document.getElementById('syncBtn');
-  btn.disabled = true;
-  btn.innerHTML = `<svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;animation:spin 1s linear infinite"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.93"/></svg> 同步中…`;
-  showSyncStatus('正在读取云端数据…', 'info');
-
-  try {
-    const url = `https://${bucket}.cos.${region}.myqcloud.com/mobile_meta.json?t=${Date.now()}`;
-    const res = await fetch(url);
-    if (res.status === 403) throw new Error('访问被拒绝（403）。请将 mobile_meta.json 设置为公有读。');
-    if (res.status === 404) throw new Error('未找到数据文件（404）。请先在插件端执行「上传同步」。');
-    if (!res.ok) throw new Error(`服务器错误：${res.status}`);
-
-    const json = await res.json();
-    cloudData = (json.data || []).map(normalizeItem);
-    boards    = json.boards || [...new Set(cloudData.map(i => i.board).filter(Boolean))];
-
-    await idbSet('cloud_cache', { data: cloudData, boards });
-
-    render();
-    renderBoards();
-    updateStats();
-    favLimit = 40;
-    showSyncStatus(`✅ 同步完成！共 ${cloudData.length} 条云端记录`, 'ok');
-  } catch(e) {
-    showSyncStatus('❌ ' + e.message, 'err');
-  } finally {
-    btn.disabled = false;
-    btn.innerHTML = `<svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.93"/></svg> 同步数据`;
-  }
-}
-
-function normalizeItem(item) {
-  return {
-    ...item,
-    id:          String(item.id || ''),
-    imageUrl:    item.thumbBlobBase64 || item.cosThumbUrl || item.cosUrl || item.imageUrl || item.localThumb || item.mainImage || '',
-    promptText:  item.promptText || item.prompt || '',
-    metaVersion: item.metaVersion || item.version || '',
-    arType:      item.arType || item.ratio || '',
-    author:      item.author || item.authorName || '',
-    tags:        Array.isArray(item.tags) ? item.tags : [],
-    source:      item.source || 'jimeng',
-    videoUrl:    item.videoUrl || '',
-    originalUrl: item.originalUrl || item.url || '',
-    title:       item.title || '',
-  };
-}
-
-function showSyncStatus(msg, type) {
-  const el = document.getElementById('syncStatus');
-  el.textContent = msg;
-  el.className = 'sync-status ' + type;
-}
-
-function updateStats() {
-  const all = getAllData();
-  const local = getLocalEntries();
-  const j = cloudData.filter(i => i.source === 'jimeng').length;
-  const m = cloudData.filter(i => i.source === 'midjourney').length;
-  const b = cloudData.filter(i => i.source === 'nanobanana').length;
-  const v = cloudData.filter(i => i.videoUrl).length;
-  document.getElementById('stat-total').textContent  = all.length;
-  document.getElementById('stat-jimeng').textContent = j;
-  document.getElementById('stat-mj').textContent     = m;
-  document.getElementById('stat-banana').textContent = b;
-  document.getElementById('stat-video').textContent  = v;
-  document.getElementById('stat-local').textContent  = local.length;
-  document.getElementById('statsCard').style.display = all.length ? '' : 'none';
-}
-
-function updateLocalUI() {
-  const local = getLocalEntries();
-  const badge = document.getElementById('localCountBadge');
-  if (local.length > 0) {
-    badge.textContent = `本地 ${local.length} 条`;
-    badge.style.display = 'block';
-  } else {
-    badge.style.display = 'none';
-  }
-  document.getElementById('localCard').style.display = local.length ? '' : 'none';
-}
-
-// ═══════════════════════════════════════
-// FILTER DATA
-// ═══════════════════════════════════════
-function getFilteredData() {
-  let data = getAllData();
-  if (currentSrc !== 'all') data = data.filter(i => i.source === currentSrc);
-  if (currentBoard) data = data.filter(i => i.board === currentBoard);
-  if (activeFilters.version.size) data = data.filter(i => activeFilters.version.has(i.metaVersion));
-  if (activeFilters.ratio.size)   data = data.filter(i => activeFilters.ratio.has(i.arType));
-  if (activeFilters.tags.size)    data = data.filter(i => (i.tags||[]).some(t => activeFilters.tags.has(t)));
-  return data;
-}
-
-// ═══════════════════════════════════════
-// RENDER GALLERY
-// ═══════════════════════════════════════
-function render() {
-  const data    = getFilteredData();
-  const masonry = document.getElementById('masonry');
-  const empty   = document.getElementById('emptyState');
-
-  if (data.length === 0) {
-    masonry.innerHTML = '';
-    empty.style.display = '';
-    return;
-  }
-  empty.style.display = 'none';
-  const visible = data.slice(0, displayLimit);
-  const left  = visible.filter((_, i) => i % 2 === 0);
-  const right = visible.filter((_, i) => i % 2 === 1);
-  masonry.innerHTML = `
-    <div style="display:flex;flex-direction:column;gap:6px">${left.map((item, i) => cardHTML(item, i * 2)).join('')}</div>
-    <div style="display:flex;flex-direction:column;gap:6px">${right.map((item, i) => cardHTML(item, i * 2 + 1)).join('')}</div>
-  `;
-}
-
-function cardHTML(item, idx) {
-  const isVideo = !!item.videoUrl;
-  const isLocal = !!item._isLocal;
-  return `
-    <div class="card" onclick="openDetail(${idx})">
-      <div class="card-stripe stripe-${item.source || 'jimeng'}"></div>
-      ${item.imageUrl
-        ? `<img src="${escH(item.imageUrl)}" loading="lazy" onerror="this.style.display='none'">`
-        : `<div style="height:${80 + Math.random()*80|0}px;background:var(--bg3)"></div>`
-      }
-      ${isVideo ? `<div class="video-badge"><svg viewBox="0 0 24 24" fill="white" width="10" height="10"><polygon points="5 3 19 12 5 21 5 3"/></svg></div>` : ''}
-      ${isLocal ? `<div class="local-badge">本地</div>` : ''}
-      <div class="card-overlay">
-        <div class="card-prompt">${escH(item.title || item.promptText || '')}</div>
-      </div>
-    </div>
-  `;
-}
-
-function onHomeScroll(el) {
-  const { scrollTop, scrollHeight, clientHeight } = el;
-  if (scrollTop + clientHeight >= scrollHeight - 600) {
-    const data = getFilteredData();
-    if (displayLimit < data.length) { displayLimit += 40; render(); }
-  }
-}
-
-// ═══════════════════════════════════════
-// BOARDS
-// ═══════════════════════════════════════
-function renderBoards() {
-  const grid = document.getElementById('boardsGrid');
-  // Combine cloud boards + local boards
-  const local = getLocalEntries();
-  const localBoards = [...new Set(local.map(i => i.board).filter(Boolean))];
-  const allBoards = [...new Set([...boards, ...localBoards])];
-  const allData = getAllData();
-
-  if (!allBoards.length) { grid.innerHTML = ''; return; }
-
-  grid.innerHTML = allBoards.map(board => {
-    const items = allData.filter(i => i.board === board);
-    const imgs  = items.slice(0, 3).map(i => i.imageUrl).filter(Boolean);
-    return `
-      <div class="board-card" onclick="filterByBoard('${escH(board)}')">
-        <div class="board-cover">
-          <div class="cover-main">${imgs[0] ? `<img class="cover-img" src="${escH(imgs[0])}" loading="lazy">` : '<div style="width:100%;height:100%;background:var(--bg3)"></div>'}</div>
-          <div class="cover-side">
-            <div class="cover-sm">${imgs[1] ? `<img class="cover-img" src="${escH(imgs[1])}" loading="lazy">` : '<div style="width:100%;height:100%;background:var(--bg2)"></div>'}</div>
-            <div class="cover-sm">${imgs[2] ? `<img class="cover-img" src="${escH(imgs[2])}" loading="lazy">` : '<div style="width:100%;height:100%;background:var(--bg2)"></div>'}</div>
-          </div>
+    <!-- 首页 -->
+    <div id="page-home" class="page active">
+        <div class="top-bar">
+            <div class="top-left-btn" id="home-back-btn" onclick="goBackToAll()">
+                <i class="ri-arrow-left-line ri-lg"></i>
+            </div>
+            <span id="page-title">全部采集</span>
+            <div class="top-right-group">
+                <div class="top-icon-btn" onclick="showSearch()"><i class="ri-search-line"></i></div>
+                <div class="top-icon-btn" onclick="toggleFilter(true)"><i class="ri-filter-3-line"></i></div>
+            </div>
         </div>
-        <div class="board-info">
-          <div class="board-name">${escH(board)}</div>
-          <div class="board-count">${items.length} 个采集</div>
+        <div class="content-area">
+            <div id="gallery" class="waterfall"></div>
+            <div class="empty-hint" id="empty-hint">
+                <i class="ri-inbox-2-line"></i>
+                暂无内容，请前往「设置」加载数据
+            </div>
         </div>
-      </div>
-    `;
-  }).join('');
-}
-
-function filterByBoard(board) {
-  currentBoard = board;
-  displayLimit = 40;
-  switchTab('home');
-  render();
-}
-
-// ═══════════════════════════════════════
-// SOURCE TABS
-// ═══════════════════════════════════════
-function setSource(src) {
-  currentSrc   = src;
-  currentBoard = null;
-  displayLimit = 40;
-  document.querySelectorAll('.src-tab').forEach(el => {
-    el.className = 'src-tab';
-    if (el.dataset.src === src) {
-      const cls = src === 'all' ? 'all' : src === 'nanobanana' ? 'nanobanana' : src === 'midjourney' ? 'mj' : src;
-      el.classList.add('active-' + cls);
-    }
-  });
-  render();
-}
-
-// ═══════════════════════════════════════
-// DETAIL
-// ═══════════════════════════════════════
-function openDetail(idx) {
-  const data = getFilteredData();
-  const item = data[idx];
-  if (!item) return;
-  currentItem = item;
-
-  const badge = document.getElementById('detailBadge');
-  if (item._isLocal) {
-    badge.textContent = '本地新建';
-    badge.className = 'detail-source-badge badge-local';
-  } else {
-    badge.textContent = SOURCE_LABELS[item.source] || item.source;
-    badge.className = `detail-source-badge badge-${item.source}`;
-  }
-
-  // Media
-  const img    = document.getElementById('detailImg');
-  const video  = document.getElementById('detailVideo');
-  const playBtn = document.getElementById('playBtn');
-  img.src = item.imageUrl || '';
-  video.src = '';
-  video.style.display = 'none';
-  img.style.display = 'block';
-  playBtn.className = item.videoUrl ? 'play-btn' : 'play-btn hidden';
-
-  // Title
-  const titleEl = document.getElementById('detailTitle');
-  if (item.title) { titleEl.textContent = item.title; titleEl.style.display = 'block'; }
-  else { titleEl.style.display = 'none'; }
-
-  // Meta
-  document.getElementById('detailAuthor').textContent = item.author ? `@${item.author}` : '';
-  document.getElementById('detailVersion').textContent = [item.metaVersion, item.arType].filter(Boolean).join(' · ');
-  document.getElementById('detailPrompt').textContent  = item.promptText || '—';
-
-  // Params
-  const paramsEl = document.getElementById('detailParams');
-  if (item.paramsText) { paramsEl.textContent = item.paramsText; paramsEl.style.display = 'block'; }
-  else { paramsEl.style.display = 'none'; }
-
-  // Original link button
-  const origBtn = document.getElementById('detailOriginalBtn');
-  origBtn.style.display = item.originalUrl ? '' : 'none';
-
-  document.getElementById('detailOverlay').classList.add('open');
-  document.body.style.overflow = 'hidden';
-}
-
-function closeDetail() {
-  const video = document.getElementById('detailVideo');
-  video.pause(); video.src = '';
-  document.getElementById('detailOverlay').classList.remove('open');
-  document.body.style.overflow = '';
-}
-
-function playVideo() {
-  if (!currentItem?.videoUrl) return;
-  const img   = document.getElementById('detailImg');
-  const video = document.getElementById('detailVideo');
-  const playBtn = document.getElementById('playBtn');
-  video.src = currentItem.videoUrl;
-  video.style.display = 'block';
-  img.style.display   = 'none';
-  playBtn.className   = 'play-btn hidden';
-  video.play();
-}
-
-function copyDetailPrompt() {
-  if (!currentItem) return;
-  const text = [currentItem.promptText || '', currentItem.paramsText || ''].join(' ').trim();
-  navigator.clipboard.writeText(text).then(() => showToast('📋 已复制提示词'));
-}
-
-function openOriginal() {
-  if (currentItem?.originalUrl) window.open(currentItem.originalUrl, '_blank');
-}
-
-// ═══════════════════════════════════════
-// SEARCH
-// ═══════════════════════════════════════
-function openSearch() {
-  document.getElementById('searchOverlay').classList.add('open');
-  setTimeout(() => document.getElementById('searchInput').focus(), 300);
-}
-function closeSearch() {
-  document.getElementById('searchOverlay').classList.remove('open');
-  document.getElementById('searchInput').value = '';
-  document.getElementById('searchMasonry').innerHTML = '';
-}
-function onSearch() {
-  const q = document.getElementById('searchInput').value.trim().toLowerCase();
-  const masonry = document.getElementById('searchMasonry');
-  if (!q) { masonry.innerHTML = ''; return; }
-
-  const results = getAllData().filter(item => {
-    const hay = [item.promptText, item.title, item.author, ...(item.tags||[])].join(' ').toLowerCase();
-    return hay.includes(q);
-  }).slice(0, 60);
-
-  const left  = results.filter((_, i) => i % 2 === 0);
-  const right = results.filter((_, i) => i % 2 === 1);
-
-  const makeCard = (item) => {
-    const isVideo = !!item.videoUrl;
-    const isLocal = !!item._isLocal;
-    return `
-      <div class="card" onclick="openDetailFromItem('${escH(item.id)}')">
-        <div class="card-stripe stripe-${item.source}"></div>
-        ${item.imageUrl ? `<img src="${escH(item.imageUrl)}" loading="lazy" onerror="this.style.display='none'">` : `<div style="height:120px;background:var(--bg3)"></div>`}
-        ${isVideo ? `<div class="video-badge"><svg viewBox="0 0 24 24" fill="white" width="10" height="10"><polygon points="5 3 19 12 5 21 5 3"/></svg></div>` : ''}
-        ${isLocal ? `<div class="local-badge">本地</div>` : ''}
-        <div class="card-overlay"><div class="card-prompt">${escH(item.title || item.promptText || '')}</div></div>
-      </div>
-    `;
-  };
-
-  masonry.innerHTML = `
-    <div style="display:flex;flex-direction:column;gap:6px">${left.map(makeCard).join('')}</div>
-    <div style="display:flex;flex-direction:column;gap:6px">${right.map(makeCard).join('')}</div>
-  `;
-}
-
-function openDetailFromItem(id) {
-  closeSearch();
-  const data = getFilteredData();
-  const idx = data.findIndex(i => i.id === id);
-  if (idx >= 0) openDetail(idx);
-  else {
-    const item = getAllData().find(i => i.id === id);
-    if (item) { currentItem = item; /* open directly */ openDetailDirect(item); }
-  }
-}
-
-function openDetailDirect(item) {
-  const data = getAllData();
-  const idx = data.findIndex(i => i.id === item.id);
-  // temporarily set filter to all
-  const savedSrc = currentSrc; const savedBoard = currentBoard;
-  currentSrc = 'all'; currentBoard = null;
-  openDetail(getFilteredData().findIndex(i => i.id === item.id));
-  currentSrc = savedSrc; currentBoard = savedBoard;
-}
-
-// ═══════════════════════════════════════
-// FILTER
-// ═══════════════════════════════════════
-function openFilter() {
-  const data = getAllData().filter(i => currentSrc === 'all' || i.source === currentSrc);
-  const versions = [...new Set(data.map(i => i.metaVersion).filter(Boolean))].sort();
-  const ratios   = [...new Set(data.map(i => i.arType).filter(Boolean).filter(r => /\d+:\d+/.test(r)))].sort();
-  const vSet     = new Set(versions);
-  const arSet    = new Set(['landscape','portrait','square','横板','竖版','方板','16:9','9:16','1:1','4:3','3:4']);
-  const tags     = [...new Set(data.flatMap(i => (i.tags||[]).filter(t => !vSet.has(t) && !arSet.has(t))))].sort().slice(0, 30);
-
-  pendingFilters = { version: new Set(activeFilters.version), ratio: new Set(activeFilters.ratio), tags: new Set(activeFilters.tags) };
-
-  renderChips('chip-version', versions, 'version');
-  renderChips('chip-ratio',   ratios,   'ratio');
-  renderChips('chip-tags',    tags,     'tags');
-  document.getElementById('filter-tags-section').style.display = tags.length ? '' : 'none';
-
-  document.getElementById('filterBg').classList.add('open');
-  document.getElementById('filterSheet').classList.add('open');
-}
-
-function renderChips(id, values, type) {
-  document.getElementById(id).innerHTML = values.map(v =>
-    `<div class="chip ${pendingFilters[type].has(v)?'active':''}" onclick="toggleChip(this,'${type}','${escH(v)}')">${escH(v)}</div>`
-  ).join('');
-}
-
-function toggleChip(el, type, val) {
-  if (pendingFilters[type].has(val)) { pendingFilters[type].delete(val); el.classList.remove('active'); }
-  else { pendingFilters[type].add(val); el.classList.add('active'); }
-}
-
-function applyFilter() {
-  activeFilters = { version: new Set(pendingFilters.version), ratio: new Set(pendingFilters.ratio), tags: new Set(pendingFilters.tags) };
-  displayLimit = 40;
-  closeFilter();
-  render();
-}
-
-function resetFilter() {
-  pendingFilters = { version: new Set(), ratio: new Set(), tags: new Set() };
-  document.querySelectorAll('#filterSheet .chip.active').forEach(c => c.classList.remove('active'));
-}
-
-function closeFilter() {
-  document.getElementById('filterBg').classList.remove('open');
-  document.getElementById('filterSheet').classList.remove('open');
-}
-
-// ═══════════════════════════════════════
-// NEW ENTRY
-// ═══════════════════════════════════════
-function openNewEntry() {
-  // Reset form
-  neSource = 'jimeng';
-  document.querySelectorAll('.ne-src').forEach(el => el.classList.toggle('active', el.dataset.src === 'jimeng'));
-  document.getElementById('ne-jimeng-fields').style.display = 'flex';
-  ['ne-title','ne-prompt','ne-version','ne-ratio','ne-image','ne-url','ne-tags'].forEach(id => {
-    document.getElementById(id).value = '';
-  });
-
-  // Populate boards
-  const select = document.getElementById('ne-board');
-  const allBoards = [...new Set([...boards, ...getLocalEntries().map(i => i.board).filter(Boolean), '手机入库'])];
-  select.innerHTML = allBoards.map(b => `<option value="${escH(b)}">${escH(b)}</option>`).join('');
-
-  // Update badge
-  updateLocalUI();
-
-  document.getElementById('newBg').classList.add('open');
-  document.getElementById('newSheet').classList.add('open');
-  setTimeout(() => document.getElementById('ne-prompt').focus(), 400);
-}
-
-function closeNewEntry() {
-  document.getElementById('newBg').classList.remove('open');
-  document.getElementById('newSheet').classList.remove('open');
-}
-
-function setNeSrc(el, src) {
-  neSource = src;
-  document.querySelectorAll('.ne-src').forEach(e => e.classList.remove('active'));
-  el.classList.add('active');
-  document.getElementById('ne-jimeng-fields').style.display = src === 'jimeng' ? 'flex' : 'none';
-}
-
-function saveNewEntry() {
-  const prompt = document.getElementById('ne-prompt').value.trim();
-  if (!prompt) { showToast('⚠ 请填写提示词'); return; }
-
-  const entry = {
-    id:          'mobile_' + Date.now() + '_' + (Math.random()*9999|0),
-    _mobileLocal: true,
-    source:      neSource,
-    promptText:  prompt,
-    title:       document.getElementById('ne-title').value.trim(),
-    imageUrl:    document.getElementById('ne-image').value.trim(),
-    originalUrl: document.getElementById('ne-url').value.trim(),
-    board:       document.getElementById('ne-board').value || '手机入库',
-    tags:        document.getElementById('ne-tags').value.trim().split(/\s+/).filter(Boolean),
-    metaVersion: document.getElementById('ne-version').value.trim(),
-    arType:      document.getElementById('ne-ratio').value.trim(),
-    isFavorite:  false,
-    isMine:      true,
-    collectTime: new Date().toLocaleString('zh-CN'),
-  };
-
-  const entries = getLocalEntries();
-  entries.unshift(entry);
-  saveLocalEntries(entries);
-
-  updateStats();
-  updateLocalUI();
-  render();
-  closeNewEntry();
-  showToast(`✅ 已存入本地（共 ${entries.length} 条）`);
-}
-
-// ═══════════════════════════════════════
-// EXPORT / CLEAR LOCAL
-// ═══════════════════════════════════════
-function exportLocal() {
-  const entries = getLocalEntries();
-  if (!entries.length) { showToast('暂无本地新建记录'); return; }
-
-  // 只导出手机端新建的，不混入云端数据
-  const payload = {
-    version:    'AIGCVault_v1',
-    exportDate: new Date().toISOString(),
-    source:     'mobile_local',
-    boards:     [...new Set(entries.map(i => i.board).filter(Boolean))],
-    data:       entries.map(i => {
-      const c = { ...i };
-      delete c._mobileLocal;
-      delete c._isLocal;
-      return c;
-    }),
-  };
-
-  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = `aigc_mobile_${Date.now()}.json`;
-  a.click();
-  URL.revokeObjectURL(a.href);
-  showToast(`📦 已导出 ${entries.length} 条本地记录`);
-}
-
-function clearLocal() {
-  if (!confirm(`确认清空本地 ${getLocalEntries().length} 条记录？此操作不可恢复。`)) return;
-  localStorage.removeItem(LOCAL_KEY);
-  updateStats();
-  updateLocalUI();
-  render();
-  showToast('🗑 已清空本地记录');
-}
-
-// ═══════════════════════════════════════
-// TABS
-// ═══════════════════════════════════════
-function switchTab(tab) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
-  document.getElementById('page-' + tab).classList.add('active');
-  const tabEl = document.getElementById('tab-' + tab);
-  if (tabEl) tabEl.classList.add('active');
-  if (tab === 'boards')   renderBoards();
-  if (tab === 'settings') updateStats();
-  if (tab === 'fav')      renderFav();
-}
-
-// ═══════════════════════════════════════
-// FAV PAGE
-// ═══════════════════════════════════════
-let favLimit = 40;
-
-function renderFav() {
-  const favData = getAllData().filter(i => i.isFavorite);
-  const masonry = document.getElementById('favMasonry');
-  const empty   = document.getElementById('favEmpty');
-  const count   = document.getElementById('favCount');
-
-  count.textContent = favData.length ? `共 ${favData.length} 个收藏` : '';
-
-  if (!favData.length) {
-    masonry.innerHTML = '';
-    empty.style.display = '';
-    return;
-  }
-  empty.style.display = 'none';
-
-  const visible = favData.slice(0, favLimit);
-  const left  = visible.filter((_, i) => i % 2 === 0);
-  const right = visible.filter((_, i) => i % 2 === 1);
-
-  masonry.innerHTML = `
-    <div style="display:flex;flex-direction:column;gap:6px">${left.map(item => favCardHTML(item)).join('')}</div>
-    <div style="display:flex;flex-direction:column;gap:6px">${right.map(item => favCardHTML(item)).join('')}</div>
-  `;
-}
-
-function favCardHTML(item) {
-  const isVideo = !!item.videoUrl;
-  const isLocal = !!item._isLocal;
-  return `
-    <div class="card" onclick="openDetailFromItem('${escH(item.id)}')">
-      <div class="card-stripe stripe-${item.source || 'jimeng'}"></div>
-      ${item.imageUrl
-        ? `<img src="${escH(item.imageUrl)}" loading="lazy" onerror="this.style.display='none'">`
-        : `<div style="height:${80 + Math.random()*80|0}px;background:var(--bg3)"></div>`
-      }
-      <div style="position:absolute;top:6px;right:6px;width:20px;height:20px;display:flex;align-items:center;justify-content:center">
-        <svg viewBox="0 0 24 24" width="14" height="14" fill="#f59e0b" stroke="#f59e0b" stroke-width="1.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-      </div>
-      ${isVideo ? `<div class="video-badge" style="right:30px"><svg viewBox="0 0 24 24" fill="white" width="10" height="10"><polygon points="5 3 19 12 5 21 5 3"/></svg></div>` : ''}
-      ${isLocal ? `<div class="local-badge">本地</div>` : ''}
-      <div class="card-overlay">
-        <div class="card-prompt">${escH(item.title || item.promptText || '')}</div>
-      </div>
     </div>
-  `;
-}
 
-function onFavScroll(el) {
-  const { scrollTop, scrollHeight, clientHeight } = el;
-  if (scrollTop + clientHeight >= scrollHeight - 600) {
-    const favData = getAllData().filter(i => i.isFavorite);
-    if (favLimit < favData.length) { favLimit += 40; renderFav(); }
-  }
-}
+    <!-- 画板页 -->
+    <div id="page-boards" class="page">
+        <div class="top-bar">画板管理</div>
+        <div class="content-area">
+            <div id="board-grid" class="board-grid"></div>
+        </div>
+    </div>
 
-// ═══════════════════════════════════════
-// UTILS
-// ═══════════════════════════════════════
-function escH(str) {
-  return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
-}
+    <!-- 设置页 -->
+    <div id="page-settings" class="page">
+        <div class="top-bar">设置</div>
+        <div class="content-area settings-page">
 
-let toastTimer;
-function showToast(msg) {
-  const el = document.getElementById('toast');
-  el.textContent = msg;
-  el.classList.add('show');
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => el.classList.remove('show'), 2500);
-}
+            <!-- 外观 -->
+            <div class="setting-group">
+                <div class="s-title"><i class="ri-palette-line"></i> 外观设置</div>
+                <button class="btn-full btn-outline" id="theme-btn" onclick="toggleTheme()">
+                    <i class="ri-moon-line"></i> 切换至深色模式
+                </button>
+            </div>
 
-// Swipe down to close detail
-let touchStartY = 0;
-document.getElementById('detailOverlay').addEventListener('touchstart', e => { touchStartY = e.touches[0].clientY; }, { passive: true });
-document.getElementById('detailOverlay').addEventListener('touchend', e => {
-  if (e.changedTouches[0].clientY - touchStartY > 80) closeDetail();
-}, { passive: true });
+            <!-- 腾讯云 COS -->
+            <div class="setting-group">
+                <div class="s-title"><i class="ri-cloud-line"></i> 腾讯云 COS 同步</div>
+                <p style="font-size:13px; color:var(--text-sub); margin: 0 0 15px 0; line-height:1.5;">
+                    填入插件端配置的同一个 Bucket，一键拉取元数据。图片直接从 COS 加载，无大小限制。
+                </p>
+                <div class="s-row">
+                    <div class="s-label">Bucket 名称</div>
+                    <input id="cos-bucket" class="s-input" placeholder="jimeng-1234567890" autocomplete="off">
+                </div>
+                <div class="s-row">
+                    <div class="s-label">Region</div>
+                    <input id="cos-region" class="s-input" placeholder="ap-guangzhou" autocomplete="off">
+                </div>
 
-// Keyboard shortcuts
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') {
-    if (document.getElementById('searchOverlay').classList.contains('open')) closeSearch();
-    else if (document.getElementById('filterSheet').classList.contains('open')) closeFilter();
-    else if (document.getElementById('newSheet').classList.contains('open')) closeNewEntry();
-    else if (document.getElementById('detailOverlay').classList.contains('open')) closeDetail();
-  }
-});
-</script>
+                <div class="progress-wrap" id="cos-progress-wrap">
+                    <div class="progress-bar-bg"><div class="progress-bar-fill" id="cos-progress-bar"></div></div>
+                    <div class="progress-text" id="cos-progress-text">正在拉取元数据...</div>
+                </div>
+
+                <div style="margin-top:5px; margin-bottom:15px;" id="cos-status-area"></div>
+
+                <button class="btn-full" id="cos-sync-btn" onclick="syncFromCOS()">
+                    <i class="ri-download-cloud-2-line"></i> 从 COS 加载数据
+                </button>
+            </div>
+
+            <!-- WebDAV（保留作备用） -->
+            <div class="setting-group">
+                <div class="s-title"><i class="ri-server-line"></i> WebDAV 备用同步</div>
+                <p style="font-size:13px; color:var(--text-sub); margin: 0 0 15px 0; line-height:1.5;">
+                    适合小数据量场景（&lt;5MB）。数据量大时推荐改用上方 COS 方式。
+                </p>
+                <div class="s-row"><input id="dav-url" class="s-input" value="https://dav.jianguoyun.com/dav/jimeng/" placeholder="服务器地址"></div>
+                <div class="s-row"><input id="dav-user" class="s-input" placeholder="账号"></div>
+                <div class="s-row"><input id="dav-pass" class="s-input" type="password" placeholder="密码 / 应用授权码"></div>
+                <div style="display:flex; gap:10px;">
+                    <button class="btn-full btn-outline" onclick="syncWebDAV('download')"><i class="ri-download-cloud-2-line"></i> 下载</button>
+                    <button class="btn-full btn-outline" onclick="syncWebDAV('upload')"><i class="ri-upload-cloud-2-line"></i> 上传</button>
+                </div>
+            </div>
+
+            <!-- 本地文件 -->
+            <div class="setting-group">
+                <div class="s-title"><i class="ri-folder-open-line"></i> 本地文件导入</div>
+                <input type="file" id="file-input" accept=".json" style="display:none" onchange="importLocalFile(event)">
+                <button class="btn-full btn-outline" onclick="document.getElementById('file-input').click()">
+                    <i class="ri-file-upload-line"></i> 导入本地 JSON 备份
+                </button>
+                <div style="height:10px"></div>
+                <button class="btn-full btn-outline" style="color:#ff4d4f; border-color: rgba(255,0,0,0.15);" onclick="clearCache()">
+                    <i class="ri-delete-bin-line"></i> 清空所有本地缓存
+                </button>
+                <div style="text-align:center; margin-top:12px;">
+                    <span class="status-badge" id="data-status"></span>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- 底部导航 -->
+    <div class="tab-bar">
+        <div class="tab-item active" onclick="switchTab('home')">
+            <i class="ri-home-4-fill ri-lg"></i>
+            <span>首页</span>
+        </div>
+        <div class="tab-item" onclick="switchTab('boards')">
+            <i class="ri-layout-grid-line ri-lg"></i>
+            <span>画板</span>
+        </div>
+        <div class="tab-item" onclick="switchTab('capture')">
+            <i class="ri-add-circle-line ri-lg"></i>
+            <span>采集</span>
+        </div>
+        <div class="tab-item" onclick="switchTab('settings')">
+            <i class="ri-settings-3-line ri-lg"></i>
+            <span>设置</span>
+        </div>
+    </div>
+
+    <!-- 详情弹窗 -->
+    <div class="detail-overlay" id="detail-overlay">
+        <div class="detail-close" onclick="closeDetail()"><i class="ri-close-line"></i></div>
+        <div class="detail-img-box">
+            <img id="d-img" class="detail-img" onerror="this.style.display='none'">
+        </div>
+        <div class="detail-bar">
+            <div class="d-prompt" id="d-prompt"></div>
+            <div style="display:flex; gap:10px;">
+                <button class="btn-full" style="background:#fff; color:#000; flex:2;" onclick="copyPrompt()">
+                    <i class="ri-file-copy-line"></i> 复制提示词
+                </button>
+                <button class="btn-full btn-outline" style="flex:1;" onclick="openOriginal()">
+                    <i class="ri-external-link-line"></i> 原页面
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==================== 状态 ====================
+        let allData = [];
+        let currentFilterBoard = 'all';
+        let activeFilters = { version: new Set(), ratio: new Set(), tags: new Set() };
+        let searchTerm = '';
+        let isDarkMode = false;
+        let currentDetailItem = null;
+
+        // ==================== 初始化 ====================
+        window.onload = () => {
+            // 主题
+            if (localStorage.getItem('jm_theme') === 'dark') toggleTheme(true);
+
+            // 恢复 WebDAV 配置
+            if (localStorage.getItem('jm_dav_user')) {
+                document.getElementById('dav-user').value = localStorage.getItem('jm_dav_user') || '';
+                document.getElementById('dav-pass').value = localStorage.getItem('jm_dav_pass') || '';
+            }
+
+            // 恢复 COS 配置
+            const cosCfg = loadCosConfig();
+            if (cosCfg.bucket) document.getElementById('cos-bucket').value = cosCfg.bucket;
+            if (cosCfg.region) document.getElementById('cos-region').value = cosCfg.region;
+
+            // 加载缓存数据
+            const cached = sessionStorage.getItem('jm_meta_cache') || localStorage.getItem('jm_mobile_data');
+            if (cached) {
+                try {
+                    const parsed = JSON.parse(cached);
+                    if (Array.isArray(parsed) && parsed.length > 0) {
+                        allData = parsed;
+                        updateStatus(`缓存 ${allData.length} 条`, 'ok');
+                        initUI();
+                        return;
+                    }
+                } catch (e) {}
+            }
+            switchTab('settings');
+            updateCaptureStats();
+        };
+
+        // ==================== COS 核心逻辑 ====================
+        function loadCosConfig() {
+            try { return JSON.parse(localStorage.getItem('jm_cos_config') || '{}'); } 
+            catch (e) { return {}; }
+        }
+
+        function saveCosConfig(bucket, region) {
+            localStorage.setItem('jm_cos_config', JSON.stringify({ bucket, region }));
+        }
+
+        async function syncFromCOS() {
+            const bucket = document.getElementById('cos-bucket').value.trim();
+            const region = document.getElementById('cos-region').value.trim();
+
+            if (!bucket || !region) {
+                return setCosStatus('请先填写 Bucket 和 Region', 'err');
+            }
+
+            saveCosConfig(bucket, region);
+
+            const btn = document.getElementById('cos-sync-btn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="ri-loader-4-line"></i> 拉取中...';
+            showCosProgress(true, '正在连接 COS...');
+
+            try {
+                // jimeng_meta.json 需要在 COS 控制台设置为"公有读"，或使用签名URL
+                // 公有读是最简单的方案，手机端无需任何密钥
+                const metaUrl = `https://${bucket}.cos.${region}.myqcloud.com/jimeng_meta.json?t=${Date.now()}`;
+
+                showCosProgress(true, '正在下载元数据...');
+                const res = await fetch(metaUrl);
+
+                if (res.status === 403) {
+                    throw new Error('访问被拒绝（403）。\n\n请在腾讯云 COS 控制台将 jimeng_meta.json 设置为「公有读」，或检查 Bucket 名称是否正确。');
+                }
+                if (res.status === 404) {
+                    throw new Error('未找到数据文件（404）。\n\n请先在插件端执行「上传到 COS」操作，生成 jimeng_meta.json 文件。');
+                }
+                if (!res.ok) {
+                    throw new Error(`服务器返回错误：${res.status} ${res.statusText}`);
+                }
+
+                showCosProgress(true, '正在解析数据...');
+                const metaArr = await res.json();
+
+                if (!Array.isArray(metaArr)) {
+                    throw new Error('数据格式异常，请重新从插件端上传。');
+                }
+
+                // 数据适配：兼容插件端字段名（cosUrl/cosThumbUrl）与旧版字段（mainImage）
+                allData = metaArr.map(item => ({
+                    ...item,
+                    // 优先使用 COS 图片URL，其次是原始 imageUrl，最后是旧字段 mainImage
+                    mainImage: item.cosThumbUrl || item.cosUrl || item.imageUrl || item.mainImage || '',
+                    fullImage: item.cosUrl || item.imageUrl || item.mainImage || '',
+                    // 兼容字段名差异（插件用 promptText，旧版用 prompt）
+                    prompt: item.promptText || item.prompt || '',
+                    // 兼容 isFavorite/favorite
+                    favorite: item.isFavorite || item.favorite || false,
+                }));
+
+                // 缓存到 sessionStorage（会话内有效，避免每次刷新重新拉取）
+                // 不存 localStorage 是因为数据可能超过 5MB 限制
+                try {
+                    sessionStorage.setItem('jm_meta_cache', JSON.stringify(allData));
+                } catch (e) {
+                    // sessionStorage 也满了就不缓存，每次拉取即可
+                    console.warn('sessionStorage 存储失败，将不缓存:', e.message);
+                }
+
+                showCosProgress(true, `解析完成，共 ${allData.length} 条`);
+                setCosStatus(`✓ 已加载 ${allData.length} 条数据`, 'ok');
+
+                initUI();
+                switchTab('home');
+
+            } catch (e) {
+                setCosStatus(e.message, 'err');
+                console.error('COS 拉取失败:', e);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="ri-download-cloud-2-line"></i> 从 COS 加载数据';
+                setTimeout(() => showCosProgress(false), 2000);
+            }
+        }
+
+        function showCosProgress(show, text) {
+            const wrap = document.getElementById('cos-progress-wrap');
+            const textEl = document.getElementById('cos-progress-text');
+            wrap.classList.toggle('show', show);
+            if (text) textEl.textContent = text;
+            // 进度条动画（元数据拉取很快，用模拟进度即可）
+            const bar = document.getElementById('cos-progress-bar');
+            if (show) {
+                bar.style.width = '0%';
+                setTimeout(() => bar.style.width = '60%', 100);
+                setTimeout(() => bar.style.width = '90%', 500);
+            } else {
+                bar.style.width = '100%';
+            }
+        }
+
+        function setCosStatus(msg, type) {
+            const area = document.getElementById('cos-status-area');
+            area.innerHTML = `<span class="status-badge ${type || ''}">${msg}</span>`;
+        }
+
+        // ==================== WebDAV 备用同步 ====================
+        async function syncWebDAV(action) {
+            const u = document.getElementById('dav-user').value.trim();
+            const p = document.getElementById('dav-pass').value.trim();
+            const url = document.getElementById('dav-url').value.trim() + 'jimeng_backup.json';
+            if (!u || !p) return alert('请先填写 WebDAV 账号密码');
+            localStorage.setItem('jm_dav_user', u);
+            localStorage.setItem('jm_dav_pass', p);
+
+            const btn = event.target;
+            const txt = btn.innerHTML;
+            btn.innerHTML = '⏳ 处理中...';
+            btn.disabled = true;
+
+            try {
+                if (action === 'download') {
+                    const res = await fetch(url, { headers: { 'Authorization': 'Basic ' + btoa(u + ':' + p) } });
+                    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                    const json = await res.json();
+                    const list = Array.isArray(json) ? json : (json.jimengCollections || []);
+                    loadDataIntoApp(list);
+                    alert(`✅ 下载成功，共 ${list.length} 条`);
+                } else {
+                    if (allData.length === 0) return alert('暂无数据可上传');
+                    const res = await fetch(url, {
+                        method: 'PUT',
+                        headers: { 'Authorization': 'Basic ' + btoa(u + ':' + p), 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ jimengCollections: allData })
+                    });
+                    if (res.ok || res.status === 201 || res.status === 204) alert('✅ 上传成功');
+                    else throw new Error(`HTTP ${res.status}`);
+                }
+            } catch (e) {
+                alert('操作失败：' + e.message + '\n\n（可能是跨域限制，大数据量建议改用 COS 方案）');
+            } finally {
+                btn.innerHTML = txt;
+                btn.disabled = false;
+            }
+        }
+
+        // ==================== 本地文件导入 ====================
+        function importLocalFile(e) {
+            const f = e.target.files[0];
+            if (!f) return;
+            const r = new FileReader();
+            r.onload = (ev) => {
+                try {
+                    const j = JSON.parse(ev.target.result);
+                    const list = Array.isArray(j) ? j : (j.jimengCollections || []);
+                    loadDataIntoApp(list);
+                } catch (err) { alert('格式错误：' + err.message); }
+            };
+            r.readAsText(f);
+            e.target.value = '';
+        }
+
+        function loadDataIntoApp(list) {
+            allData = list.map(item => ({
+                ...item,
+                mainImage: item.cosThumbUrl || item.cosUrl || item.imageUrl || item.mainImage || '',
+                fullImage: item.cosUrl || item.imageUrl || item.mainImage || '',
+                prompt: item.promptText || item.prompt || '',
+                favorite: item.isFavorite || item.favorite || false,
+            }));
+            try { localStorage.setItem('jm_mobile_data', JSON.stringify(allData)); } catch (e) {}
+            updateStatus(`本地 ${allData.length} 条`, 'ok');
+            initUI();
+            switchTab('home');
+        }
+
+        function clearCache() {
+            if (!confirm('确定清空所有本地缓存数据？')) return;
+            localStorage.removeItem('jm_mobile_data');
+            sessionStorage.removeItem('jm_meta_cache');
+            allData = [];
+            initUI();
+            updateStatus('已清空', '');
+        }
+
+        function updateStatus(msg, type) {
+            const el = document.getElementById('data-status');
+            el.textContent = msg;
+            el.className = 'status-badge ' + (type || '');
+            el.style.display = msg ? 'inline-flex' : 'none';
+        }
+
+        // ==================== UI 渲染 ====================
+        function initUI() {
+            renderGallery();
+            renderBoardList();
+            renderFilterTags();
+        }
+
+        function renderGallery() {
+            const container = document.getElementById('gallery');
+            container.innerHTML = '';
+
+            let filtered = allData.filter(item => {
+                if (currentFilterBoard === 'fav' && !item.favorite) return false;
+                if (currentFilterBoard === 'mine' && !item.isMine) return false;
+                if (!['all', 'fav', 'mine'].includes(currentFilterBoard) && item.board !== currentFilterBoard) return false;
+
+                if (searchTerm) {
+                    const hay = ((item.prompt || '') + ' ' + (item.author || '')).toLowerCase();
+                    if (!hay.includes(searchTerm.toLowerCase())) return false;
+                }
+
+                const tags = item.tags || [];
+                if (activeFilters.version.size > 0 && !tags.some(t => activeFilters.version.has(t))) return false;
+                if (activeFilters.ratio.size > 0 && !tags.some(t => activeFilters.ratio.has(t))) return false;
+                if (activeFilters.tags.size > 0 && !tags.some(t => activeFilters.tags.has(t))) return false;
+
+                return true;
+            });
+
+            const emptyHint = document.getElementById('empty-hint');
+            if (filtered.length === 0) { emptyHint.style.display = 'block'; return; }
+            emptyHint.style.display = 'none';
+
+            filtered.sort((a, b) => (b.id || 0) - (a.id || 0));
+
+            filtered.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'pin';
+
+                const imgSrc = item.mainImage;
+                if (imgSrc) {
+                    const img = document.createElement('img');
+                    img.loading = 'lazy';
+                    img.src = imgSrc;
+                    img.onerror = function() {
+                        this.parentNode.innerHTML = `<div class="pin-broken"><i class="ri-image-line" style="font-size:28px;opacity:0.3"></i><span>图片失效</span></div>`;
+                    };
+                    div.appendChild(img);
+                } else {
+                    div.innerHTML = `<div class="pin-broken"><i class="ri-image-line" style="font-size:28px;opacity:0.3"></i><span>无图片</span></div>`;
+                }
+
+                const tag = document.createElement('div');
+                tag.className = 'pin-tag';
+                tag.textContent = item.board || '默认画板';
+                div.appendChild(tag);
+
+                div.onclick = () => openDetail(item);
+                container.appendChild(div);
+            });
+        }
+
+        function renderBoardList() {
+            const container = document.getElementById('board-grid');
+            container.innerHTML = '';
+
+            const boardCounts = {};
+            allData.forEach(i => {
+                const b = i.board || '默认画板';
+                boardCounts[b] = (boardCounts[b] || 0) + 1;
+            });
+
+            const mineCount = allData.filter(i => i.isMine).length;
+            const favCount = allData.filter(i => i.favorite).length;
+
+            if (mineCount > 0) {
+                container.appendChild(createBoardCard('我的作品', mineCount, null, true, () => enterBoard('mine', '我的作品')));
+            }
+            if (favCount > 0) {
+                container.appendChild(createBoardCard('❤️ 收藏', favCount, allData.find(i => i.favorite)?.mainImage, false, () => enterBoard('fav', '我的收藏')));
+            }
+
+            Object.keys(boardCounts).forEach(b => {
+                const coverItem = allData.find(i => (i.board || '默认画板') === b);
+                container.appendChild(createBoardCard(b, boardCounts[b], coverItem?.mainImage, false, () => enterBoard(b, b)));
+            });
+        }
+
+        function createBoardCard(title, count, imgUrl, isMine, onClick) {
+            const div = document.createElement('div');
+            div.className = `b-card ${isMine ? 'my-works' : ''}`;
+            const imgContent = isMine
+                ? `<i class="ri-user-smile-line" style="font-size:32px"></i>`
+                : (imgUrl ? `<img src="${imgUrl}" loading="lazy" onerror="this.style.display='none'">` : '');
+            div.innerHTML = `
+                <div class="b-cover-wrap">${imgContent}</div>
+                <div class="b-info">
+                    <div class="b-title">${title}</div>
+                    <div class="b-count">${count} 个灵感</div>
+                </div>`;
+            div.onclick = onClick;
+            return div;
+        }
+
+        // ==================== 筛选 ====================
+        function renderFilterTags() {
+            const sets = { version: new Set(), ratio: new Set(), tags: new Set() };
+            allData.forEach(item => {
+                (item.tags || []).forEach(t => {
+                    if (t.includes('图片') || t.includes('4.0') || t.includes('Image')) sets.version.add(t);
+                    else if (/\d:\d/.test(t)) sets.ratio.add(t);
+                    else sets.tags.add(t);
+                });
+                // 也从专用字段读取
+                if (item.metaVersion) sets.version.add(item.metaVersion);
+                if (item.arType) sets.ratio.add(item.arType);
+            });
+            renderChips('filter-version', sets.version, activeFilters.version);
+            renderChips('filter-ratio', sets.ratio, activeFilters.ratio);
+            renderChips('filter-tags', sets.tags, activeFilters.tags);
+        }
+
+        function renderChips(cid, dSet, aSet) {
+            const c = document.getElementById(cid);
+            c.innerHTML = '';
+            Array.from(dSet).sort().forEach(val => {
+                const chip = document.createElement('div');
+                chip.className = `f-chip ${aSet.has(val) ? 'active' : ''}`;
+                chip.textContent = val;
+                chip.onclick = () => {
+                    if (aSet.has(val)) aSet.delete(val); else aSet.add(val);
+                    chip.classList.toggle('active');
+                };
+                c.appendChild(chip);
+            });
+        }
+
+        function resetFilters() {
+            activeFilters = { version: new Set(), ratio: new Set(), tags: new Set() };
+            renderFilterTags();
+        }
+
+        // ==================== 交互 ====================
+        function enterBoard(boardId, title) {
+            currentFilterBoard = boardId;
+            document.getElementById('page-title').textContent = title;
+            document.getElementById('home-back-btn').style.display = 'flex';
+            switchTab('home');
+        }
+
+        function goBackToAll() {
+            currentFilterBoard = 'all';
+            document.getElementById('page-title').textContent = '全部采集';
+            document.getElementById('home-back-btn').style.display = 'none';
+            renderGallery();
+        }
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById('page-' + tabName).classList.add('active');
+
+            const names = ['home', 'boards', 'capture', 'settings'];
+            const fillIcons = ['ri-home-4-fill', 'ri-layout-grid-fill', 'ri-add-circle-fill', 'ri-settings-3-fill'];
+            const lineIcons = ['ri-home-4-line', 'ri-layout-grid-line', 'ri-add-circle-line', 'ri-settings-3-line'];
+
+            document.querySelectorAll('.tab-item').forEach((el, idx) => {
+                const isActive = names[idx] === tabName;
+                el.classList.toggle('active', isActive);
+                el.querySelector('i').className = (isActive ? fillIcons[idx] : lineIcons[idx]) + ' ri-lg';
+            });
+
+            if (tabName === 'home') renderGallery();
+            if (tabName === 'boards') renderBoardList();
+            if (tabName === 'capture') updateCaptureStats();
+        }
+
+        function toggleFilter(show) {
+            document.getElementById('filter-panel').classList.toggle('open', show);
+            document.getElementById('mask-overlay').classList.toggle('show', show);
+            if (!show) renderGallery();
+        }
+
+        function showSearch() {
+            const t = prompt('🔍 搜索关键词:');
+            if (t !== null) {
+                searchTerm = t.trim();
+                renderGallery();
+                const baseTitle = currentFilterBoard === 'all' ? '全部采集' : currentFilterBoard;
+                document.getElementById('page-title').textContent = searchTerm ? `搜索: ${searchTerm}` : baseTitle;
+            }
+        }
+
+        function openDetail(item) {
+            currentDetailItem = item;
+            const overlay = document.getElementById('detail-overlay');
+            overlay.style.display = 'flex';
+            const img = document.getElementById('d-img');
+            // 优先加载高清原图
+            img.style.display = 'block';
+            img.src = item.fullImage || item.mainImage || '';
+            document.getElementById('d-prompt').textContent = item.prompt || '暂无提示词';
+        }
+
+        function closeDetail() {
+            document.getElementById('detail-overlay').style.display = 'none';
+            currentDetailItem = null;
+        }
+
+        function copyPrompt() {
+            const text = document.getElementById('d-prompt').textContent;
+            if (!text || text === '暂无提示词') return alert('没有可复制的提示词');
+            navigator.clipboard.writeText(text).then(() => alert('✅ 已复制！')).catch(() => {
+                // 降级方案
+                const ta = document.createElement('textarea');
+                ta.value = text; document.body.appendChild(ta); ta.select();
+                document.execCommand('copy'); document.body.removeChild(ta);
+                alert('✅ 已复制！');
+            });
+        }
+
+        function openOriginal() {
+            if (!currentDetailItem) return;
+            const url = currentDetailItem.originalUrl || currentDetailItem.url || '';
+            if (url && url.startsWith('http')) window.open(url, '_blank');
+            else alert('没有有效的原始链接');
+        }
+
+        // ==================== 主题 ====================
+        function toggleTheme(forceDark) {
+            const body = document.body;
+            const btn = document.getElementById('theme-btn');
+            if (forceDark === true || !body.hasAttribute('data-theme')) {
+                body.setAttribute('data-theme', 'dark');
+                btn.innerHTML = '<i class="ri-sun-line"></i> 切换至白天模式';
+                isDarkMode = true;
+                localStorage.setItem('jm_theme', 'dark');
+            } else {
+                body.removeAttribute('data-theme');
+                btn.innerHTML = '<i class="ri-moon-line"></i> 切换至深色模式';
+                isDarkMode = false;
+                localStorage.setItem('jm_theme', 'light');
+            }
+        }
+
+        // ==================== 采集 ====================
+        const MOBILE_DATA_KEY = 'jm_mobile_captures';
+        let urlParseTimer = null;
+
+        function getMobileCaptures() {
+            try { return JSON.parse(localStorage.getItem(MOBILE_DATA_KEY) || '[]'); }
+            catch (e) { return []; }
+        }
+
+        function saveMobileCaptures(arr) {
+            localStorage.setItem(MOBILE_DATA_KEY, JSON.stringify(arr));
+            updateCaptureStats();
+        }
+
+        function updateCaptureStats() {
+            const arr = getMobileCaptures();
+            const el = document.getElementById('cp-local-count');
+            if (arr.length === 0) {
+                el.textContent = '暂无本地采集数据';
+            } else {
+                el.textContent = '手机端已采集 ' + arr.length + ' 条，可导出 JSON 后在桌面端合并';
+            }
+        }
+
+        function showCpToast(msg) {
+            const el = document.getElementById('cp-toast');
+            el.textContent = msg;
+            el.classList.add('show');
+            clearTimeout(el._t);
+            el._t = setTimeout(() => el.classList.remove('show'), 2000);
+        }
+
+        async function onUrlInput() {
+            const url = document.getElementById('cp-url').value.trim();
+            clearTimeout(urlParseTimer);
+
+            if (!url.startsWith('http')) return;
+
+            const loading = document.getElementById('cp-loading');
+
+            urlParseTimer = setTimeout(async () => {
+                loading.classList.add('show');
+                try {
+                    if (url.includes('x.com/') || url.includes('twitter.com/')) {
+                        await parseTwitterUrl(url);
+                    } else {
+                        loading.classList.remove('show');
+                    }
+                } catch (e) {
+                    loading.classList.remove('show');
+                    showCpToast('解析失败：' + e.message);
+                }
+            }, 800);
+        }
+
+        async function parseTwitterUrl(url) {
+            const statusMatch = url.match(/\/(?:status|statuses)\/(\d+)/);
+            if (!statusMatch) {
+                document.getElementById('cp-loading').classList.remove('show');
+                showCpToast('未识别推文 ID，请检查链接格式');
+                return;
+            }
+            const tweetId = statusMatch[1];
+
+            try {
+                const oembedUrl = `https://publish.twitter.com/oembed?url=https://x.com/i/status/${tweetId}&omit_script=1`;
+                const res = await fetch(oembedUrl);
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+
+                const data = await res.json();
+                document.getElementById('cp-title').value = '';
+                document.getElementById('cp-author').value = (data.author_name || '').replace(/^@/, '');
+                document.getElementById('cp-prompt').value = data.html ? stripHtml(data.html) : '';
+
+                document.getElementById('cp-url').style.borderColor = '#16a34a';
+                showCpToast('已解析推文信息，请补充图片链接');
+            } catch (e) {
+                showCpToast('无法解析推文，请手动填写。原因：' + e.message);
+            } finally {
+                document.getElementById('cp-loading').classList.remove('show');
+            }
+        }
+
+        function stripHtml(html) {
+            const div = document.createElement('div');
+            div.innerHTML = html;
+            return div.textContent || '';
+        }
+
+        function submitCapture() {
+            const prompt = document.getElementById('cp-prompt').value.trim();
+            if (!prompt) { showCpToast('请填写提示词内容'); return; }
+
+            const images = document.getElementById('cp-images').value.trim()
+                .split('\n').map(s => s.trim()).filter(s => s.startsWith('http'));
+
+            const item = {
+                id: 'mobile_' + Date.now() + '_' + Math.floor(Math.random() * 9999),
+                source: document.getElementById('cp-source').value,
+                title: document.getElementById('cp-title').value.trim(),
+                promptText: prompt,
+                prompt: prompt,
+                author: document.getElementById('cp-author').value.trim() || '手动采集',
+                allImages: images,
+                imageUrl: images[0] || '',
+                mainImage: images[0] || '',
+                tags: document.getElementById('cp-tags').value.trim().split(/\s+/).filter(Boolean),
+                board: document.getElementById('cp-board').value.trim() || '快速采集',
+                originalUrl: document.getElementById('cp-url').value.trim(),
+                collectTime: new Date().toLocaleString('zh-CN'),
+                isFavorite: false,
+                isMine: false,
+                syncStatus: 0,
+            };
+
+            const arr = getMobileCaptures();
+            arr.push(item);
+            saveMobileCaptures(arr);
+
+            // 清空表单
+            ['cp-url', 'cp-title', 'cp-author', 'cp-prompt', 'cp-images', 'cp-tags'].forEach(id => {
+                document.getElementById(id).value = '';
+            });
+            document.getElementById('cp-url').style.borderColor = '';
+            document.getElementById('cp-board').value = '快速采集';
+
+            showCpToast('已存入，共 ' + arr.length + ' 条');
+        }
+
+        function exportMobileData() {
+            const arr = getMobileCaptures();
+            if (arr.length === 0) { showCpToast('没有可导出的数据'); return; }
+
+            const blob = new Blob([JSON.stringify(arr, null, 2)], { type: 'application/json' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'aigc_mobile_captures_' + new Date().toISOString().slice(0, 10) + '.json';
+            a.click();
+            URL.revokeObjectURL(a.href);
+            showCpToast('已导出 ' + arr.length + ' 条');
+        }
+
+        function clearMobileCaptures() {
+            if (!confirm('确定清空手机端采集的所有数据？')) return;
+            localStorage.removeItem(MOBILE_DATA_KEY);
+            updateCaptureStats();
+            showCpToast('已清空');
+        }
+    </script>
 </body>
 </html>
