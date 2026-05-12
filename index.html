@@ -97,6 +97,8 @@ html, body { height: 100%; width: 100%; background: var(--bg); color: var(--t1);
 .card-prompt { font-size: 10px; line-height: 1.4; color: rgba(255,255,255,0.8); font-family: 'DM Mono', monospace; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .video-badge { position: absolute; top: 6px; right: 6px; width: 22px; height: 22px; border-radius: 50%; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; }
 .local-badge { position: absolute; top: 6px; left: 6px; padding: 2px 6px; border-radius: 6px; background: rgba(79,142,247,0.7); font-size: 9px; font-weight: 600; color: #fff; letter-spacing: 0.5px; }
+.multi-badge { position: absolute; top: 6px; right: 6px; padding: 3px 7px; border-radius: 12px; background: rgba(0,0,0,0.62); backdrop-filter: blur(4px); font-size: 10px; font-weight: 600; color: #fff; display: flex; align-items: center; gap: 3px; }
+.video-badge + .multi-badge { right: 32px; }
 
 /* ═══════════════════════════════════════
    EMPTY / SKELETON
@@ -214,6 +216,15 @@ html, body { height: 100%; width: 100%; background: var(--bg); color: var(--t1);
 .detail-media { flex: 1; position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden; background: #000; }
 .detail-img { max-width: 100%; max-height: 100%; object-fit: contain; display: block; }
 .detail-video { max-width: 100%; max-height: 100%; object-fit: contain; display: none; }
+.detail-nav { position: absolute; top: 50%; transform: translateY(-50%); width: 38px; height: 52px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.12); background: rgba(0,0,0,0.35); color: #fff; display: none; align-items: center; justify-content: center; z-index: 5; backdrop-filter: blur(8px); cursor: pointer; }
+.detail-nav.show { display: flex; }
+.detail-nav.prev { left: 12px; }
+.detail-nav.next { right: 12px; }
+.detail-nav svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.detail-dots { position: absolute; left: 0; right: 0; bottom: 14px; display: none; justify-content: center; gap: 6px; z-index: 6; }
+.detail-dots.show { display: flex; }
+.detail-dot { width: 6px; height: 6px; border-radius: 50%; border: 0; padding: 0; background: rgba(255,255,255,0.35); }
+.detail-dot.active { width: 18px; border-radius: 99px; background: #fff; }
 .play-btn { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 56px; height: 56px; border-radius: 50%; background: rgba(255,255,255,0.15); backdrop-filter: blur(8px); border: 2px solid rgba(255,255,255,0.3); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; }
 .play-btn:active { background: rgba(255,255,255,0.25); }
 .play-btn svg { width: 20px; height: 20px; fill: #fff; margin-left: 3px; }
@@ -222,6 +233,10 @@ html, body { height: 100%; width: 100%; background: var(--bg); color: var(--t1);
 .detail-meta-row { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
 .detail-author { font-size: 13px; color: var(--t2); }
 .detail-version { font-size: 11px; color: var(--t3); font-family: 'DM Mono', monospace; background: var(--bg3); padding: 3px 8px; border-radius: 6px; }
+.detail-lang-tabs { display: none; gap: 6px; overflow-x: auto; margin: 0 0 12px; }
+.detail-lang-tabs.show { display: flex; }
+.detail-lang-tab { padding: 5px 10px; border-radius: 999px; border: 1px solid var(--border); background: var(--glass); color: var(--t2); font-size: 11px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+.detail-lang-tab.active { background: rgba(79,142,247,0.18); border-color: rgba(79,142,247,0.4); color: var(--acc); }
 .detail-title { font-size: 14px; font-weight: 600; margin-bottom: 8px; }
 .detail-prompt { font-size: 13px; line-height: 1.7; color: rgba(255,255,255,0.75); font-family: 'DM Mono', monospace; margin-bottom: 16px; white-space: pre-wrap; }
 .detail-actions { display: flex; gap: 10px; }
@@ -272,10 +287,10 @@ html, body { height: 100%; width: 100%; background: var(--bg); color: var(--t1);
       </div>
     </div>
     <div class="source-tabs" id="sourceTabs">
-      <div class="src-tab" data-src="all" onclick="setSource('all')">全部</div>
+      <div class="src-tab active-all" data-src="all" onclick="setSource('all')">全部</div>
       <div class="src-tab" data-src="jimeng" onclick="setSource('jimeng')"><span class="src-dot dot-jimeng"></span>即梦</div>
       <div class="src-tab" data-src="midjourney" onclick="setSource('midjourney')"><span class="src-dot dot-mj"></span>MJ</div>
-      <div class="src-tab active-nanobanana" data-src="nanobanana" onclick="setSource('nanobanana')"><span class="src-dot dot-banana"></span>Banana</div>
+      <div class="src-tab" data-src="nanobanana" onclick="setSource('nanobanana')"><span class="src-dot dot-banana"></span>多模态</div>
     </div>
   </div>
 
@@ -336,7 +351,7 @@ html, body { height: 100%; width: 100%; background: var(--bg); color: var(--t1);
           <div class="stat-row"><span>全部采集</span><span class="stat-num" id="stat-total">—</span></div>
           <div class="stat-row"><span>即梦</span><span class="stat-num stat-jimeng" id="stat-jimeng">—</span></div>
           <div class="stat-row"><span>Midjourney</span><span class="stat-num stat-mj" id="stat-mj">—</span></div>
-          <div class="stat-row"><span>Nano Banana</span><span class="stat-num stat-banana" id="stat-banana">—</span></div>
+          <div class="stat-row"><span>多模态</span><span class="stat-num stat-banana" id="stat-banana">—</span></div>
           <div class="stat-row"><span>视频</span><span class="stat-num" id="stat-video">—</span></div>
           <div class="stat-row"><span>手机新建</span><span class="stat-num stat-local" id="stat-local">—</span></div>
         </div>
@@ -358,7 +373,7 @@ html, body { height: 100%; width: 100%; background: var(--bg); color: var(--t1);
           <div class="setting-row">
             <div>
               <div class="setting-name">AIGC Vault Mobile</div>
-              <div class="setting-desc">v1.1.0 · 即梦 / MJ / Banana 三合一灵感库手机端</div>
+              <div class="setting-desc">v1.1.0 · 即梦 / MJ / 多模态三合一灵感库手机端</div>
             </div>
           </div>
         </div>
@@ -447,7 +462,7 @@ html, body { height: 100%; width: 100%; background: var(--bg); color: var(--t1);
     <div class="ne-src-row">
       <div class="ne-src active" data-src="jimeng"    onclick="setNeSrc(this,'jimeng')">即梦</div>
       <div class="ne-src"        data-src="midjourney" onclick="setNeSrc(this,'midjourney')">MJ</div>
-      <div class="ne-src"        data-src="nanobanana" onclick="setNeSrc(this,'nanobanana')">Banana</div>
+      <div class="ne-src"        data-src="nanobanana" onclick="setNeSrc(this,'nanobanana')">多模态</div>
     </div>
   </div>
 
@@ -461,6 +476,23 @@ html, body { height: 100%; width: 100%; background: var(--bg); color: var(--t1);
   <div class="ne-field">
     <span class="filter-lbl">提示词 <span style="color:#ef4444">*</span></span>
     <textarea class="ne-textarea" id="ne-prompt" placeholder="粘贴提示词内容…" rows="4"></textarea>
+  </div>
+
+  <div class="ne-field ne-row2">
+    <div>
+      <span class="filter-lbl">当前语言</span>
+      <select class="ne-select" id="ne-lang">
+        <option value="zh">中文</option>
+        <option value="en">English</option>
+        <option value="ja">日本語</option>
+        <option value="ko">한국어</option>
+        <option value="other">其他/原文</option>
+      </select>
+    </div>
+    <div>
+      <span class="filter-lbl">原文提示词（选填）</span>
+      <input class="ne-inp" id="ne-original-prompt" placeholder="双语时填另一种语言">
+    </div>
   </div>
 
   <!-- 版本 + 画幅（即梦） -->
@@ -477,8 +509,8 @@ html, body { height: 100%; width: 100%; background: var(--bg); color: var(--t1);
 
   <!-- 图片链接 -->
   <div class="ne-field">
-    <span class="filter-lbl">图片链接（选填）</span>
-    <input class="ne-inp" id="ne-image" placeholder="https://…" type="url">
+    <span class="filter-lbl">图片链接（选填，可多行）</span>
+    <textarea class="ne-textarea" id="ne-image" placeholder="https://…&#10;https://…" rows="2"></textarea>
   </div>
 
   <!-- 来源链接 -->
@@ -516,8 +548,15 @@ html, body { height: 100%; width: 100%; background: var(--bg); color: var(--t1);
     <div class="detail-source-badge" id="detailBadge">—</div>
   </div>
   <div class="detail-media" id="detailMedia">
+    <button class="detail-nav prev" id="detailPrev" onclick="event.stopPropagation(); stepDetailImage(-1)">
+      <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+    </button>
     <img class="detail-img" id="detailImg" src="">
     <video class="detail-video" id="detailVideo" controls playsinline></video>
+    <button class="detail-nav next" id="detailNext" onclick="event.stopPropagation(); stepDetailImage(1)">
+      <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+    </button>
+    <div class="detail-dots" id="detailDots"></div>
     <div class="play-btn hidden" id="playBtn" onclick="playVideo()">
       <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3" fill="white"/></svg>
     </div>
@@ -528,6 +567,7 @@ html, body { height: 100%; width: 100%; background: var(--bg); color: var(--t1);
       <div class="detail-author" id="detailAuthor"></div>
       <div class="detail-version" id="detailVersion"></div>
     </div>
+    <div class="detail-lang-tabs" id="detailLangTabs"></div>
     <div class="detail-prompt" id="detailPrompt"></div>
     <div class="detail-params" id="detailParams" style="display:none"></div>
     <div class="detail-actions">
@@ -588,16 +628,21 @@ async function idbGet(key) {
 // ═══════════════════════════════════════
 let cloudData    = [];   // 从 COS 同步的数据
 let boards       = [];
-let currentSrc   = 'nanobanana';
+let currentSrc   = 'all';
 let currentBoard = null;
 let displayLimit = 40;
 let activeFilters  = { version: new Set(), ratio: new Set(), tags: new Set() };
 let pendingFilters = { version: new Set(), ratio: new Set(), tags: new Set() };
 let currentItem  = null;
 let neSource     = 'jimeng';
+let detailImages = [];
+let detailImageIndex = 0;
+let detailPromptLang = '';
+let detailTouchStartX = 0;
 
 const LOCAL_KEY  = 'aigc_mobile_local';
-const SOURCE_LABELS = { jimeng: '即梦', midjourney: 'MJ', nanobanana: 'Banana' };
+const SOURCE_LABELS = { jimeng: '即梦', midjourney: 'MJ', nanobanana: '多模态' };
+const LANG_LABELS = { zh: '中文', cn: '中文', en: 'English', ja: '日本語', ko: '한국어', other: '原文', original: '原文', current: '当前' };
 
 // ═══════════════════════════════════════
 // LOCAL ENTRIES
@@ -611,7 +656,7 @@ function saveLocalEntries(arr) {
 
 // Combined data = cloud + local
 function getAllData() {
-  const local = getLocalEntries().map(i => ({ ...i, _isLocal: true }));
+  const local = getLocalEntries().map(i => normalizeItem({ ...i, _isLocal: true }));
   return [...local, ...cloudData];
 }
 
@@ -687,11 +732,17 @@ async function syncData() {
 }
 
 function normalizeItem(item) {
+  const allImages = normalizeImages(item);
+  const promptText = item.promptText || item.prompt || '';
   return {
     ...item,
     id:          String(item.id || ''),
-    imageUrl:    item.thumbBlobBase64 || item.cosThumbUrl || item.cosUrl || item.imageUrl || item.localThumb || item.mainImage || '',
-    promptText:  item.promptText || item.prompt || '',
+    allImages,
+    imageUrl:    item.thumbBlobBase64 || item.cosThumbUrl || allImages[0] || item.cosUrl || item.imageUrl || item.localThumb || item.mainImage || '',
+    promptText,
+    originalPrompt: item.originalPrompt || '',
+    translations:  item.translations && typeof item.translations === 'object' ? item.translations : {},
+    promptLang:    item.promptLang || item.language || item.lang || '',
     metaVersion: item.metaVersion || item.version || '',
     arType:      item.arType || item.ratio || '',
     author:      item.author || item.authorName || '',
@@ -701,6 +752,50 @@ function normalizeItem(item) {
     originalUrl: item.originalUrl || item.url || '',
     title:       item.title || '',
   };
+}
+
+function normalizeImages(item) {
+  const images = [
+    ...(Array.isArray(item.allImages) ? item.allImages : []),
+    ...(Array.isArray(item.images) ? item.images : []),
+    item.cosUrl,
+    item.imageUrl,
+    item.mainImage,
+    item.localThumb,
+  ];
+  return [...new Set(images.filter(Boolean).map(v => String(v).trim()))]
+    .filter(u => /^https?:\/\//i.test(u) || /^data:image\//i.test(u));
+}
+
+function getItemImages(item) {
+  const normalized = normalizeImages(item);
+  return normalized.length ? normalized : [item.imageUrl].filter(Boolean);
+}
+
+function getPromptEntries(item) {
+  const entries = [];
+  const add = (key, label, text) => {
+    const value = String(text || '').trim();
+    if (!value || entries.some(e => e.text === value)) return;
+    entries.push({ key, label, text: value });
+  };
+
+  if (item.translations && typeof item.translations === 'object') {
+    Object.entries(item.translations).forEach(([key, value]) => {
+      add(key, LANG_LABELS[key] || key.toUpperCase(), value);
+    });
+  }
+
+  const lang = item.promptLang || item.language || item.lang || '';
+  add(lang || 'current', LANG_LABELS[lang] || '当前', item.promptText || item.prompt);
+  add('original', LANG_LABELS.original, item.originalPrompt);
+  return entries;
+}
+
+function getDisplayPrompt(item, preferredLang) {
+  const entries = getPromptEntries(item);
+  if (!entries.length) return '—';
+  return (entries.find(e => e.key === preferredLang) || entries[0]).text;
 }
 
 function showSyncStatus(msg, type) {
@@ -776,6 +871,7 @@ function render() {
 function cardHTML(item, idx) {
   const isVideo = !!item.videoUrl;
   const isLocal = !!item._isLocal;
+  const images = getItemImages(item);
   return `
     <div class="card" onclick="openDetail(${idx})">
       <div class="card-stripe stripe-${item.source || 'jimeng'}"></div>
@@ -784,9 +880,10 @@ function cardHTML(item, idx) {
         : `<div style="height:${80 + Math.random()*80|0}px;background:var(--bg3)"></div>`
       }
       ${isVideo ? `<div class="video-badge"><svg viewBox="0 0 24 24" fill="white" width="10" height="10"><polygon points="5 3 19 12 5 21 5 3"/></svg></div>` : ''}
+      ${images.length > 1 ? `<div class="multi-badge"><span>▣</span>${images.length}</div>` : ''}
       ${isLocal ? `<div class="local-badge">本地</div>` : ''}
       <div class="card-overlay">
-        <div class="card-prompt">${escH(item.title || item.promptText || '')}</div>
+        <div class="card-prompt">${escH(item.title || getDisplayPrompt(item) || '')}</div>
       </div>
     </div>
   `;
@@ -866,6 +963,10 @@ function openDetail(idx) {
   const item = data[idx];
   if (!item) return;
   currentItem = item;
+  detailImages = getItemImages(item);
+  detailImageIndex = 0;
+  const promptEntries = getPromptEntries(item);
+  detailPromptLang = promptEntries[0]?.key || '';
 
   const badge = document.getElementById('detailBadge');
   if (item._isLocal) {
@@ -880,11 +981,12 @@ function openDetail(idx) {
   const img    = document.getElementById('detailImg');
   const video  = document.getElementById('detailVideo');
   const playBtn = document.getElementById('playBtn');
-  img.src = item.imageUrl || '';
+  img.src = detailImages[detailImageIndex] || item.imageUrl || '';
   video.src = '';
   video.style.display = 'none';
   img.style.display = 'block';
   playBtn.className = item.videoUrl ? 'play-btn' : 'play-btn hidden';
+  renderDetailImageNav();
 
   // Title
   const titleEl = document.getElementById('detailTitle');
@@ -894,7 +996,7 @@ function openDetail(idx) {
   // Meta
   document.getElementById('detailAuthor').textContent = item.author ? `@${item.author}` : '';
   document.getElementById('detailVersion').textContent = [item.metaVersion, item.arType].filter(Boolean).join(' · ');
-  document.getElementById('detailPrompt').textContent  = item.promptText || '—';
+  renderDetailPromptTabs();
 
   // Params
   const paramsEl = document.getElementById('detailParams');
@@ -909,11 +1011,71 @@ function openDetail(idx) {
   document.body.style.overflow = 'hidden';
 }
 
+function renderDetailImageNav() {
+  const hasMany = detailImages.length > 1;
+  document.getElementById('detailPrev').classList.toggle('show', hasMany);
+  document.getElementById('detailNext').classList.toggle('show', hasMany);
+
+  const dots = document.getElementById('detailDots');
+  dots.classList.toggle('show', hasMany);
+  dots.innerHTML = '';
+  detailImages.forEach((_, i) => {
+    const dot = document.createElement('button');
+    dot.className = 'detail-dot' + (i === detailImageIndex ? ' active' : '');
+    dot.onclick = (e) => {
+      e.stopPropagation();
+      detailImageIndex = i;
+      updateDetailImage();
+    };
+    dots.appendChild(dot);
+  });
+}
+
+function updateDetailImage() {
+  const img = document.getElementById('detailImg');
+  const video = document.getElementById('detailVideo');
+  const playBtn = document.getElementById('playBtn');
+  video.pause();
+  video.src = '';
+  video.style.display = 'none';
+  img.style.display = 'block';
+  img.src = detailImages[detailImageIndex] || currentItem?.imageUrl || '';
+  playBtn.className = currentItem?.videoUrl ? 'play-btn' : 'play-btn hidden';
+  renderDetailImageNav();
+}
+
+function stepDetailImage(step) {
+  if (detailImages.length <= 1) return;
+  detailImageIndex = (detailImageIndex + step + detailImages.length) % detailImages.length;
+  updateDetailImage();
+}
+
+function renderDetailPromptTabs() {
+  const entries = getPromptEntries(currentItem || {});
+  const tabs = document.getElementById('detailLangTabs');
+  tabs.innerHTML = '';
+  tabs.classList.toggle('show', entries.length > 1);
+  entries.forEach(entry => {
+    const btn = document.createElement('button');
+    btn.className = 'detail-lang-tab' + (entry.key === detailPromptLang ? ' active' : '');
+    btn.textContent = entry.label;
+    btn.onclick = () => {
+      detailPromptLang = entry.key;
+      renderDetailPromptTabs();
+    };
+    tabs.appendChild(btn);
+  });
+  document.getElementById('detailPrompt').textContent = getDisplayPrompt(currentItem || {}, detailPromptLang);
+}
+
 function closeDetail() {
   const video = document.getElementById('detailVideo');
   video.pause(); video.src = '';
   document.getElementById('detailOverlay').classList.remove('open');
   document.body.style.overflow = '';
+  detailImages = [];
+  detailImageIndex = 0;
+  detailPromptLang = '';
 }
 
 function playVideo() {
@@ -930,7 +1092,7 @@ function playVideo() {
 
 function copyDetailPrompt() {
   if (!currentItem) return;
-  const text = [currentItem.promptText || '', currentItem.paramsText || ''].join(' ').trim();
+  const text = [getDisplayPrompt(currentItem, detailPromptLang) || '', currentItem.paramsText || ''].join(' ').trim();
   navigator.clipboard.writeText(text).then(() => showToast('📋 已复制提示词'));
 }
 
@@ -956,7 +1118,14 @@ function onSearch() {
   if (!q) { masonry.innerHTML = ''; return; }
 
   const results = getAllData().filter(item => {
-    const hay = [item.promptText, item.title, item.author, ...(item.tags||[])].join(' ').toLowerCase();
+    const hay = [
+      item.promptText,
+      item.originalPrompt,
+      ...getPromptEntries(item).map(e => e.text),
+      item.title,
+      item.author,
+      ...(item.tags||[])
+    ].join(' ').toLowerCase();
     return hay.includes(q);
   }).slice(0, 60);
 
@@ -966,13 +1135,15 @@ function onSearch() {
   const makeCard = (item) => {
     const isVideo = !!item.videoUrl;
     const isLocal = !!item._isLocal;
+    const images = getItemImages(item);
     return `
       <div class="card" onclick="openDetailFromItem('${escH(item.id)}')">
         <div class="card-stripe stripe-${item.source}"></div>
         ${item.imageUrl ? `<img src="${escH(item.imageUrl)}" loading="lazy" onerror="this.style.display='none'">` : `<div style="height:120px;background:var(--bg3)"></div>`}
         ${isVideo ? `<div class="video-badge"><svg viewBox="0 0 24 24" fill="white" width="10" height="10"><polygon points="5 3 19 12 5 21 5 3"/></svg></div>` : ''}
+        ${images.length > 1 ? `<div class="multi-badge"><span>▣</span>${images.length}</div>` : ''}
         ${isLocal ? `<div class="local-badge">本地</div>` : ''}
-        <div class="card-overlay"><div class="card-prompt">${escH(item.title || item.promptText || '')}</div></div>
+        <div class="card-overlay"><div class="card-prompt">${escH(item.title || getDisplayPrompt(item) || '')}</div></div>
       </div>
     `;
   };
@@ -1062,9 +1233,10 @@ function openNewEntry() {
   neSource = 'jimeng';
   document.querySelectorAll('.ne-src').forEach(el => el.classList.toggle('active', el.dataset.src === 'jimeng'));
   document.getElementById('ne-jimeng-fields').style.display = 'flex';
-  ['ne-title','ne-prompt','ne-version','ne-ratio','ne-image','ne-url','ne-tags'].forEach(id => {
+  ['ne-title','ne-prompt','ne-original-prompt','ne-version','ne-ratio','ne-image','ne-url','ne-tags'].forEach(id => {
     document.getElementById(id).value = '';
   });
+  document.getElementById('ne-lang').value = 'zh';
 
   // Populate boards
   const select = document.getElementById('ne-board');
@@ -1094,14 +1266,27 @@ function setNeSrc(el, src) {
 function saveNewEntry() {
   const prompt = document.getElementById('ne-prompt').value.trim();
   if (!prompt) { showToast('⚠ 请填写提示词'); return; }
+  const lang = document.getElementById('ne-lang').value;
+  const originalPrompt = document.getElementById('ne-original-prompt').value.trim();
+  const translations = {};
+  if (lang && lang !== 'other') translations[lang] = prompt;
+  if (originalPrompt) translations.original = originalPrompt;
+  const images = document.getElementById('ne-image').value
+    .split(/\n+/)
+    .map(s => s.trim())
+    .filter(s => /^https?:\/\//i.test(s));
 
   const entry = {
     id:          'mobile_' + Date.now() + '_' + (Math.random()*9999|0),
     _mobileLocal: true,
     source:      neSource,
     promptText:  prompt,
+    promptLang:  lang,
+    originalPrompt,
+    translations,
     title:       document.getElementById('ne-title').value.trim(),
-    imageUrl:    document.getElementById('ne-image').value.trim(),
+    imageUrl:    images[0] || '',
+    allImages:   images,
     originalUrl: document.getElementById('ne-url').value.trim(),
     board:       document.getElementById('ne-board').value || '手机入库',
     tags:        document.getElementById('ne-tags').value.trim().split(/\s+/).filter(Boolean),
@@ -1209,6 +1394,7 @@ function renderFav() {
 function favCardHTML(item) {
   const isVideo = !!item.videoUrl;
   const isLocal = !!item._isLocal;
+  const images = getItemImages(item);
   return `
     <div class="card" onclick="openDetailFromItem('${escH(item.id)}')">
       <div class="card-stripe stripe-${item.source || 'jimeng'}"></div>
@@ -1220,9 +1406,10 @@ function favCardHTML(item) {
         <svg viewBox="0 0 24 24" width="14" height="14" fill="#f59e0b" stroke="#f59e0b" stroke-width="1.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
       </div>
       ${isVideo ? `<div class="video-badge" style="right:30px"><svg viewBox="0 0 24 24" fill="white" width="10" height="10"><polygon points="5 3 19 12 5 21 5 3"/></svg></div>` : ''}
+      ${images.length > 1 ? `<div class="multi-badge" style="right:${isVideo ? '56px' : '30px'}"><span>▣</span>${images.length}</div>` : ''}
       ${isLocal ? `<div class="local-badge">本地</div>` : ''}
       <div class="card-overlay">
-        <div class="card-prompt">${escH(item.title || item.promptText || '')}</div>
+        <div class="card-prompt">${escH(item.title || getDisplayPrompt(item) || '')}</div>
       </div>
     </div>
   `;
@@ -1252,11 +1439,20 @@ function showToast(msg) {
   toastTimer = setTimeout(() => el.classList.remove('show'), 2500);
 }
 
-// Swipe down to close detail
+// Swipe down to close detail, swipe sideways on image to browse multi-image entries.
 let touchStartY = 0;
-document.getElementById('detailOverlay').addEventListener('touchstart', e => { touchStartY = e.touches[0].clientY; }, { passive: true });
+document.getElementById('detailOverlay').addEventListener('touchstart', e => {
+  touchStartY = e.touches[0].clientY;
+}, { passive: true });
 document.getElementById('detailOverlay').addEventListener('touchend', e => {
   if (e.changedTouches[0].clientY - touchStartY > 80) closeDetail();
+}, { passive: true });
+document.getElementById('detailMedia').addEventListener('touchstart', e => {
+  detailTouchStartX = e.touches[0].clientX;
+}, { passive: true });
+document.getElementById('detailMedia').addEventListener('touchend', e => {
+  const dx = e.changedTouches[0].clientX - detailTouchStartX;
+  if (Math.abs(dx) > 45) stepDetailImage(dx > 0 ? -1 : 1);
 }, { passive: true });
 
 // Keyboard shortcuts
