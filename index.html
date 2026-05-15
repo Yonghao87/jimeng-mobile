@@ -667,11 +667,11 @@ window.addEventListener('DOMContentLoaded', async () => {
   loadConfig();
   // Load cached cloud data from IndexedDB
   try {
-    const cached = await idbGet('cloud_cache');
-    if (cached) {
-      cloudData = (cached.data || []).map(normalizeItem);
-      boards    = cached.boards || [];
-    }
+      const cached = await idbGet('cloud_cache');
+      if (cached) {
+        cloudData = getMetaDataList(cached).map(normalizeItem);
+        boards    = normalizeBoardNames([...(cached.boards || []), ...cloudData.map(i => i.board)]);
+      }
   } catch(e) {}
   render();
   updateStats();
@@ -713,8 +713,11 @@ async function syncData() {
     if (!res.ok) throw new Error(`服务器错误：${res.status}`);
 
     const json = await res.json();
-    cloudData = (json.data || []).map(normalizeItem);
-    boards    = json.boards || [...new Set(cloudData.map(i => i.board).filter(Boolean))];
+    const deletedIds = normalizeDeletedIds(json.deletedIds || []);
+    cloudData = getMetaDataList(json)
+      .filter(item => !deletedIds.has(String(item.id || '')))
+      .map(normalizeItem);
+    boards = normalizeBoardNames([...(json.boards || []), ...cloudData.map(i => i.board)]);
 
     await idbSet('cloud_cache', { data: cloudData, boards });
 
@@ -747,11 +750,40 @@ function normalizeItem(item) {
     arType:      item.arType || item.ratio || '',
     author:      item.author || item.authorName || '',
     tags:        Array.isArray(item.tags) ? item.tags : [],
+    board:       normalizeBoardName(item.board || item.boardName || item.collection || ''),
     source:      item.source || 'jimeng',
-    videoUrl:    item.videoUrl || '',
+    videoUrl:    item.cosVideoUrl || item.videoUrl || '',
     originalUrl: item.originalUrl || item.url || '',
     title:       item.title || '',
   };
+}
+
+function getMetaDataList(json) {
+  if (Array.isArray(json)) return json;
+  if (Array.isArray(json?.data)) return json.data;
+  if (Array.isArray(json?.jimengCollections)) return json.jimengCollections;
+  if (Array.isArray(json?.items)) return json.items;
+  return [];
+}
+
+function normalizeBoardName(board) {
+  if (typeof board === 'string') return board.trim();
+  if (board && typeof board === 'object') return String(board.name || board.title || '').trim();
+  return '';
+}
+
+function normalizeBoardNames(list) {
+  return [...new Set((Array.isArray(list) ? list : [])
+    .map(normalizeBoardName)
+    .filter(Boolean)
+  )];
+}
+
+function normalizeDeletedIds(list) {
+  return new Set((Array.isArray(list) ? list : [])
+    .map(row => typeof row === 'object' && row !== null ? row.id : row)
+    .filter(Boolean)
+    .map(id => String(id)));
 }
 
 function normalizeImages(item) {
@@ -838,7 +870,7 @@ function updateLocalUI() {
 function getFilteredData() {
   let data = getAllData();
   if (currentSrc !== 'all') data = data.filter(i => i.source === currentSrc);
-  if (currentBoard) data = data.filter(i => i.board === currentBoard);
+  if (currentBoard) data = data.filter(i => normalizeBoardName(i.board) === currentBoard);
   if (activeFilters.version.size) data = data.filter(i => activeFilters.version.has(i.metaVersion));
   if (activeFilters.ratio.size)   data = data.filter(i => activeFilters.ratio.has(i.arType));
   if (activeFilters.tags.size)    data = data.filter(i => (i.tags||[]).some(t => activeFilters.tags.has(t)));
@@ -904,14 +936,15 @@ function renderBoards() {
   const grid = document.getElementById('boardsGrid');
   // Combine cloud boards + local boards
   const local = getLocalEntries();
-  const localBoards = [...new Set(local.map(i => i.board).filter(Boolean))];
-  const allBoards = [...new Set([...boards, ...localBoards])];
   const allData = getAllData();
+  const dataBoards = normalizeBoardNames(allData.map(i => i.board));
+  const localBoards = normalizeBoardNames(local.map(i => i.board));
+  const allBoards = [...new Set([...normalizeBoardNames(boards), ...dataBoards, ...localBoards])];
 
   if (!allBoards.length) { grid.innerHTML = ''; return; }
 
   grid.innerHTML = allBoards.map(board => {
-    const items = allData.filter(i => i.board === board);
+    const items = allData.filter(i => normalizeBoardName(i.board) === board);
     const imgs  = items.slice(0, 3).map(i => i.imageUrl).filter(Boolean);
     return `
       <div class="board-card" onclick="filterByBoard('${escH(board)}')">
@@ -932,7 +965,7 @@ function renderBoards() {
 }
 
 function filterByBoard(board) {
-  currentBoard = board;
+  currentBoard = normalizeBoardName(board);
   displayLimit = 40;
   switchTab('home');
   render();
@@ -1240,7 +1273,12 @@ function openNewEntry() {
 
   // Populate boards
   const select = document.getElementById('ne-board');
-  const allBoards = [...new Set([...boards, ...getLocalEntries().map(i => i.board).filter(Boolean), '手机入库'])];
+  const allBoards = [...new Set([
+    ...normalizeBoardNames(boards),
+    ...normalizeBoardNames(getAllData().map(i => i.board)),
+    ...normalizeBoardNames(getLocalEntries().map(i => i.board)),
+    '手机入库'
+  ])];
   select.innerHTML = allBoards.map(b => `<option value="${escH(b)}">${escH(b)}</option>`).join('');
 
   // Update badge
