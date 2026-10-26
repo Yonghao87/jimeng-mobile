@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#080c14">
-<title>底栏测试 01</title>
+<title>底栏测试 02</title>
 <style>
 :root {
   --safe-top: env(safe-area-inset-top, 0px);
@@ -26,7 +26,7 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
 .top { position: fixed; z-index: 2; top: 0; left: 0; right: 0; height: calc(56px + var(--inset-top)); padding: var(--inset-top) 16px 0; display: flex; align-items: center; justify-content: space-between; background: #101b2c; border-bottom: 2px solid #6bbcff; }
 .top strong { font-size: 16px; }
 .top span { color: #b0c5e3; font-size: 12px; }
-.main { position: absolute; inset: 0; padding: calc(68px + var(--inset-top)) 16px calc(76px + var(--inset-bottom)); overflow: auto; display: grid; align-items: center; }
+.main { position: absolute; inset: calc(56px + var(--inset-top)) 0 calc(64px + var(--inset-bottom)); padding: 12px 16px; overflow: auto; display: grid; align-items: center; }
 .panel { width: 100%; max-width: 380px; margin: auto; }
 .hint { margin: 0 0 14px; color: #b0c0d9; font-size: 13px; }
 .controls { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
@@ -39,6 +39,8 @@ dl > div { display: flex; justify-content: space-between; gap: 12px; padding: 4p
 dt { color: #b0c0d9; }
 dd { margin: 0; text-align: right; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
 #copy { width: 100%; }
+#applied { margin: 0 0 10px; padding: 7px 10px; border: 1px solid #3c896e; border-radius: 8px; background: #102b25; color: #a5f5d7; font-size: 12px; }
+#applied[data-supported="false"] { border-color: #b68b42; color: #ffe0a8; background: #332817; }
 #status { min-height: 20px; margin: 4px 0 0; color: #99dfc1; font-size: 12px; text-align: center; }
 .bottom { position: fixed; z-index: 2; left: 0; right: 0; bottom: 0; height: calc(64px + var(--inset-bottom)); flex-shrink: 0; padding: 8px 16px calc(8px + var(--inset-bottom)); display: flex; flex-direction: column; align-items: center; justify-content: center; background: #143c68; }
 .bottom strong { font-size: 16px; }
@@ -51,7 +53,7 @@ dd { margin: 0; text-align: right; font-variant-numeric: tabular-nums; overflow-
 </head>
 <body>
 <div class="app" id="app" data-layout="fixed">
-  <header class="top"><strong>底栏测试 · 01</strong><span>顶部蓝线</span></header>
+  <header class="top"><strong>底栏测试 · 02</strong><span id="change-count">尚未切换</span></header>
   <main class="main">
     <div class="panel">
       <p class="hint">看底部绿色线与屏幕底边的距离。分别从 Safari 和主屏快捷方式打开对比。</p>
@@ -60,10 +62,12 @@ dd { margin: 0; text-align: right; font-variant-numeric: tabular-nums; overflow-
         <label>页面高度<select id="height"><option value="percent">100%</option><option value="dynamic">100dvh</option></select></label>
       </div>
       <label class="safe-toggle"><input type="checkbox" id="safe" checked>保留系统安全区</label>
+      <p id="applied" role="status" aria-live="polite">正在读取…</p>
       <dl aria-label="当前设备布局数据">
         <div><dt>启动方式</dt><dd id="mode">—</dd></div>
         <div><dt>屏幕 / 页面 / 可视高度</dt><dd id="heights">—</dd></div>
         <div><dt>页面 / 底栏底边</dt><dd id="bottoms">—</dd></div>
+        <div><dt>CSS 实际页面高度</dt><dd id="computed-height">—</dd></div>
         <div><dt>系统安全区：上 / 下</dt><dd id="insets">—</dd></div>
         <div><dt>可视顶偏移 / 缩放</dt><dd id="offset">—</dd></div>
       </dl>
@@ -71,7 +75,7 @@ dd { margin: 0; text-align: right; font-variant-numeric: tabular-nums; overflow-
       <p id="status" role="status" aria-live="polite"></p>
     </div>
   </main>
-  <footer class="bottom" id="bottom"><strong>底部栏</strong><span>绿色线 = 网页底部边界</span></footer>
+  <footer class="bottom" id="bottom"><strong id="bottom-label">底部栏 · 100%</strong><span>绿色线 = 网页底部边界</span></footer>
 </div>
 <div class="safe-probe" id="probe" aria-hidden="true"></div>
 <script>
@@ -83,18 +87,22 @@ const safe = document.getElementById('safe');
 const rounded = n => Number.isFinite(n) ? Math.round(n * 10) / 10 : null;
 const show = (id, text) => { document.getElementById(id).textContent = text; };
 let latest;
+let changeCount = 0;
 function measure() {
   const vv = window.visualViewport;
   const probe = getComputedStyle(document.getElementById('probe'));
   const appBox = app.getBoundingClientRect();
   const navBox = bottom.getBoundingClientRect();
   const standalone = navigator.standalone === true || matchMedia('(display-mode: standalone)').matches;
+  const requestedHeight = height.value === 'dynamic' ? '100dvh' : '100%';
+  const heightSupported = CSS.supports('height', requestedHeight);
   latest = {
-    test: 'bar-test-01', time: new Date().toISOString(), url: location.href,
+    test: 'bar-test-02', time: new Date().toISOString(), url: location.href,
     userAgent: navigator.userAgent,
     mode: standalone ? 'standalone' : matchMedia('(display-mode: fullscreen)').matches ? 'fullscreen' : 'browser',
     navigatorStandalone: navigator.standalone ?? null,
     options: { layout: layout.value, height: height.value, safeArea: safe.checked },
+    applied: { changes: changeCount, requestedHeight, inlineHeight: app.style.height || '100% (stylesheet)', computedHeight: getComputedStyle(app).height, heightSupported },
     screen: { width: screen.width, height: screen.height, availableHeight: screen.availHeight, dpr: devicePixelRatio },
     inner: { width: innerWidth, height: innerHeight },
     visualViewport: vv ? { width: rounded(vv.width), height: rounded(vv.height), offsetTop: rounded(vv.offsetTop), offsetLeft: rounded(vv.offsetLeft), scale: rounded(vv.scale) } : null,
@@ -106,10 +114,16 @@ function measure() {
   show('mode', latest.mode === 'standalone' ? '主屏独立运行' : latest.mode === 'fullscreen' ? '全屏运行' : '浏览器内运行');
   show('heights', `${screen.height} / ${innerHeight} / ${vv ? rounded(vv.height) : '—'}`);
   show('bottoms', `${latest.app.bottom} / ${latest.bottomBar.bottom}`);
+  show('computed-height', latest.applied.computedHeight);
   show('insets', `${latest.safeArea.top} / ${latest.safeArea.bottom}`);
   show('offset', `${vv ? rounded(vv.offsetTop) : '—'} / ${vv ? rounded(vv.scale) : '—'}`);
+  show('change-count', changeCount ? `已切换 ${changeCount} 次` : '尚未切换');
+  show('applied', heightSupported ? `已应用：${requestedHeight} · ${layout.value === 'fixed' ? '固定贴底' : '页面内排列'} · 安全区${safe.checked ? '开' : '关'}` : `当前浏览器不支持 ${requestedHeight}，此选项未生效`);
+  document.getElementById('applied').dataset.supported = String(heightSupported);
+  show('bottom-label', heightSupported ? `底部栏 · ${requestedHeight}` : '底部栏 · 高度选项未生效');
 }
 function applyOptions() {
+  changeCount++;
   app.dataset.layout = layout.value;
   app.style.height = height.value === 'dynamic' ? '100dvh' : '100%';
   document.documentElement.style.setProperty('--inset-top', safe.checked ? 'var(--safe-top)' : '0px');
