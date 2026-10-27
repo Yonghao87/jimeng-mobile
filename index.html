@@ -6,7 +6,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
-<meta name="aigc-mobile-ui" content="2026-10-27-browse01">
+<meta name="aigc-mobile-ui" content="2026-10-27-browse02">
 <meta name="theme-color" content="#080c14">
 <title>AIGC Vault</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -65,7 +65,7 @@ html { overscroll-behavior: none; }
   border-bottom: 1px solid var(--border);
 }
 .header-inner { display: flex; align-items: center; gap: 10px; padding: 6px 16px; height: var(--header-h); }
-.logo { width: 28px; height: 28px; border-radius: 7px; background: linear-gradient(135deg, #4f8ef7, #a78bfa); display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: #fff; flex-shrink: 0; }
+.logo { width: 44px; height: 44px; padding:0; border:0; cursor:pointer; border-radius: 7px; background: linear-gradient(135deg, #4f8ef7, #a78bfa); display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: #fff; flex-shrink: 0; }
 .header-title { font-size: 16px; font-weight: 600; letter-spacing: -0.3px; flex: 1; }
 .header-btn { width: 44px; height: 44px; border-radius: 10px; background: var(--glass); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; transition: background 0.2s; }
 .header-btn:active { background: rgba(255,255,255,0.1); }
@@ -321,7 +321,7 @@ html { overscroll-behavior: none; }
   <!-- HEADER -->
   <div class="header" id="appHeader">
     <div class="header-inner">
-      <div class="logo">AI</div>
+      <button type="button" class="logo" onclick="handleModeLogoClick()" aria-label="连续点击三次切换普通与工作模式" title="连续点击三次切换普通与工作模式">AI</button>
       <div class="header-title">AIGC Vault</div>
       <button type="button" class="header-btn" onclick="openSearch()" aria-label="搜索">
         <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -379,6 +379,16 @@ html { overscroll-behavior: none; }
       <div class="settings-wrap">
 
         <div class="setting-card">
+          <div class="setting-header">浏览模式</div>
+          <div class="setting-row" style="flex-direction:column;align-items:stretch;gap:10px">
+            <label class="setting-name" for="modeSelect">普通模式 / 工作模式</label>
+            <select class="setting-inp-field" id="modeSelect" aria-label="浏览模式" onchange="setWorkMode(this.value==='work')"><option value="normal">普通模式 · 显示全部画板</option><option value="work">工作模式 · 隐藏指定画板</option></select>
+            <div class="setting-desc" id="workModeStatus">普通模式 · 显示全部画板</div>
+            <div class="setting-desc">也可连续点击左上角 AI 图标三次切换。选择只保存在这台手机，不修改电脑和云端。</div>
+          </div>
+        </div>
+
+        <div class="setting-card">
           <div class="setting-header">腾讯云 COS 配置</div>
           <div class="setting-row" style="flex-direction:column;align-items:stretch">
             <div style="font-size:12px;color:var(--t2);line-height:1.6">需要将 mobile_meta.json 设为公有读，填写 Bucket 和地域后点同步。</div>
@@ -422,8 +432,7 @@ html { overscroll-behavior: none; }
           <div class="setting-row">
             <div>
               <div class="setting-name">AIGC Vault Mobile</div>
-              <div class="setting-desc">浏览交互版 · 2026-10-27</div>
-              <div class="setting-desc" id="workModeStatus">已启用 · 自动隐藏电脑端标记的画板</div>
+              <div class="setting-desc">浏览交互版 02 · 2026-10-27</div>
             </div>
           </div>
         </div>
@@ -690,6 +699,9 @@ let cloudDeletedIds = [];
 let cloudData    = [];   // 从 COS 同步的数据
 let boards       = [];
 let hiddenBoards = new Set();
+let isWorkMode = false;
+let modeLogoClicks = 0;
+let modeLogoTimer;
 let sortOrder = 'newest';
 let recentRange = 'all';
 let libraryCache = null;
@@ -727,16 +739,38 @@ function getAllData() {
     const local = getLocalEntries().map(i => normalizeItem({...i,_isLocal:true}));
     libraryCache = {cloud:cloudData,deleted:cloudDeletedIds,local:localText,items:mergeMobileLibrary(cloudData,local,cloudDeletedIds).map(normalizeItem)};
   }
-  return libraryCache.items.filter(i => !hiddenBoards.has(normalizeBoardName(i.board)));
+  return libraryCache.items.filter(i => !isBoardHidden(i.board));
 }
 
+function isBoardHidden(board) { return isWorkMode && hiddenBoards.has(normalizeBoardName(board)); }
+function renderWorkMode() {
+  document.getElementById('modeSelect').value=isWorkMode?'work':'normal';
+  document.getElementById('workModeStatus').textContent=isWorkMode?'工作模式 · 隐藏电脑端标记的画板':'普通模式 · 显示全部画板';
+}
+function setWorkMode(enabled) {
+  isWorkMode=!!enabled;
+  try { localStorage.setItem('aigc_mobile_work_mode',String(isWorkMode)); } catch {}
+  if(currentBoard && isBoardHidden(currentBoard)) currentBoard=null;
+  if(currentItem && isBoardHidden(currentItem.board)) closeDetail();
+  activeFilters=emptyFilters(); pendingFilters=emptyFilters();
+  resetGalleryPosition(); favLimit=40;
+  document.getElementById('page-fav').scrollTop=0;
+  document.getElementById('page-boards').scrollTop=0;
+  renderWorkMode(); render(); renderFav(); renderBoards(); updateStats();
+  if(document.getElementById('searchOverlay').classList.contains('open')) onSearch();
+  showToast(isWorkMode?'已切换为工作模式':'已切换为普通模式');
+}
+function handleModeLogoClick() {
+  modeLogoClicks++; clearTimeout(modeLogoTimer);
+  modeLogoTimer=setTimeout(()=>{modeLogoClicks=0;},800);
+  if(modeLogoClicks<3) return;
+  modeLogoClicks=0; clearTimeout(modeLogoTimer); setWorkMode(!isWorkMode);
+}
 function applyBoardPolicy(index) {
   hiddenBoards = mobileHiddenBoards(index.boards);
-  boards = normalizeBoardNames([...index.boards,...index.data.map(i=>i.board)]).filter(name=>!hiddenBoards.has(name));
-  if (currentBoard && hiddenBoards.has(currentBoard)) currentBoard = null;
-  const status = document.getElementById('workModeStatus');
-  status.textContent = '已启用 · 自动隐藏电脑端标记的画板';
-
+  boards = normalizeBoardNames([...index.boards,...index.data.map(i=>i.board)]);
+  if (currentBoard && isBoardHidden(currentBoard)) currentBoard = null;
+  renderWorkMode();
 }
 
 // ═══════════════════════════════════════
@@ -745,6 +779,8 @@ function applyBoardPolicy(index) {
 window.addEventListener('DOMContentLoaded', async () => {
   renderSourceTabs();
   loadConfig();
+  try { isWorkMode=localStorage.getItem('aigc_mobile_work_mode')==='true'; } catch {}
+  renderWorkMode();
   try { const prefs=JSON.parse(localStorage.getItem('aigc_mobile_browse') || '{}'); if(['newest','oldest','updated'].includes(prefs.sort)) sortOrder=prefs.sort; if(Object.hasOwn(RECENT_LABELS,prefs.recent)) recentRange=prefs.recent; } catch {}
   document.getElementById('sortSelect').value=sortOrder;
   document.getElementById('recentSelect').value=recentRange;
@@ -997,7 +1033,7 @@ function render() {
     masonry.innerHTML = '';
     empty.style.display = '';
     document.getElementById('emptyTitle').textContent=hasBrowseConditions()?'没有符合条件的内容':'没有找到内容';
-    document.getElementById('emptyHint').textContent=hasBrowseConditions()?'试试扩大采集时间范围，或清除筛选。':'请在设置页配置 COS 并同步数据，或新建提示词。已隐藏的画板不在手机显示。';
+    document.getElementById('emptyHint').textContent=hasBrowseConditions()?'试试扩大采集时间范围，或清除筛选。':isWorkMode?'当前为工作模式，可在设置中切换普通模式，或同步云端数据。':'请在设置页配置 COS 并同步数据，或新建提示词。';
     document.getElementById('clearConditionsBtn').hidden=!hasBrowseConditions();
     return;
   }
@@ -1046,7 +1082,7 @@ function renderBoards() {
   const allData = sortMobileItems(getAllData(),sortOrder);
   const dataBoards = normalizeBoardNames(allData.map(i => i.board));
   const localBoards = normalizeBoardNames(local.map(i => i.board));
-  const allBoards = [...new Set([...normalizeBoardNames(boards), ...dataBoards, ...localBoards])].filter(name=>!hiddenBoards.has(name));
+  const allBoards = [...new Set([...normalizeBoardNames(boards), ...dataBoards, ...localBoards])].filter(name=>!isBoardHidden(name));
 
   if (!allBoards.length) { grid.innerHTML = ''; return; }
 
@@ -1392,7 +1428,7 @@ function openNewEntry() {
     ...normalizeBoardNames(getAllData().map(i => i.board)),
     ...normalizeBoardNames(getLocalEntries().map(i => i.board)),
     '手机入库'
-  ])].filter(name=>!hiddenBoards.has(name));
+  ])].filter(name=>!isBoardHidden(name));
   select.innerHTML = allBoards.map(b => `<option value="${escH(b)}">${escH(b)}</option>`).join('');
 
   // Update badge
