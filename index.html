@@ -5,9 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="theme-color" content="#080c14">
-<title>底栏测试 02</title>
+<title>底栏测试 03（不透明）</title>
 <style>
 :root {
   --safe-top: env(safe-area-inset-top, 0px);
@@ -52,19 +52,20 @@ dd { margin: 0; text-align: right; font-variant-numeric: tabular-nums; overflow-
 </style>
 </head>
 <body>
-<div class="app" id="app" data-layout="fixed">
-  <header class="top"><strong>底栏测试 · 02</strong><span id="change-count">尚未切换</span></header>
+<div class="app" id="app" data-layout="fixed" style="height:100dvh">
+  <header class="top"><strong>底栏测试 · 03</strong><span id="change-count">尚未切换</span></header>
   <main class="main">
     <div class="panel">
-      <p class="hint">看底部绿色线与屏幕底边的距离。分别从 Safari 和主屏快捷方式打开对比。</p>
+      <p class="hint">此页仅对照不透明状态栏。请从 Safari 打开后，为此页新建一个主屏快捷方式。</p>
       <div class="controls">
         <label>底栏定位<select id="layout"><option value="fixed">固定贴底</option><option value="flex">页面内排列</option></select></label>
-        <label>页面高度<select id="height"><option value="percent">100%</option><option value="dynamic">100dvh</option></select></label>
+        <label>页面高度<select id="height"><option value="percent">100%</option><option value="dynamic" selected>100dvh</option></select></label>
       </div>
       <label class="safe-toggle"><input type="checkbox" id="safe" checked>保留系统安全区</label>
       <p id="applied" role="status" aria-live="polite">正在读取…</p>
       <dl aria-label="当前设备布局数据">
         <div><dt>启动方式</dt><dd id="mode">—</dd></div>
+        <div><dt>状态栏配置</dt><dd>black（不透明）</dd></div>
         <div><dt>屏幕 / 页面 / 可视高度</dt><dd id="heights">—</dd></div>
         <div><dt>页面 / 底栏底边</dt><dd id="bottoms">—</dd></div>
         <div><dt>CSS 实际页面高度</dt><dd id="computed-height">—</dd></div>
@@ -97,7 +98,8 @@ function measure() {
   const requestedHeight = height.value === 'dynamic' ? '100dvh' : '100%';
   const heightSupported = CSS.supports('height', requestedHeight);
   latest = {
-    test: 'bar-test-02', time: new Date().toISOString(), url: location.href,
+    test: 'bar-test-03-black',
+    documentStatusBarStyle: document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]').content, time: new Date().toISOString(), url: location.href,
     userAgent: navigator.userAgent,
     mode: standalone ? 'standalone' : matchMedia('(display-mode: fullscreen)').matches ? 'fullscreen' : 'browser',
     navigatorStandalone: navigator.standalone ?? null,
