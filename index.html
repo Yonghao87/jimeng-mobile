@@ -6,7 +6,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
-<meta name="aigc-mobile-ui" content="2026-10-29-feed01">
+<meta name="aigc-mobile-ui" content="2026-10-29-feed02">
 <meta name="theme-color" content="#080c14">
 <title>AIGC Vault</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -452,7 +452,7 @@ html { overscroll-behavior: none; }
           <div class="setting-row">
             <div>
               <div class="setting-name">AIGC Vault Mobile</div>
-              <div class="setting-desc">大图浏览版 · 2026-10-29</div>
+              <div class="setting-desc">大图浏览版 02 · 2026-10-29</div>
             </div>
           </div>
         </div>
@@ -914,22 +914,38 @@ function normalizeBoardNames(list) {
 }
 
 
-function normalizeImages(item) {
-  const images = [
-    ...(Array.isArray(item.allImages) ? item.allImages : []),
-    ...(Array.isArray(item.images) ? item.images : []),
-    item.cosUrl,
-    item.imageUrl,
-    item.mainImage,
-    item.localThumb,
-  ];
-  return [...new Set(images.filter(Boolean).map(v => String(v).trim()))]
-    .filter(u => /^https?:\/\//i.test(u) || /^data:image\//i.test(u));
+function validImageUrls(values) {
+  return [...new Set(values.filter(v=>typeof v==='string').map(v=>v.trim()).filter(u=>/^https?:\/\//i.test(u) || /^data:image\//i.test(u)))];
 }
-
-function getItemImages(item) {
-  const normalized = normalizeImages(item);
-  return normalized.length ? normalized : [item.imageUrl].filter(Boolean);
+function normalizeImages(item) {
+  const listed=validImageUrls([...(Array.isArray(item.allImages)?item.allImages:[]),...(Array.isArray(item.images)?item.images:[])]);
+  // Old phone caches appended previews to allImages. Remove known preview copies
+  // when real image URLs exist; never count fallback addresses as extra images.
+  const originals=listed.filter(url=>url!==item.cosThumbUrl && url!==item.thumbBlobBase64 && url!==item.localThumb);
+  if(originals.length) return originals;
+  if(listed.length) return listed.slice(0,1);
+  return validImageUrls([item.cosUrl || item.mainImage || item.imageUrl || item.cosThumbUrl || item.localThumb || item.thumbBlobBase64]);
+}
+function getItemImages(item) { return normalizeImages(item); }
+const imageRetries=new WeakMap();
+function imageCandidates(item,index) {
+  const original=getItemImages(item)[index];
+  return validImageUrls([original,...(index===0?[item.cosUrl,item.cosThumbUrl,item.thumbBlobBase64,item.thumbnailUrl,item.localThumb,item.imageUrl,item.mainImage]:[])]);
+}
+function retryItemImage(img) {
+  const item=getAllData().find(row=>String(row.id)===img.getAttribute('data-media-id'));
+  const tried=imageRetries.get(img) || new Set(); tried.add(img.getAttribute('src')); imageRetries.set(img,tried);
+  const next=item && imageCandidates(item,Number(img.getAttribute('data-media-index') || 0)).find(url=>!tried.has(url));
+  if(next) { img.src=next; return; }
+  img.style.display='none';
+  if(img.previousElementSibling?.classList.contains('card-media-fallback')) img.previousElementSibling.textContent='图片暂不可用';
+}
+function mediaImageHTML(item,url,index,alt='') {
+  return `<img src="${escH(url)}" data-media-id="${escH(item.id)}" data-media-index="${index}" alt="${escH(alt)}" loading="lazy" decoding="async" onerror="retryItemImage(this)">`;
+}
+function setDetailImage(img,item,index) {
+  imageRetries.delete(img); img.setAttribute('data-media-id',String(item.id)); img.setAttribute('data-media-index',String(index));
+  img.onerror=()=>retryItemImage(img); img.style.display='block'; img.src=getItemImages(item)[index] || item.imageUrl || '';
 }
 
 function getPromptEntries(item) {
@@ -1046,7 +1062,7 @@ function feedCardHTML(item) {
   return `<article class="feed-card" aria-label="${escH(item.title || item._modelLabel || '作品')}">
     <div class="feed-heading"><strong>${escH(item._modelLabel)}</strong><span>${escH(item._site)}${item._isLocal?' · 本地':''}${item.isFavorite?' · ★':''}</span></div>
     <div class="feed-visual"><div class="feed-carousel" aria-label="作品图片，可左右滑动" onscroll="updateFeedPosition(this)" onpointerdown="this.dataset.startX=event.clientX">
-      ${slides.length?slides.map((slide,slideIndex)=>`<button type="button" class="feed-slide" aria-label="查看第 ${slideIndex+1} 张大图" onclick="openFeedImage(event,${escH(JSON.stringify(String(slide.id)))},${slide.index})"><span>图片暂不可用</span><img src="${escH(slide.url)}" alt="${escH(item.title || '作品图片')}" loading="lazy" decoding="async" onerror="this.style.display='none'"></button>`).join(''):'<div class="feed-slide">暂无预览</div>'}
+      ${slides.length?slides.map((slide,slideIndex)=>`<button type="button" class="feed-slide" aria-label="查看第 ${slideIndex+1} 张大图" onclick="openFeedImage(event,${escH(JSON.stringify(String(slide.id)))},${slide.index})"><span>图片暂不可用</span>${mediaImageHTML({id:slide.id},slide.url,slide.index,item.title || '作品图片')}</button>`).join(''):'<div class="feed-slide">暂无预览</div>'}
     </div>${slides.length>1?`<span class="feed-image-count" aria-hidden="true">1 / ${slides.length}</span>`:''}</div>
     ${slides.length>1?`<div class="feed-pager"><button type="button" aria-label="上一张图片" onclick="stepFeed(this,-1)">‹</button><span class="feed-count" aria-live="polite">1 / ${slides.length}</span><button type="button" aria-label="下一张图片" onclick="stepFeed(this,1)">›</button></div>`:''}
     <div class="feed-caption">${item.title?`<strong>${escH(item.title)}</strong>`:''}<p>${escH(getDisplayPrompt(item))}</p><button type="button" onclick="openDetailFromItem(${id})">${item.videoUrl?'播放视频 / 查看提示词':'查看详情与提示词'}</button></div>
@@ -1089,7 +1105,7 @@ function cardMediaHTML(item) {
   item = item._groupCover || item;
   const ratio = String(item.arType || '').match(/^(\d+(?:\.\d+)?)\s*[:/]\s*(\d+(?:\.\d+)?)$/);
   const aspect = ratio && Number(ratio[1]) > 0 && Number(ratio[2]) > 0 ? `${Number(ratio[1])} / ${Number(ratio[2])}` : '1';
-  return `${groupBadge}<div class="card-media" style="--media-ratio:${aspect}"><span class="card-media-fallback">${item.imageUrl ? '图片加载中…' : '暂无预览'}</span>${item.imageUrl ? `<img src="${escH(item.imageUrl)}" alt="" loading="lazy" decoding="async" onerror="this.style.display='none';this.previousElementSibling.textContent='图片暂不可用'">` : ''}</div>`;
+  return `${groupBadge}<div class="card-media" style="--media-ratio:${aspect}"><span class="card-media-fallback">${item.imageUrl ? '图片加载中…' : '暂无预览'}</span>${item.imageUrl ? mediaImageHTML(item,item.imageUrl,0) : ''}</div>`;
 }
 
 function render() {
@@ -1240,7 +1256,7 @@ function showDetail(item) {
   const img    = document.getElementById('detailImg');
   const video  = document.getElementById('detailVideo');
   const playBtn = document.getElementById('playBtn');
-  img.src = detailImages[detailImageIndex] || item.imageUrl || '';
+  setDetailImage(img,item,detailImageIndex);
   video.src = '';
   video.onerror=()=>{ if(currentItem===item && video.getAttribute('src')) restoreVideoCover(); };
   video.style.display = 'none';
@@ -1302,7 +1318,7 @@ function updateDetailImage() {
   video.src = '';
   video.style.display = 'none';
   img.style.display = 'block';
-  img.src = detailImages[detailImageIndex] || currentItem?.imageUrl || '';
+  if(currentItem) setDetailImage(img,currentItem,detailImageIndex);
   playBtn.className = currentItem?.videoUrl ? 'play-btn' : 'play-btn hidden';
   renderDetailImageNav();
 }
