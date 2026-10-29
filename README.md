@@ -4,7 +4,7 @@ AIGC Vault 的独立手机网页，用于浏览电脑端同步的图片、视频
 
 **打开网页：[Yonghao87.github.io/jimeng-mobile](https://Yonghao87.github.io/jimeng-mobile/)**
 
-当前界面：**浏览体验版 04 · 2026-10-29**。源码标记：`2026-10-29-view04`。更新记录见 [CHANGELOG.md](CHANGELOG.md)。
+当前界面：**v1.0.4 · 2026-10-29**。手机版独立版本：`1.0.4`。源码标记：`2026-10-29-view04`。更新记录见 [CHANGELOG.md](CHANGELOG.md)。
 
 ## 三种浏览方式
 
