@@ -6,7 +6,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
-<meta name="aigc-mobile-ui" content="2026-10-29-feed02">
+<meta name="aigc-mobile-ui" content="2026-10-29-view03">
 <meta name="theme-color" content="#080c14">
 <title>AIGC Vault</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -71,10 +71,10 @@ html { overscroll-behavior: none; }
 .header-btn:active { background: rgba(255,255,255,0.1); }
 .header-btn svg { width: 18px; height: 18px; stroke: var(--t2); fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 
-.source-tabs { display: flex; gap: 6px; padding: 3px 16px 10px; overflow-x: auto; scrollbar-width: thin; scrollbar-color: var(--t3) transparent; }
+.source-tabs { display: flex; gap: 6px; padding: 2px 16px 6px; overflow-x: auto; scrollbar-width: thin; scrollbar-color: var(--t3) transparent; }
 .source-tabs::-webkit-scrollbar { display: block; height: 3px; }
 .source-tabs::-webkit-scrollbar-thumb { background: var(--t3); border-radius: 2px; }
-.src-tab { display: flex; align-items: center; justify-content: center; min-width: 44px; min-height: 44px; gap: 5px; padding: 7px 12px; border-radius: 24px; font-size: 12px; font-weight: 500; border: 1px solid var(--border); background: var(--glass); color: var(--t2); cursor: pointer; white-space: nowrap; transition: all 0.2s; flex-shrink: 0; }
+.src-tab { display: flex; align-items: center; justify-content: center; min-width: 44px; min-height: 32px; gap: 5px; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 500; border: 1px solid var(--border); background: var(--glass); color: var(--t2); cursor: pointer; white-space: nowrap; transition: all 0.2s; flex-shrink: 0; }
 .header.compact .source-tabs, .header.compact #browseSummary, .header.compact .gallery-only { display: none; }
 .browse-toolbar { display:flex; align-items:center; gap:8px; padding:0 12px 4px; }
 .browse-toolbar #browseSummary { flex:1; min-width:0; font-size:11px; color:var(--t2); overflow-wrap:anywhere; }
@@ -331,6 +331,18 @@ html { overscroll-behavior: none; }
 .feed-caption p { color:var(--t2); display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; white-space:pre-wrap; }
 .feed-caption button { min-height:44px; border:0; background:none; color:var(--acc); padding:4px 0; font:inherit; }
 
+.logo.work-mode { background:linear-gradient(135deg,#22c55e,#4ade80); color:#052e16; }
+.page,.search-results { overflow-anchor:none; }
+.pure-menu { position:fixed; z-index:120; top:calc(var(--safe-t) + 8px); right:12px; min-height:44px; min-width:56px; border:1px solid #ffffff40; border-radius:24px; padding:8px 12px; background:#080c14c9; color:white; font:inherit; font-size:13px; }
+.pure-menu.chrome-open { top:auto; bottom:calc(var(--tab-h) + var(--safe-b) + 8px); }
+.pure-menu[hidden] { display:none; }
+.pure-view > .header,.pure-view > .tab-bar { display:none; }
+.pure-view .page { padding-bottom:var(--safe-b); }
+.pure-view .page-home { padding-top:0; }
+.masonry.pure { gap:4px; }
+.pure .feed-heading,.pure .feed-caption,.pure .feed-pager { display:none; }
+.pure .feed-carousel { height:calc(100dvh - var(--safe-t) - var(--safe-b)); }
+.pure .feed-image-count { right:auto; left:12px; }
 @keyframes spin { to { transform: rotate(360deg); } }
 </style>
 </head>
@@ -340,9 +352,9 @@ html { overscroll-behavior: none; }
   <!-- HEADER -->
   <div class="header" id="appHeader">
     <div class="header-inner">
-      <button type="button" class="logo" onclick="handleModeLogoClick()" aria-label="单击切换普通与工作模式" title="单击切换普通与工作模式">AI</button>
+      <button type="button" class="logo" id="modeLogo" onclick="handleModeLogoClick()" aria-label="累计点击三次切换普通与工作模式" title="累计点击三次切换普通与工作模式">AI</button>
       <div class="header-title">AIGC Vault</div>
-      <button type="button" class="header-btn" id="layoutToggle" onclick="setBrowseLayout(browseLayout==='grid'?'feed':'grid')" aria-label="切换到大图浏览" style="color:var(--t2);font-size:12px">大图</button>
+      <select class="header-btn" id="layoutToggle" onchange="setBrowseLayout(this.value)" aria-label="浏览方式" style="width:66px;color:var(--t2);font-size:16px;padding:0 3px"><option value="grid">网格</option><option value="feed">大图</option><option value="pure">纯享</option></select>
       <button type="button" class="header-btn" onclick="openSearch()" aria-label="搜索">
         <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
       </button>
@@ -404,7 +416,7 @@ html { overscroll-behavior: none; }
             <label class="setting-name" for="modeSelect">普通模式 / 工作模式</label>
             <select class="setting-inp-field" id="modeSelect" aria-label="浏览模式" onchange="setWorkMode(this.value==='work')"><option value="normal">普通模式 · 显示全部画板</option><option value="work">工作模式 · 隐藏指定画板</option></select>
             <div class="setting-desc" id="workModeStatus">普通模式 · 显示全部画板</div>
-            <div class="setting-desc">也可单击左上角 AI 图标切换。选择只保存在这台手机，不修改电脑和云端。</div>
+            <div class="setting-desc">也可累计点击左上角 AI 图标三次切换，不限点击间隔。选择只保存在这台手机，不修改电脑和云端。</div>
           </div>
         </div>
 
@@ -452,7 +464,7 @@ html { overscroll-behavior: none; }
           <div class="setting-row">
             <div>
               <div class="setting-name">AIGC Vault Mobile</div>
-              <div class="setting-desc">大图浏览版 02 · 2026-10-29</div>
+              <div class="setting-desc">浏览体验版 03 · 2026-10-29</div>
             </div>
           </div>
         </div>
@@ -461,6 +473,8 @@ html { overscroll-behavior: none; }
     </div>
 
   </div>
+
+  <button type="button" id="pureMenuToggle" class="pure-menu" onclick="togglePureChrome()" hidden>菜单</button>
 
   <!-- TAB BAR -->
   <div class="tab-bar">
@@ -721,6 +735,9 @@ let cloudData    = [];   // 从 COS 同步的数据
 let boards       = [];
 let hiddenBoards = new Set();
 let isWorkMode = false;
+let modeLogoClicks = 0;
+let pureChromeVisible = false;
+let layoutChangeToken = 0;
 let browseLayout = 'grid';
 let sortOrder = 'newest';
 let recentRange = 'all';
@@ -765,10 +782,13 @@ function getAllData() {
 
 function isBoardHidden(board) { return isWorkMode && hiddenBoards.has(normalizeBoardName(board)); }
 function renderWorkMode() {
+  document.getElementById('modeLogo').classList.toggle('work-mode',isWorkMode);
+  document.getElementById('modeLogo').setAttribute('aria-pressed',String(isWorkMode));
   document.getElementById('modeSelect').value=isWorkMode?'work':'normal';
   document.getElementById('workModeStatus').textContent=isWorkMode?'工作模式 · 隐藏电脑端标记的画板':'普通模式 · 显示全部画板';
 }
 function setWorkMode(enabled) {
+  modeLogoClicks=0;
   isWorkMode=!!enabled;
   try { localStorage.setItem('aigc_mobile_work_mode',String(isWorkMode)); } catch {}
   if(currentBoard && isBoardHidden(currentBoard)) currentBoard=null;
@@ -782,7 +802,9 @@ function setWorkMode(enabled) {
   showToast(isWorkMode?'已切换为工作模式':'已切换为普通模式');
 }
 function handleModeLogoClick() {
-  setWorkMode(!isWorkMode);
+  modeLogoClicks++;
+  if(modeLogoClicks===3) setWorkMode(!isWorkMode);
+  else showToast('再点击 '+(3-modeLogoClicks)+' 次切换模式');
 }
 function applyBoardPolicy(index) {
   collectionGroups = index.collectionGroups || [];
@@ -800,7 +822,7 @@ window.addEventListener('DOMContentLoaded', async () => {
   loadConfig();
   try { isWorkMode=localStorage.getItem('aigc_mobile_work_mode')==='true'; } catch {}
   renderWorkMode();
-  try { const prefs=JSON.parse(localStorage.getItem('aigc_mobile_browse') || '{}'); if(['grid','feed'].includes(prefs.layout)) browseLayout=prefs.layout; if(['newest','oldest','updated'].includes(prefs.sort)) sortOrder=prefs.sort; if(Object.hasOwn(RECENT_LABELS,prefs.recent)) recentRange=prefs.recent; } catch {}
+  try { const prefs=JSON.parse(localStorage.getItem('aigc_mobile_browse') || '{}'); if(['grid','feed','pure'].includes(prefs.layout)) browseLayout=prefs.layout; if(['newest','oldest','updated'].includes(prefs.sort)) sortOrder=prefs.sort; if(Object.hasOwn(RECENT_LABELS,prefs.recent)) recentRange=prefs.recent; } catch {}
   document.getElementById('sortSelect').value=sortOrder;
   document.getElementById('recentSelect').value=recentRange;
   // Load cached cloud data from IndexedDB
@@ -1036,17 +1058,47 @@ function getBrowseBase() {
 // RENDER GALLERY
 // ═══════════════════════════════════════
 function applyBrowseLayout() {
-  for(const id of ['masonry','favMasonry','searchMasonry']) document.getElementById(id).classList.toggle('feed',browseLayout==='feed');
-  const toggle=document.getElementById('layoutToggle');
-  toggle.textContent=browseLayout==='feed'?'网格':'大图';
-  toggle.setAttribute('aria-label',browseLayout==='feed'?'切换到网格浏览':'切换到大图浏览');
+  for(const id of ['masonry','favMasonry','searchMasonry']) {
+    const root=document.getElementById(id); root.classList.toggle('feed',browseLayout!=='grid'); root.classList.toggle('pure',browseLayout==='pure');
+  }
+  document.getElementById('layoutToggle').value=browseLayout;
+  const available=browseLayout==='pure' && (document.getElementById('page-home').classList.contains('active') || document.getElementById('page-fav').classList.contains('active'));
+  document.getElementById('appRoot').classList.toggle('pure-view',available && !pureChromeVisible);
+  document.getElementById('pureMenuToggle').hidden=!available;
+  document.getElementById('pureMenuToggle').classList.toggle('chrome-open',pureChromeVisible);
+  document.getElementById('pureMenuToggle').textContent=pureChromeVisible?'收起菜单':'菜单';
+}
+function captureBrowsePosition(rootId,scrollId) {
+  const root=document.getElementById(rootId),scroll=document.getElementById(scrollId);
+  if(!scroll.clientHeight) return null;
+  const top=scroll.getBoundingClientRect().top,bottom=scroll.getBoundingClientRect().bottom;
+  const visible=[...root.querySelectorAll('[data-browse-id]')].filter(el=>{const r=el.getBoundingClientRect();return r.bottom>top+8 && r.top<bottom;}).sort((a,b)=>a.getBoundingClientRect().top-b.getBoundingClientRect().top);
+  const card=visible[0];
+  return {rootId,scrollId,id:card?.getAttribute('data-browse-id'),offset:card?card.getBoundingClientRect().top-top:0,scrollTop:scroll.scrollTop,slides:[...root.querySelectorAll('.feed-carousel')].map(track=>({id:track.closest('[data-browse-id]').getAttribute('data-browse-id'),index:Math.round(track.scrollLeft/track.clientWidth)}))};
+}
+function captureBrowsePositions() { return [['masonry','page-home'],['favMasonry','page-fav'],['searchMasonry','searchResults']].map(([root,scroll])=>captureBrowsePosition(root,scroll)).filter(Boolean); }
+function restoreBrowsePositions(positions) {
+  for(const saved of positions) {
+    const root=document.getElementById(saved.rootId),scroll=document.getElementById(saved.scrollId);
+    if(!scroll.clientHeight) continue;
+    const cards=[...root.querySelectorAll('[data-browse-id]')];
+    const card=cards.find(el=>el.getAttribute('data-browse-id')===saved.id);
+    if(card) scroll.scrollTop+=card.getBoundingClientRect().top-scroll.getBoundingClientRect().top-saved.offset;
+    else scroll.scrollTop=saved.scrollTop;
+    for(const slide of saved.slides) { const card=cards.find(el=>el.getAttribute('data-browse-id')===slide.id),track=card?.querySelector('.feed-carousel'); if(track) track.scrollLeft=slide.index*track.clientWidth; }
+  }
 }
 function setBrowseLayout(value) {
-  if(!['grid','feed'].includes(value)) return;
-  browseLayout=value; saveBrowsePreferences(); resetGalleryPosition(); favLimit=40;
-  document.getElementById('page-fav').scrollTop=0;
+  if(!['grid','feed','pure'].includes(value)) return;
+  const positions=captureBrowsePositions(),token=++layoutChangeToken;
+  browseLayout=value; pureChromeVisible=false; saveBrowsePreferences();
   render(); renderFav();
-  if(document.getElementById('searchOverlay').classList.contains('open')) onSearch();
+  if(document.getElementById('searchOverlay').classList.contains('open')) onSearch(false);
+  restoreBrowsePositions(positions);
+  requestAnimationFrame(()=>{if(token===layoutChangeToken) restoreBrowsePositions(positions);});
+}
+function togglePureChrome() {
+  const positions=captureBrowsePositions();pureChromeVisible=!pureChromeVisible;applyBrowseLayout();restoreBrowsePositions(positions);
 }
 function feedSlides(item) {
   const members=item._memberIds ? item._memberIds.map(id=>getAllData().find(row=>String(row.id)===String(id))).filter(Boolean) : [item];
@@ -1059,7 +1111,7 @@ function feedSlides(item) {
 function feedCardHTML(item) {
   const slides=feedSlides(item);
   const id=escH(JSON.stringify(String(item.id)));
-  return `<article class="feed-card" aria-label="${escH(item.title || item._modelLabel || '作品')}">
+  return `<article class="feed-card" data-browse-id="${escH(item.id)}" aria-label="${escH(item.title || item._modelLabel || '作品')}">
     <div class="feed-heading"><strong>${escH(item._modelLabel)}</strong><span>${escH(item._site)}${item._isLocal?' · 本地':''}${item.isFavorite?' · ★':''}</span></div>
     <div class="feed-visual"><div class="feed-carousel" aria-label="作品图片，可左右滑动" onscroll="updateFeedPosition(this)" onpointerdown="this.dataset.startX=event.clientX">
       ${slides.length?slides.map((slide,slideIndex)=>`<button type="button" class="feed-slide" aria-label="查看第 ${slideIndex+1} 张大图" onclick="openFeedImage(event,${escH(JSON.stringify(String(slide.id)))},${slide.index})"><span>图片暂不可用</span>${mediaImageHTML({id:slide.id},slide.url,slide.index,item.title || '作品图片')}</button>`).join(''):'<div class="feed-slide">暂无预览</div>'}
@@ -1089,13 +1141,13 @@ function galleryColumns() {
 }
 function galleryHTML(items, makeCard) {
   applyBrowseLayout();
-  if(browseLayout==='feed') return items.map(feedCardHTML).join('');
+  if(browseLayout!=='grid') return items.map(feedCardHTML).join('');
   const columns = Array.from({ length: galleryColumns() }, () => []);
   items.forEach((item, index) => columns[index % columns.length].push(makeCard(item, index)));
   return columns.map(cards => `<div class="masonry-column">${cards.join('')}</div>`).join('');
 }
 function appendGallery(root,data,from,to,makeCard,reset=render) {
-  if(browseLayout==='feed') { root.insertAdjacentHTML('beforeend',data.slice(from,to).map(feedCardHTML).join('')); return; }
+  if(browseLayout!=='grid') { root.insertAdjacentHTML('beforeend',data.slice(from,to).map(feedCardHTML).join('')); return; }
   const columns=root.querySelectorAll('.masonry-column');
   if(columns.length!==galleryColumns()) { reset(); return; }
   for(let index=from;index<to;index++) columns[index % columns.length].insertAdjacentHTML('beforeend',makeCard(data[index],index));
@@ -1137,7 +1189,7 @@ function cardHTML(item, idx) {
   const isLocal = !!item._isLocal;
   const images = getItemImages(item);
   return `
-    <div class="card" role="button" tabindex="0" aria-label="查看${escH(item.title || item._modelLabel || '作品')}" onclick="openDetail(${idx})">
+    <div class="card" data-browse-id="${escH(item.id)}" role="button" tabindex="0" aria-label="查看${escH(item.title || item._modelLabel || '作品')}" onclick="openDetail(${idx})">
       <div class="card-stripe stripe-${item._browseGroup || 'other'}"></div>
       ${cardMediaHTML(item)}
       ${isVideo ? `<div class="video-badge"><svg viewBox="0 0 24 24" fill="white" width="10" height="10"><polygon points="5 3 19 12 5 21 5 3"/></svg></div>` : ''}
@@ -1428,7 +1480,7 @@ function onSearch(resetPosition=true) {
     const isLocal = !!item._isLocal;
     const images = getItemImages(item);
     return `
-      <div class="card" role="button" tabindex="0" aria-label="查看${escH(item.title || item._modelLabel || '作品')}" data-item-id="${escH(item.id)}">
+      <div class="card" data-browse-id="${escH(item.id)}" role="button" tabindex="0" aria-label="查看${escH(item.title || item._modelLabel || '作品')}" data-item-id="${escH(item.id)}">
         <div class="card-stripe stripe-${item._browseGroup || 'other'}"></div>
         ${cardMediaHTML(item)}
         ${isVideo ? `<div class="video-badge"><svg viewBox="0 0 24 24" fill="white" width="10" height="10"><polygon points="5 3 19 12 5 21 5 3"/></svg></div>` : ''}
@@ -1652,6 +1704,7 @@ function switchTab(tab) {
   if (tab === 'boards')   renderBoards();
   if (tab === 'settings') updateStats();
   if (tab === 'fav')      renderFav();
+  applyBrowseLayout();
 }
 
 // ═══════════════════════════════════════
@@ -1684,7 +1737,7 @@ function favCardHTML(item) {
   const isLocal = !!item._isLocal;
   const images = getItemImages(item);
   return `
-    <div class="card" role="button" tabindex="0" aria-label="查看${escH(item.title || item._modelLabel || '作品')}" data-item-id="${escH(item.id)}">
+    <div class="card" data-browse-id="${escH(item.id)}" role="button" tabindex="0" aria-label="查看${escH(item.title || item._modelLabel || '作品')}" data-item-id="${escH(item.id)}">
       <div class="card-stripe stripe-${item._browseGroup || 'other'}"></div>
       ${cardMediaHTML(item)}
       <div style="position:absolute;top:6px;right:6px;width:20px;height:20px;display:flex;align-items:center;justify-content:center">
