@@ -6,8 +6,8 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
-<meta name="aigc-mobile-ui" content="2026-10-29-view05">
-<meta name="aigc-mobile-version" content="1.0.5">
+<meta name="aigc-mobile-ui" content="2026-10-29-view06">
+<meta name="aigc-mobile-version" content="1.0.6">
 <meta name="theme-color" content="#080c14">
 <title>AIGC Vault</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -460,7 +460,7 @@ html { overscroll-behavior: none; }
           <div class="setting-row">
             <div>
               <div class="setting-name">AIGC Vault Mobile</div>
-              <div class="setting-desc">v<span id="mobileVersion">1.0.5</span> · 2026-10-29</div>
+              <div class="setting-desc">v<span id="mobileVersion">1.0.6</span> · 2026-10-29</div>
             </div>
           </div>
         </div>
@@ -953,6 +953,10 @@ function normalizeImages(item) {
 }
 function getItemImages(item) { return normalizeImages(item); }
 const imageRetries=new WeakMap();
+function imageReferrerPolicy(url) {
+  try { if (/(^|\.)meigen\.ai$/i.test(new URL(url).hostname)) return 'no-referrer'; } catch {}
+  return 'strict-origin-when-cross-origin';
+}
 function imageCandidates(item,index) {
   const original=getItemImages(item)[index];
   return validImageUrls([original,...(index===0?[item.cosUrl,item.cosThumbUrl,item.thumbBlobBase64,item.thumbnailUrl,item.localThumb,item.imageUrl,item.mainImage]:[])]);
@@ -961,16 +965,17 @@ function retryItemImage(img) {
   const item=getAllData().find(row=>String(row.id)===img.getAttribute('data-media-id'));
   const tried=imageRetries.get(img) || new Set(); tried.add(img.getAttribute('src')); imageRetries.set(img,tried);
   const next=item && imageCandidates(item,Number(img.getAttribute('data-media-index') || 0)).find(url=>!tried.has(url));
-  if(next) { img.src=next; return; }
+  if(next) { img.referrerPolicy=imageReferrerPolicy(next); img.src=next; return; }
   img.style.display='none';
   if(img.previousElementSibling?.classList.contains('card-media-fallback')) img.previousElementSibling.textContent='图片暂不可用';
 }
 function mediaImageHTML(item,url,index,alt='') {
-  return `<img src="${escH(url)}" data-media-id="${escH(item.id)}" data-media-index="${index}" alt="${escH(alt)}" loading="lazy" decoding="async" onerror="retryItemImage(this)">`;
+  return `<img referrerpolicy="${imageReferrerPolicy(url)}" src="${escH(url)}" data-media-id="${escH(item.id)}" data-media-index="${index}" alt="${escH(alt)}" loading="lazy" decoding="async" onerror="retryItemImage(this)">`;
 }
 function setDetailImage(img,item,index) {
   imageRetries.delete(img); img.setAttribute('data-media-id',String(item.id)); img.setAttribute('data-media-index',String(index));
-  img.onerror=()=>retryItemImage(img); img.style.display='block'; img.src=getItemImages(item)[index] || item.imageUrl || '';
+  const url=getItemImages(item)[index] || item.imageUrl || '';
+  img.onerror=()=>retryItemImage(img); img.style.display='block'; img.referrerPolicy=imageReferrerPolicy(url); img.src=url;
 }
 
 function getPromptEntries(item) {
@@ -1252,10 +1257,10 @@ function renderBoards() {
     return `
       <div class="board-card" role="button" tabindex="0" aria-label="打开画板：${escH(board)}" data-board="${escH(board)}">
         <div class="board-cover">
-          <div class="cover-main">${imgs[0] ? `<img class="cover-img" src="${escH(imgs[0])}" loading="lazy">` : '<div style="width:100%;height:100%;background:var(--bg3)"></div>'}</div>
+          <div class="cover-main">${imgs[0] ? `<img class="cover-img" referrerpolicy="${imageReferrerPolicy(imgs[0])}" src="${escH(imgs[0])}" loading="lazy">` : '<div style="width:100%;height:100%;background:var(--bg3)"></div>'}</div>
           <div class="cover-side">
-            <div class="cover-sm">${imgs[1] ? `<img class="cover-img" src="${escH(imgs[1])}" loading="lazy">` : '<div style="width:100%;height:100%;background:var(--bg2)"></div>'}</div>
-            <div class="cover-sm">${imgs[2] ? `<img class="cover-img" src="${escH(imgs[2])}" loading="lazy">` : '<div style="width:100%;height:100%;background:var(--bg2)"></div>'}</div>
+            <div class="cover-sm">${imgs[1] ? `<img class="cover-img" referrerpolicy="${imageReferrerPolicy(imgs[1])}" src="${escH(imgs[1])}" loading="lazy">` : '<div style="width:100%;height:100%;background:var(--bg2)"></div>'}</div>
+            <div class="cover-sm">${imgs[2] ? `<img class="cover-img" referrerpolicy="${imageReferrerPolicy(imgs[2])}" src="${escH(imgs[2])}" loading="lazy">` : '<div style="width:100%;height:100%;background:var(--bg2)"></div>'}</div>
           </div>
         </div>
         <div class="board-info">
@@ -1280,7 +1285,7 @@ function filterByBoard(board) {
 // SOURCE TABS
 // ═══════════════════════════════════════
 function setSource(src) {
- currentSrc=src; currentBoard=null; activeFilters=emptyFilters(); resetGalleryPosition(); render();
+ currentSrc=src; activeFilters=emptyFilters(); resetGalleryPosition(); render();
 }
 function renderSourceTabs() {
  const groups=[{key:'all',label:'全部'},...MODEL_BROWSE_GROUPS,{key:'image2prompt',label:'图片识别'}];
