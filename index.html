@@ -6,8 +6,8 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
-<meta name="aigc-mobile-ui" content="2026-10-29-view04">
-<meta name="aigc-mobile-version" content="1.0.4">
+<meta name="aigc-mobile-ui" content="2026-10-29-view05">
+<meta name="aigc-mobile-version" content="1.0.5">
 <meta name="theme-color" content="#080c14">
 <title>AIGC Vault</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -79,6 +79,9 @@ html { overscroll-behavior: none; }
 .header.compact .source-tabs, .header.compact #browseSummary, .header.compact .gallery-only { display: none; }
 .browse-toolbar { display:flex; align-items:center; gap:8px; padding:0 12px 4px; }
 .browse-toolbar #browseSummary { flex:1; min-width:0; font-size:11px; color:var(--t2); overflow-wrap:anywhere; }
+.cache-status { padding:0 12px 5px; font-size:10px; line-height:1.4; color:var(--t2); }
+.cache-status[hidden] { display:none; }
+.header.compact .cache-status { display:none; }
 .browse-toolbar select { max-width:126px; min-height:44px; border:0; border-radius:8px; padding:0 4px; color:var(--t2); background:var(--bg); font:inherit; font-size:16px; }
 .active-conditions { display:flex; gap:6px; padding:0 12px 6px; overflow-x:auto; }
 .active-conditions:empty { display:none; }
@@ -370,6 +373,7 @@ html { overscroll-behavior: none; }
       <select id="recentSelect" aria-label="采集时间范围" onchange="setRecent(this.value)"><option value="all">全部时间</option><option value="today">今天采集</option><option value="7">近 7 天</option><option value="30">近 30 天</option></select>
       <select id="sortSelect" aria-label="排序方式" onchange="setSort(this.value)"><option value="newest">最新采集</option><option value="oldest">最早采集</option><option value="updated">最近修改</option></select>
     </div>
+    <div class="cache-status" id="cacheStatus" role="status" hidden></div>
     <div class="active-conditions" id="activeConditions"></div>
   </div>
 
@@ -411,16 +415,6 @@ html { overscroll-behavior: none; }
     <div class="page page-settings" id="page-settings">
       <div class="page-inner-header"><h1 class="page-inner-title">设置</h1></div>
       <div class="settings-wrap">
-
-        <div class="setting-card">
-          <div class="setting-header">浏览模式</div>
-          <div class="setting-row" style="flex-direction:column;align-items:stretch;gap:10px">
-            <label class="setting-name" for="modeSelect">普通模式 / 工作模式</label>
-            <select class="setting-inp-field" id="modeSelect" aria-label="浏览模式" onchange="setWorkMode(this.value==='work')"><option value="normal">普通模式 · 显示全部画板</option><option value="work">工作模式 · 隐藏指定画板</option></select>
-            <div class="setting-desc" id="workModeStatus">普通模式 · 显示全部画板</div>
-            <div class="setting-desc">选择只保存在这台手机，不修改电脑和云端。</div>
-          </div>
-        </div>
 
         <div class="setting-card">
           <div class="setting-header">腾讯云 COS 配置</div>
@@ -466,7 +460,7 @@ html { overscroll-behavior: none; }
           <div class="setting-row">
             <div>
               <div class="setting-name">AIGC Vault Mobile</div>
-              <div class="setting-desc">v<span id="mobileVersion">1.0.4</span> · 2026-10-29</div>
+              <div class="setting-desc">v<span id="mobileVersion">1.0.5</span> · 2026-10-29</div>
             </div>
           </div>
         </div>
@@ -734,6 +728,8 @@ async function idbGet(key) {
 // ═══════════════════════════════════════
 let cloudDeletedIds = [];
 let cloudData    = [];   // 从 COS 同步的数据
+let cloudCacheAvailable = false;
+let cloudCacheSyncedAt = null;
 let boards       = [];
 let hiddenBoards = new Set();
 let isWorkMode = false;
@@ -787,8 +783,6 @@ function isBoardHidden(board) { return isWorkMode && hiddenBoards.has(normalizeB
 function renderWorkMode() {
   document.getElementById('modeLogo').classList.toggle('work-mode',isWorkMode);
   document.getElementById('modeLogo').setAttribute('aria-pressed',String(isWorkMode));
-  document.getElementById('modeSelect').value=isWorkMode?'work':'normal';
-  document.getElementById('workModeStatus').textContent=isWorkMode?'工作模式 · 隐藏电脑端标记的画板':'普通模式 · 显示全部画板';
 }
 function setWorkMode(enabled) {
   modeLogoClicks=0;
@@ -801,6 +795,7 @@ function setWorkMode(enabled) {
   document.getElementById('page-fav').scrollTop=0;
   document.getElementById('page-boards').scrollTop=0;
   renderWorkMode(); render(); renderFav(); renderBoards(); updateStats();
+  renderCacheStatus();
   if(document.getElementById('searchOverlay').classList.contains('open')) onSearch();
 }
 function handleModeLogoClick() {
@@ -813,6 +808,7 @@ function applyBoardPolicy(index) {
   boards = normalizeBoardNames([...index.boards,...index.data.map(i=>i.board)]);
   if (currentBoard && isBoardHidden(currentBoard)) currentBoard = null;
   renderWorkMode();
+  renderCacheStatus();
 }
 
 // ═══════════════════════════════════════
@@ -832,9 +828,12 @@ window.addEventListener('DOMContentLoaded', async () => {
       if (cached) {
         const index=readMobileIndex(cached);
         cloudData=index.data.map(normalizeItem); cloudDeletedIds=index.deletedIds;
+        cloudCacheAvailable=true;
+        try { cloudCacheSyncedAt=(await idbGet('cloud_cache_meta'))?.syncedAt || null; } catch {}
         applyBoardPolicy(index);
       }
   } catch(e) {}
+  renderCacheStatus();
   render();
   updateStats();
   updateLocalUI();
@@ -879,7 +878,10 @@ async function syncData() {
     const next=index.data.map(normalizeItem);
     const previousIds=new Set(getAllData().map(i=>i.id));
     await idbSet('cloud_cache',json);
+    const syncedAt=Date.now();
+    try { await idbSet('cloud_cache_meta',{syncedAt}); } catch {}
     cloudData=next; cloudDeletedIds=index.deletedIds; applyBoardPolicy(index);
+    cloudCacheAvailable=true; cloudCacheSyncedAt=syncedAt; renderCacheStatus();
 
     render();
     renderBoards();
@@ -1001,6 +1003,16 @@ function showSyncStatus(msg, type) {
   const el = document.getElementById('syncStatus');
   el.textContent = msg;
   el.className = 'sync-status ' + type;
+}
+
+function renderCacheStatus() {
+  const el=document.getElementById('cacheStatus');
+  if(!cloudCacheAvailable) { el.hidden=true; el.textContent=''; return; }
+  const deleted=new Set(cloudDeletedIds.map(String));
+  const count=cloudData.filter(item=>!isBoardHidden(item.board) && !deleted.has(String(item.id))).length;
+  const when=cloudCacheSyncedAt ? new Intl.DateTimeFormat('zh-CN',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'}).format(new Date(cloudCacheSyncedAt)) : '';
+  el.textContent=`已显示本机缓存 · ${count.toLocaleString('zh-CN')} 条云端采集${when?' · 上次同步 '+when:''}`;
+  el.hidden=false;
 }
 
 function updateStats() {
@@ -1181,7 +1193,7 @@ function render() {
     masonry.innerHTML = '';
     empty.style.display = '';
     document.getElementById('emptyTitle').textContent=hasBrowseConditions()?'没有符合条件的内容':'没有找到内容';
-    document.getElementById('emptyHint').textContent=hasBrowseConditions()?'试试扩大采集时间范围，或清除筛选。':isWorkMode?'当前为工作模式，可在设置中切换普通模式，或同步云端数据。':'请在设置页配置 COS 并同步数据，或新建提示词。';
+    document.getElementById('emptyHint').textContent=hasBrowseConditions()?'试试扩大采集时间范围，或清除筛选。':'当前没有可显示的内容，可调整筛选条件或同步云端数据。';
     document.getElementById('clearConditionsBtn').hidden=!hasBrowseConditions();
     return;
   }
