@@ -325,7 +325,7 @@ html { overscroll-behavior: none; }
 .feed-heading span { font-size:11px; color:var(--t2); }
 .feed-visual { position:relative; }
 .feed-image-count { position:absolute; right:12px; top:12px; padding:4px 10px; border-radius:16px; font-size:12px; color:white; background:#0009; pointer-events:none; }
-.feed-carousel { display:flex; width:100%; height:min(125vw,72dvh); overflow-x:auto; scroll-snap-type:x mandatory; overscroll-behavior-x:contain; background:#05080e; }
+.feed-carousel { display:flex; width:100%; height:auto; aspect-ratio:var(--preview-ratio,1); overflow-x:auto; scroll-snap-type:x mandatory; overscroll-behavior-x:contain; background:#05080e; }
 .feed-slide { position:relative; flex:0 0 100%; width:100%; height:100%; min-width:0; scroll-snap-align:start; scroll-snap-stop:always; padding:0; border:0; background:#05080e; color:var(--t2); display:grid; place-items:center; }
 .feed-slide img { position:absolute; inset:0; width:100%; height:100%; object-fit:contain; background:#05080e; }
 .feed-pager { display:flex; align-items:center; justify-content:center; gap:12px; }
@@ -346,7 +346,6 @@ html { overscroll-behavior: none; }
 .pure-view .page-home { padding-top:0; }
 .masonry.pure { gap:4px; }
 .pure .feed-heading,.pure .feed-caption,.pure .feed-pager { display:none; }
-.pure .feed-carousel { height:auto; aspect-ratio:var(--preview-ratio,1); }
 .pure .feed-image-count { right:auto; left:12px; }
 @keyframes spin { to { transform: rotate(360deg); } }
 </style>
