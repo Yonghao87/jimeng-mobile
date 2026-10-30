@@ -252,7 +252,7 @@ html { overscroll-behavior: none; }
 .badge-nano-banana, .badge-nanobanana { background: rgba(245,158,11,0.25); color: var(--banana); }
 .badge-local      { background: rgba(79,142,247,0.25); color: var(--acc); }
 .detail-media { flex: 1; position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden; background: #000; touch-action: pinch-zoom; }
-.detail-img { max-width: 100%; max-height: 100%; object-fit: contain; display: block; }
+.detail-img { max-width: 100%; max-height: 100%; object-fit: contain; display: block; -webkit-user-drag:none; user-select:none; -webkit-user-select:none; -webkit-touch-callout:none; }
 .detail-video { max-width: 100%; max-height: 100%; object-fit: contain; display: none; }
 .detail-nav { position: absolute; top: 50%; transform: translateY(-50%); width: 44px; height: 52px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.12); background: rgba(0,0,0,0.35); color: #fff; display: none; align-items: center; justify-content: center; z-index: 5; backdrop-filter: blur(8px); cursor: pointer; }
 .detail-nav.show { display: flex; }
@@ -327,7 +327,7 @@ html { overscroll-behavior: none; }
 .feed-image-count { position:absolute; right:12px; top:12px; padding:4px 10px; border-radius:16px; font-size:12px; color:white; background:#0009; pointer-events:none; }
 .feed-carousel { display:flex; width:100%; height:auto; aspect-ratio:var(--preview-ratio,1); overflow-x:auto; scroll-snap-type:x mandatory; overscroll-behavior-x:contain; background:#05080e; }
 .feed-slide { position:relative; flex:0 0 100%; width:100%; height:100%; min-width:0; scroll-snap-align:start; scroll-snap-stop:always; padding:0; border:0; background:#05080e; color:var(--t2); display:grid; place-items:center; }
-.feed-slide img { position:absolute; inset:0; width:100%; height:100%; object-fit:contain; background:#05080e; }
+.feed-slide img { position:absolute; inset:0; width:100%; height:100%; object-fit:contain; background:#05080e; pointer-events:none; -webkit-user-drag:none; user-select:none; -webkit-user-select:none; -webkit-touch-callout:none; }
 .feed-pager { display:flex; align-items:center; justify-content:center; gap:12px; }
 .feed-pager button { width:44px; height:44px; border:0; background:none; color:var(--t1); font-size:24px; }
 .feed-count { color:var(--t2); font-size:12px; min-width:50px; text-align:center; }
@@ -637,7 +637,7 @@ html { overscroll-behavior: none; }
     <button class="detail-nav prev" aria-label="上一张图片" id="detailPrev" onclick="event.stopPropagation(); stepDetailImage(-1)">
       <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
     </button>
-    <img class="detail-img" id="detailImg" src="" alt="当前作品预览">
+    <img class="detail-img" id="detailImg" src="" alt="当前作品预览" draggable="false">
     <video class="detail-video" id="detailVideo" controls playsinline></video>
     <button class="detail-nav next" aria-label="下一张图片" id="detailNext" onclick="event.stopPropagation(); stepDetailImage(1)">
       <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
@@ -993,7 +993,7 @@ function retryItemImage(img) {
   if(img.previousElementSibling?.classList.contains('card-media-fallback')) img.previousElementSibling.textContent='图片暂不可用';
 }
 function mediaImageHTML(item,url,index,alt='') {
-  return `<img referrerpolicy="${imageReferrerPolicy(url)}" src="${escH(url)}" data-media-id="${escH(item.id)}" data-media-index="${index}" alt="${escH(alt)}" loading="lazy" decoding="async" onload="onPreviewImageLoad(this)" onerror="retryItemImage(this)">`;
+  return `<img draggable="false" referrerpolicy="${imageReferrerPolicy(url)}" src="${escH(url)}" data-media-id="${escH(item.id)}" data-media-index="${index}" alt="${escH(alt)}" loading="lazy" decoding="async" onload="onPreviewImageLoad(this)" onerror="retryItemImage(this)">`;
 }
 function setDetailImage(img,item,index) {
   imageRetries.delete(img); img.setAttribute('data-media-id',String(item.id)); img.setAttribute('data-media-index',String(index));
