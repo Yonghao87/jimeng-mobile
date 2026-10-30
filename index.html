@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="aigc-mobile-ui" content="2026-10-29-view06">
-<meta name="aigc-mobile-version" content="1.1.1a">
+<meta name="aigc-mobile-version" content="1.1.1b">
 <meta name="theme-color" content="#080c14">
 <title>AIGC Vault</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -252,7 +252,7 @@ html { overscroll-behavior: none; }
 .badge-nano-banana, .badge-nanobanana { background: rgba(245,158,11,0.25); color: var(--banana); }
 .badge-local      { background: rgba(79,142,247,0.25); color: var(--acc); }
 .detail-media { flex: 1; position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden; background: #000; touch-action: pinch-zoom; }
-.detail-img { max-width: 100%; max-height: 100%; object-fit: contain; display: block; -webkit-user-drag:none; user-select:none; -webkit-user-select:none; -webkit-touch-callout:none; }
+.detail-img { max-width: 100%; max-height: 100%; object-fit: contain; display: block; pointer-events:none; -webkit-user-drag:none; user-drag:none; user-select:none; -webkit-user-select:none; -webkit-touch-callout:none; }
 .detail-video { max-width: 100%; max-height: 100%; object-fit: contain; display: none; }
 .detail-nav { position: absolute; top: 50%; transform: translateY(-50%); width: 44px; height: 52px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.12); background: rgba(0,0,0,0.35); color: #fff; display: none; align-items: center; justify-content: center; z-index: 5; backdrop-filter: blur(8px); cursor: pointer; }
 .detail-nav.show { display: flex; }
@@ -327,7 +327,7 @@ html { overscroll-behavior: none; }
 .feed-image-count { position:absolute; right:12px; top:12px; padding:4px 10px; border-radius:16px; font-size:12px; color:white; background:#0009; pointer-events:none; }
 .feed-carousel { display:flex; width:100%; height:auto; aspect-ratio:var(--preview-ratio,1); overflow-x:auto; scroll-snap-type:x mandatory; overscroll-behavior-x:contain; background:#05080e; }
 .feed-slide { position:relative; flex:0 0 100%; width:100%; height:100%; min-width:0; scroll-snap-align:start; scroll-snap-stop:always; padding:0; border:0; background:#05080e; color:var(--t2); display:grid; place-items:center; }
-.feed-slide img { position:absolute; inset:0; width:100%; height:100%; object-fit:contain; background:#05080e; pointer-events:none; -webkit-user-drag:none; user-select:none; -webkit-user-select:none; -webkit-touch-callout:none; }
+.feed-slide img { position:absolute; inset:0; width:100%; height:100%; object-fit:contain; background:#05080e; pointer-events:none; -webkit-user-drag:none; user-drag:none; user-select:none; -webkit-user-select:none; -webkit-touch-callout:none; }
 .feed-pager { display:flex; align-items:center; justify-content:center; gap:12px; }
 .feed-pager button { width:44px; height:44px; border:0; background:none; color:var(--t1); font-size:24px; }
 .feed-count { color:var(--t2); font-size:12px; min-width:50px; text-align:center; }
@@ -459,7 +459,7 @@ html { overscroll-behavior: none; }
           <div class="setting-row">
             <div>
               <div class="setting-name">AIGC Vault Mobile</div>
-              <div class="setting-desc">v<span id="mobileVersion">1.1.1a</span> · 2026-10-30</div>
+              <div class="setting-desc">v<span id="mobileVersion">1.1.1b</span> · 2026-10-30</div>
             </div>
           </div>
         </div>
@@ -1832,6 +1832,9 @@ function showToast(msg) {
 }
 
 // Gestures start on the media, leaving prompt scrolling and pinch zoom alone.
+document.addEventListener('dragstart', e => {
+  if (e.target instanceof HTMLImageElement) e.preventDefault();
+}, true);
 let detailTouch = null;
 document.getElementById('detailMedia').addEventListener('touchstart', e => {
   const control = e.target.closest('button, video');

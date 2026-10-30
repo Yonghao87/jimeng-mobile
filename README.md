@@ -9,8 +9,8 @@ AIGC Vault 的独立手机网页，用于浏览电脑端同步的图片、视频
 | 项目 | 当前标识 |
 | --- | --- |
 | 仓库构建版本 | 1.6.9，取自根目录 `package.json` |
-| 手机版版本 | 1.1.1a，由本目录 `version.json` 维护 |
-| 手机界面标识 | v1.1.1a · 2026-10-30 |
+| 手机版版本 | 1.1.1b，由本目录 `version.json` 维护 |
+| 手机界面标识 | v1.1.1b · 2026-10-30 |
 | 源码适配标记 | `aigc-mobile-ui=2026-10-29-view06` |
 | 验证范围 | iPhone底栏已获用户实机确认；新浏览交互已通过本地隔离回归，待更新后的手机实测 |
 
@@ -53,7 +53,7 @@ npm ci
 npm run build:mobile
 ```
 
-构建会更新手机 HTML 中的共享模型规则，并输出 `dist/aigc-vault-mobile-<手机版版本>.html`。当前输出为 `dist/aigc-vault-mobile-1.1.1a.html`，内容与本目录 `index.html` 一致。
+构建会更新手机 HTML 中的共享模型规则，并输出 `dist/aigc-vault-mobile-<手机版版本>.html`。当前输出为 `dist/aigc-vault-mobile-1.1.1b.html`，内容与本目录 `index.html` 一致。
 
 完整扩展的 `build`、`build:firefox`、`zip` 和 `zip:firefox` 也会先生成手机 HTML。共享模型规则来自 [model-mobile-runtime.js](../src/utils/model-mobile-runtime.js)，不要直接修改 HTML 中 `shared-model-runtime` 标记内的生成代码。
 
@@ -61,7 +61,7 @@ npm run build:mobile
 
 1. 将本目录 `index.html` 或构建输出文件部署到 GitHub Pages、COS 静态站点等 HTTPS 地址；若使用构建文件，将它重命名为 `index.html`。
 2. 从手机 Safari 打开页面，确认能看到画廊、收藏、画板及设置入口。
-3. 在“设置 → 关于”检查“v1.1.1a · 2026-10-30”，确认部署的是本轮文件。
+3. 在“设置 → 关于”检查“v1.1.1b · 2026-10-30”，确认部署的是本轮文件。
 4. 如需主屏快捷方式，从 Safari 的分享菜单选择“添加到主屏幕”。本轮浏览更新沿用已确认的03启动配置；已有主屏图标刷新后检查版本即可。
 
 README、更新日志及测试页不属于运行时必需文件。
