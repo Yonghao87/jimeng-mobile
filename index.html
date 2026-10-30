@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="aigc-mobile-ui" content="2026-10-29-view06">
-<meta name="aigc-mobile-version" content="1.1.0">
+<meta name="aigc-mobile-version" content="1.1.1">
 <meta name="theme-color" content="#080c14">
 <title>AIGC Vault</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -346,7 +346,7 @@ html { overscroll-behavior: none; }
 .pure-view .page-home { padding-top:0; }
 .masonry.pure { gap:4px; }
 .pure .feed-heading,.pure .feed-caption,.pure .feed-pager { display:none; }
-.pure .feed-carousel { height:calc(100dvh - var(--safe-t) - var(--safe-b)); }
+.pure .feed-carousel { height:auto; aspect-ratio:var(--preview-ratio,1); }
 .pure .feed-image-count { right:auto; left:12px; }
 @keyframes spin { to { transform: rotate(360deg); } }
 </style>
@@ -460,7 +460,7 @@ html { overscroll-behavior: none; }
           <div class="setting-row">
             <div>
               <div class="setting-name">AIGC Vault Mobile</div>
-              <div class="setting-desc">v<span id="mobileVersion">1.1.0</span> · 2026-10-29</div>
+              <div class="setting-desc">v<span id="mobileVersion">1.1.1</span> · 2026-10-30</div>
             </div>
           </div>
         </div>
@@ -962,6 +962,21 @@ function normalizeImages(item) {
 }
 function getItemImages(item) { return normalizeImages(item); }
 const imageRetries=new WeakMap();
+const previewImageRatios=new Map();
+function onPreviewImageLoad(img) {
+  if(img.naturalWidth && img.naturalHeight) previewImageRatios.set(img.currentSrc || img.src,img.naturalWidth/img.naturalHeight);
+  const track=img.closest('.feed-carousel');
+  if(track) updateFeedAspect(track);
+}
+function updateFeedAspect(track) {
+  const index=track.clientWidth ? Math.round(track.scrollLeft/track.clientWidth) : 0;
+  const img=track.children[index]?.querySelector('img');
+  const ratio=img && (img.naturalWidth && img.naturalHeight ? img.naturalWidth/img.naturalHeight : previewImageRatios.get(img.currentSrc || img.src));
+  if(!ratio || track.style.getPropertyValue('--preview-ratio')===String(ratio)) return;
+  const scroll=track.closest('.page,.search-results'),before=track.getBoundingClientRect();
+  track.style.setProperty('--preview-ratio',String(ratio));
+  if(scroll && before.bottom<=scroll.getBoundingClientRect().top) scroll.scrollTop+=track.getBoundingClientRect().height-before.height;
+}
 function imageReferrerPolicy(url) {
   try { if (/(^|\.)meigen\.ai$/i.test(new URL(url).hostname)) return 'no-referrer'; } catch {}
   return 'strict-origin-when-cross-origin';
@@ -979,7 +994,7 @@ function retryItemImage(img) {
   if(img.previousElementSibling?.classList.contains('card-media-fallback')) img.previousElementSibling.textContent='图片暂不可用';
 }
 function mediaImageHTML(item,url,index,alt='') {
-  return `<img referrerpolicy="${imageReferrerPolicy(url)}" src="${escH(url)}" data-media-id="${escH(item.id)}" data-media-index="${index}" alt="${escH(alt)}" loading="lazy" decoding="async" onerror="retryItemImage(this)">`;
+  return `<img referrerpolicy="${imageReferrerPolicy(url)}" src="${escH(url)}" data-media-id="${escH(item.id)}" data-media-index="${index}" alt="${escH(alt)}" loading="lazy" decoding="async" onload="onPreviewImageLoad(this)" onerror="retryItemImage(this)">`;
 }
 function setDetailImage(img,item,index) {
   imageRetries.delete(img); img.setAttribute('data-media-id',String(item.id)); img.setAttribute('data-media-index',String(index));
@@ -1114,7 +1129,7 @@ function restoreBrowsePositions(positions) {
     const card=cards.find(el=>el.getAttribute('data-browse-id')===saved.id);
     if(card) scroll.scrollTop+=card.getBoundingClientRect().top-scroll.getBoundingClientRect().top-saved.offset;
     else scroll.scrollTop=saved.scrollTop;
-    for(const slide of saved.slides) { const card=cards.find(el=>el.getAttribute('data-browse-id')===slide.id),track=card?.querySelector('.feed-carousel'); if(track) track.scrollLeft=slide.index*track.clientWidth; }
+    for(const slide of saved.slides) { const card=cards.find(el=>el.getAttribute('data-browse-id')===slide.id),track=card?.querySelector('.feed-carousel'); if(track) { track.scrollLeft=slide.index*track.clientWidth; updateFeedAspect(track); } }
   }
 }
 function setBrowseLayout(value) {
@@ -1145,7 +1160,7 @@ function feedCardHTML(item) {
   const id=escH(JSON.stringify(String(item.id)));
   return `<article class="feed-card" data-browse-id="${escH(item.id)}" aria-label="${escH(item.title || item._modelLabel || '作品')}">
     <div class="feed-heading"><strong>${escH(item._modelLabel)}</strong><span>${escH(item._site)}${item._isLocal?' · 本地':''}${item.isFavorite?' · ★':''}</span></div>
-    <div class="feed-visual"><div class="feed-carousel" aria-label="作品图片，可左右滑动" onscroll="updateFeedPosition(this)" onpointerdown="this.dataset.startX=event.clientX">
+    <div class="feed-visual"><div class="feed-carousel" style="--preview-ratio:${previewImageRatios.get(slides[0]?.url) || 1}" aria-label="作品图片，可左右滑动" onscroll="updateFeedPosition(this)" onpointerdown="this.dataset.startX=event.clientX">
       ${slides.length?slides.map((slide,slideIndex)=>`<button type="button" class="feed-slide" aria-label="查看第 ${slideIndex+1} 张大图" onclick="openFeedImage(event,${escH(JSON.stringify(String(slide.id)))},${slide.index})"><span>图片暂不可用</span>${mediaImageHTML({id:slide.id},slide.url,slide.index,item.title || '作品图片')}</button>`).join(''):'<div class="feed-slide">暂无预览</div>'}
     </div>${slides.length>1?`<span class="feed-image-count" aria-hidden="true">1 / ${slides.length}</span>`:''}</div>
     ${slides.length>1?`<div class="feed-pager"><button type="button" aria-label="上一张图片" onclick="stepFeed(this,-1)">‹</button><span class="feed-count" aria-live="polite">1 / ${slides.length}</span><button type="button" aria-label="下一张图片" onclick="stepFeed(this,1)">›</button></div>`:''}
@@ -1154,6 +1169,7 @@ function feedCardHTML(item) {
 }
 function updateFeedPosition(track) {
   track.closest('.feed-card').querySelectorAll('.feed-count,.feed-image-count').forEach(count=>{count.textContent=(Math.round(track.scrollLeft/track.clientWidth)+1)+' / '+track.children.length;});
+  updateFeedAspect(track);
 }
 function stepFeed(button,step) {
   const track=button.closest('.feed-card').querySelector('.feed-carousel');
